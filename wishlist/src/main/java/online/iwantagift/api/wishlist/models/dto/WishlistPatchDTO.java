@@ -1,9 +1,10 @@
 package online.iwantagift.api.wishlist.models.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import online.iwantagift.api.wishlist.models.dto.abstracts.WishlistWriteDTO;
 
 /**
  * Data Transfer Object for partially updating an existing wishlist.
@@ -13,23 +14,9 @@ import lombok.NoArgsConstructor;
  *
  * <p>Fields omitted or set to {@code null} will not be modified.</p>
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class WishlistPatchDTO {
-    /**
-     * New display title of the wishlist.
-     *
-     * <p>If {@code null}, the title will not be changed.</p>
-     */
-    @JsonProperty("title")
-    private String title;
-
-    /**
-     * New description of the wishlist.
-     *
-     * <p>If {@code null}, the description will not be changed.</p>
-     */
-    @JsonProperty("description")
-    private String description;
+public class WishlistPatchDTO extends WishlistWriteDTO {
 }

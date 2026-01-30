@@ -1,10 +1,10 @@
 package online.iwantagift.api.wishlist.models.dto;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import jakarta.validation.constraints.NotBlank;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import online.iwantagift.api.wishlist.models.dto.abstracts.WishlistWriteDTO;
 
 /**
  * Data Transfer Object for creating a new wishlist.
@@ -16,21 +16,9 @@ import lombok.NoArgsConstructor;
  * <p>The {@code title} field is required and represents the display
  * name of the wishlist.</p>
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class WishlistCreateDTO {
-    /**
-     * Display title of the wishlist.
-     * Must not be blank.
-     */
-    @JsonProperty("title")
-    @NotBlank
-    private String title;
-
-    /**
-     * Optional description of the wishlist.
-     */
-    @JsonProperty("description")
-    private String description;
+public class WishlistCreateDTO extends WishlistWriteDTO {
 }
