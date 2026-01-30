@@ -1,10 +1,11 @@
-package online.iwantagift.api.wishlist.models.dto;
+package online.iwantagift.api.wishlist.models.dto.wl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import online.iwantagift.api.wishlist.models.dto.WishDTO;
 
 import java.time.Instant;
 import java.util.Collections;

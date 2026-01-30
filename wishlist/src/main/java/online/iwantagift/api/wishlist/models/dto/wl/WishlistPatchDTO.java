@@ -1,4 +1,4 @@
-package online.iwantagift.api.wishlist.models.dto;
+package online.iwantagift.api.wishlist.models.dto.wl;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotEmpty;
