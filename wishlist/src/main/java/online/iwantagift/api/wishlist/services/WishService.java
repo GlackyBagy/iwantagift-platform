@@ -18,6 +18,21 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+/**
+ * Application service responsible for managing {@link Wish} entities.
+ *
+ * <p>
+ * This service defines strict contracts for create, full update (PUT),
+ * and partial update (PATCH) operations on wishes.
+ * </p>
+ *
+ * <h2>Write Semantics</h2>
+ * <ul>
+ *   <li><b>CREATE</b> — insert-only. Fails if the entity already exists.</li>
+ *   <li><b>PUT</b> — full replacement of an existing entity.</li>
+ *   <li><b>PATCH</b> — partial update of an existing entity.</li>
+ * </ul>
+ */
 @Service
 @RequiredArgsConstructor
 public class WishService {
@@ -26,6 +41,24 @@ public class WishService {
     private final WishRepository wishRepository;
     private final WishlistService wishlistService;
 
+    /**
+     * Creates a new {@link Wish} entity.
+     *
+     * <p>
+     * This method is <b>insert-only</b> and guarantees that a new wish
+     * is persisted using {@link EntityManager#persist(Object)}.
+     * </p>
+     *
+     * <h3>Contract</h3>
+     * <ul>
+     *   <li>The wish must represent a new entity.</li>
+     *   <li>If a wish with the same id already exists, the operation fails.</li>
+     *   <li>This method must not be used for updates.</li>
+     * </ul>
+     *
+     * @param wish new wish entity to persist
+     * @throws AlreadyExistsException if a wish with the same id already exists
+     */
     @Transactional
     public void create(Wish wish) {
         try {
@@ -37,6 +70,17 @@ public class WishService {
         }
     }
 
+    /**
+     * Updates an existing wish using a write DTO.
+     *
+     * <p>
+     * Dispatches to PATCH or PUT semantics based on the concrete DTO type.
+     * </p>
+     *
+     * @param dto WriteDTO describing the update operation
+     * @throws IllegalArgumentException if dto is null or of unsupported type
+     * @throws EntityNotFoundException if the target wish does not exist
+     */
     @Transactional
     public void update(WishWriteDTO dto) {
         if (dto == null)
@@ -50,6 +94,17 @@ public class WishService {
             throw new IllegalArgumentException("Dto type %s not supported".formatted(dto.getClass()));
     }
 
+    /**
+     * Applies a partial update (PATCH) to an existing wish.
+     *
+     * <p>
+     * Only non-null fields in the DTO are applied.
+     * Existing values are preserved for omitted fields.
+     * </p>
+     *
+     * @param dto PATCH DTO
+     * @throws EntityNotFoundException if the target wish does not exist
+     */
     private void patch(WishPatchDTO dto) {
         Wish wish = findByIdOrThrow(dto.getId());
 
@@ -62,6 +117,16 @@ public class WishService {
             );
     }
 
+    /**
+     * Applies a full update (PUT) to an existing wish.
+     *
+     * <p>
+     * All writable fields are applied as part of a full replacement.
+     * </p>
+     *
+     * @param dto PUT DTO
+     * @throws EntityNotFoundException if the target wish does not exist
+     */
     private void put(WishPutDTO dto) {
         Wish wish = findByIdOrThrow(dto.getId());
 
