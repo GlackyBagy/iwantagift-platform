@@ -1,10 +1,16 @@
 package online.iwantagift.api.wishlist.models.dto;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import online.iwantagift.api.wishlist.models.dto.abstracts.ValidationGroups;
 import online.iwantagift.api.wishlist.models.dto.abstracts.WishlistWriteDTO;
+
+import java.util.UUID;
 
 /**
  * Data Transfer Object for partially updating an existing wishlist.
@@ -19,4 +25,11 @@ import online.iwantagift.api.wishlist.models.dto.abstracts.WishlistWriteDTO;
 @NoArgsConstructor
 @AllArgsConstructor
 public class WishlistPatchDTO extends WishlistWriteDTO {
+    /**
+     * Unique identifier of the wish item.
+     */
+    @JsonProperty("id")
+    @NotNull(groups = ValidationGroups.Patch.class)
+    @NotEmpty(groups = ValidationGroups.Patch.class)
+    private UUID id;
 }
