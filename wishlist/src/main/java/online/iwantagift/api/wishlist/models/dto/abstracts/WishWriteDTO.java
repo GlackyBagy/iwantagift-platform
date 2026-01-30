@@ -3,6 +3,9 @@ package online.iwantagift.api.wishlist.models.dto.abstracts;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 import online.iwantagift.api.wishlist.models.dto.WishCreateDTO;
 import online.iwantagift.api.wishlist.models.dto.WishPatchDTO;
 import org.hibernate.validator.constraints.Length;
@@ -52,6 +55,9 @@ import java.util.UUID;
  * @see WishCreateDTO
  * @see WishPatchDTO
  */
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public abstract class WishWriteDTO {
     /**
      * Display title of the wish item.
