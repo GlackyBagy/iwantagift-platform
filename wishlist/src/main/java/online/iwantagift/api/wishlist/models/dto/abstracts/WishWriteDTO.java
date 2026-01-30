@@ -100,7 +100,7 @@ public abstract class WishWriteDTO {
      * <p>This field is required and is used to determine ownership
      * and access control for the created wish item.</p>
      */
-    @JsonProperty("user_id")
+    @JsonProperty("owner_id")
     @NotNull(groups = ValidationGroups.Create.class)
-    private UUID userId;
+    private UUID ownerId;
 }

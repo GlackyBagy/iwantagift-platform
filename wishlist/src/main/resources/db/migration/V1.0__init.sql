@@ -1,4 +1,4 @@
-CREATE TABLE wishes
+CREATE TABLE IF NOT EXISTS wishes
 (
     id          UUID        NOT NULL,
     title       VARCHAR(255),
@@ -7,11 +7,11 @@ CREATE TABLE wishes
     created_at  TIMESTAMPTZ NOT NULL
         DEFAULT now(),
     wishlist_id UUID        NOT NULL,
-    CONSTRAINT pk_wishes PRIMARY KEY (id),
-    CONSTRAINT w_title_not_blank CHECK (strip(title) <> '')
+    owner_id    UUID        NOT NULL,
+    CONSTRAINT pk_wishes PRIMARY KEY (id)
 );
 
-CREATE TABLE wishlist
+CREATE TABLE IF NOT EXISTS wishlist
 (
     id          UUID          NOT NULL,
     title       VARCHAR(255)  NOT NULL,
@@ -19,8 +19,7 @@ CREATE TABLE wishlist
     created_at  TIMESTAMPTZ   NOT NULL
         DEFAULT now(),
     owner_id    UUID          NOT NULL,
-    CONSTRAINT pk_wishlist PRIMARY KEY (id),
-    CONSTRAINT wl_title_not_blank CHECK (strip(title) <> '')
+    CONSTRAINT pk_wishlist PRIMARY KEY (id)
 );
 
 ALTER TABLE wishes
