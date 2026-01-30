@@ -75,7 +75,7 @@ public class WishlistService {
         listRepository.deleteById(id);
     }
 
-    public List<Wishlist> findAllByOwnerId() {
-        return listRepository.findAll();
+    public List<Wishlist> findAllByOwnerId(UUID ownerId) {
+        return listRepository.findAllByOwnerId(ownerId);
     }
 }
