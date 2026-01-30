@@ -1,1 +1,41 @@
-/.idea/
+# Generic
+HELP.md
+
+# Maven / Build
+**/target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# Maven Wrapper (only in root, but ignore anywhere just in case)
+**/.mvn/
+
+# Spring / IDE caches
+**/.apt_generated
+**/.classpath
+**/.factorypath
+**/.project
+**/.settings
+**/.springBeans
+**/.sts4-cache
+
+# IntelliJ IDEA
+**/.idea/
+**/*.iws
+**/*.iml
+**/*.ipr
+
+# NetBeans
+**/nbproject/private/
+**/nbbuild/
+**/dist/
+**/nbdist/
+**/.nb-gradle/
+
+# Gradle
+**/build/
+!**/src/main/**/build/
+!**/src/test/**/build/
+
+# VS Code
+**/.vscode/
