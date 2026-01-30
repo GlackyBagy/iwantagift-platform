@@ -5,4 +5,5 @@ import jakarta.validation.groups.Default;
 public final class ValidationGroups {
     public interface Create extends Default {}
     public interface Patch extends Default {}
+    public interface Put extends Create {}
 }
