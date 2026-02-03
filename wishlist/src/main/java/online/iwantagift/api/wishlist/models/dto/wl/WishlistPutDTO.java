@@ -41,7 +41,6 @@ import java.util.UUID;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class WishlistPutDTO extends WishlistWriteDTO {
 
     /**

@@ -66,13 +66,13 @@ public abstract class WishWriteDTO {
     @JsonProperty("title")
     @NotBlank(groups = ValidationGroups.Create.class)
     @Length(min = 1)
-    private String title;
+    protected String title;
 
     /**
      * Optional description of the wish item.
      */
     @JsonProperty("description")
-    private String description;
+    protected String description;
 
     /**
      * URL of the product or external resource associated with the wish.
@@ -83,7 +83,7 @@ public abstract class WishWriteDTO {
     @Length(max = 1000, message = "URL is too long")
     @URL
     @NotBlank(groups = ValidationGroups.Create.class)
-    private String url;
+    protected String url;
 
     /**
      * Identifier of the wishlist where the wish will be created.
@@ -92,7 +92,7 @@ public abstract class WishWriteDTO {
      * to the user's default wishlist.</p>
      */
     @JsonProperty("wish_list_id")
-    private UUID wishListId;
+    protected UUID wishListId;
 
     /**
      * Identifier of the user who is creating the wish.
@@ -102,5 +102,5 @@ public abstract class WishWriteDTO {
      */
     @JsonProperty("owner_id")
     @NotNull(groups = ValidationGroups.Create.class)
-    private UUID ownerId;
+    protected UUID ownerId;
 }

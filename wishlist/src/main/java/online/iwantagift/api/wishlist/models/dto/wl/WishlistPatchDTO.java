@@ -23,7 +23,6 @@ import java.util.UUID;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class WishlistPatchDTO extends WishlistWriteDTO {
     /**
      * Unique identifier of the wish item.

@@ -24,7 +24,6 @@ import java.util.UUID;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class WishPatchDTO extends WishWriteDTO {
     /**
      * Unique identifier of the wishlist.

@@ -81,7 +81,7 @@ public abstract class WishlistWriteDTO {
     @JsonProperty("title")
     @Length(min = 1, groups = ValidationGroups.Patch.class)
     @NotBlank(groups = ValidationGroups.Create.class)
-    private String title;
+    protected String title;
 
     /**
      * Optional description of the wishlist.
@@ -93,5 +93,5 @@ public abstract class WishlistWriteDTO {
      * </p>
      */
     @JsonProperty("description")
-    private String description;
+    protected String description;
 }

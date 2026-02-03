@@ -1,6 +1,5 @@
 package online.iwantagift.api.wishlist.models.dto.wl;
 
-import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
@@ -19,6 +18,5 @@ import online.iwantagift.api.wishlist.models.dto.abstracts.WishlistWriteDTO;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
-@AllArgsConstructor
 public class WishlistCreateDTO extends WishlistWriteDTO {
 }
