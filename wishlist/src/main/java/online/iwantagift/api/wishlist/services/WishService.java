@@ -2,7 +2,6 @@ package online.iwantagift.api.wishlist.services;
 
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
-import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceException;
 import lombok.RequiredArgsConstructor;
 import online.iwantagift.api.wishlist.exceptions.AlreadyExistsException;
@@ -36,8 +35,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class WishService {
-    @PersistenceContext
-    private EntityManager em;
+    private final EntityManager em;
     private final WishRepository wishRepository;
     private final WishlistService wishlistService;
 
@@ -82,7 +80,7 @@ public class WishService {
      * @throws EntityNotFoundException if the target wish does not exist
      */
     @Transactional
-    public void update(WishWriteDTO dto) {
+    public void update(WishWriteDTO dto) throws EntityNotFoundException {
         if (dto == null)
             throw new IllegalArgumentException("Dto is null");
 
@@ -103,9 +101,9 @@ public class WishService {
      * </p>
      *
      * @param dto PATCH DTO
-     * @throws EntityNotFoundException if the target wish does not exist
+     * @throws EntityNotFoundException if the target wish or the target wishlist does not exist
      */
-    private void patch(WishPatchDTO dto) {
+    private void patch(WishPatchDTO dto) throws EntityNotFoundException {
         Wish wish = findByIdOrThrow(dto.getId());
 
         if (dto.getTitle() != null) wish.setTitle(dto.getTitle());
@@ -120,18 +118,24 @@ public class WishService {
     /**
      * Applies a full update (PUT) to an existing wish.
      *
-     * <p>
-     * All writable fields are applied as part of a full replacement.
-     * </p>
+     * <p>All writable fields are applied as part of a full replacement.</p>
      *
-     * @param dto PUT DTO
-     * @throws EntityNotFoundException if the target wish does not exist
+     * <p><b>Validation:</b> This method does not validate {@code dto}. It assumes that
+     * input was validated earlier (e.g., at the API layer). If {@code dto} contains invalid
+     * values (nulls, too-long strings, etc.), persistence/transaction commit may fail.</p>
+     *
+     * @param dto PUT DTO (assumed to be validated)
+     * @throws EntityNotFoundException if the target wish or the target wishlist does not exist
+     * @throws jakarta.persistence.PersistenceException if the update violates database constraints
+     *         (propagated from the persistence layer, typically on flush/commit)
      */
-    private void put(WishPutDTO dto) {
+    private void put(WishPutDTO dto) throws EntityNotFoundException {
         Wish wish = findByIdOrThrow(dto.getId());
 
         wish.setTitle(dto.getTitle());
         wish.setDescription(dto.getDescription());
+        wish.setUrl(dto.getUrl());
+        wish.setWishlist(wishlistService.findByIdOrThrow(dto.getWishListId()));
     }
 
     public Optional<Wish> findById(UUID id) {
