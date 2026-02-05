@@ -37,8 +37,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class WishlistService {
-    @PersistenceContext
-    private EntityManager em;
+    private final EntityManager em;
     private final WishlistRepository listRepository;
 
     /**
@@ -90,10 +89,10 @@ public class WishlistService {
      *
      * @param dto WriteDTO describing the update operation
      * @throws IllegalArgumentException if dto is null or of unsupported type
-     * @throws EntityNotFoundException if the target wishlist does not exist
+     * @throws EntityNotFoundException  if the target wishlist does not exist
      */
     @Transactional
-    public void update(WishlistWriteDTO dto) {
+    public void update(WishlistWriteDTO dto) throws EntityNotFoundException, IllegalArgumentException {
         if (dto == null)
             throw new IllegalArgumentException("Dto is null");
 
@@ -124,7 +123,7 @@ public class WishlistService {
      * @param dto PATCH DTO containing partial updates
      * @throws EntityNotFoundException if the target wishlist does not exist
      */
-    private void patch(WishlistPatchDTO dto) {
+    private void patch(WishlistPatchDTO dto) throws EntityNotFoundException {
         Wishlist wl = findByIdOrThrow(dto.getId());
 
         if (dto.getTitle() != null) wl.setTitle(dto.getTitle());
@@ -150,19 +149,19 @@ public class WishlistService {
      * @param dto PUT DTO containing the full state to apply
      * @throws EntityNotFoundException if the target wishlist does not exist
      */
-    private void put(WishlistPutDTO dto) {
+    private void put(WishlistPutDTO dto) throws EntityNotFoundException {
         Wishlist wl = findByIdOrThrow(dto.getId());
 
         wl.setTitle(dto.getTitle());
         wl.setDescription(dto.getDescription());
     }
 
-    public Wishlist findByIdOrThrow(UUID id) {
+    public Wishlist findByIdOrThrow(UUID id) throws EntityNotFoundException {
         return listRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Wishlist with id %s not found".formatted(id)));
     }
 
-    public Optional<Wishlist> findById (UUID id) {
+    public Optional<Wishlist> findById(UUID id) {
         return listRepository.findById(id);
     }
 
