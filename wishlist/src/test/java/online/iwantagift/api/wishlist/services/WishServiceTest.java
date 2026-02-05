@@ -143,6 +143,91 @@ class WishServiceTest {
     }
 
     @ParameterizedTest
+    @MethodSource("patchArgs")
+    void testUpdate_whenPatch_onlTitle(Wish existing, Wishlist oldWishlist, WishPatchDTO patchDto, Wishlist newWishlist) {
+        patchDto.setTitle("new title");
+        patchDto.setDescription(null);
+        patchDto.setUrl(null);
+        patchDto.setWishListId(null);
+
+        when(wr.findById(patchDto.getId())).thenReturn(Optional.of(existing));
+
+        wishService.update(patchDto);
+
+        assertEquals("new title", existing.getTitle());
+        assertEquals("old description", existing.getDescription());
+        assertEquals("http://old.url", existing.getUrl());
+        assertSame(oldWishlist, existing.getWishlist());
+
+        verify(wr).findById(patchDto.getId());
+        verifyNoInteractions(wls, em);
+    }
+
+    @ParameterizedTest
+    @MethodSource("patchArgs")
+    void testUpdate_whenPatch_onlDesc(Wish existing, Wishlist oldWishlist, WishPatchDTO patchDto, Wishlist newWishlist) {
+        patchDto.setTitle(null);
+        patchDto.setDescription("new description");
+        patchDto.setUrl(null);
+        patchDto.setWishListId(null);
+
+        when(wr.findById(patchDto.getId())).thenReturn(Optional.of(existing));
+
+        wishService.update(patchDto);
+
+        assertEquals("old title", existing.getTitle());
+        assertEquals("new description", existing.getDescription());
+        assertEquals("http://old.url", existing.getUrl());
+        assertSame(oldWishlist, existing.getWishlist());
+
+        verify(wr).findById(patchDto.getId());
+        verifyNoInteractions(wls, em);
+    }
+
+    @ParameterizedTest
+    @MethodSource("patchArgs")
+    void testUpdate_whenPatch_onlyWishListId(Wish existing, Wishlist oldWishlist, WishPatchDTO patchDto, Wishlist newWishlist) {
+        patchDto.setTitle(null);
+        patchDto.setDescription(null);
+        patchDto.setUrl(null);
+        patchDto.setWishListId(newWishlist.getId());
+
+        when(wr.findById(patchDto.getId())).thenReturn(Optional.of(existing));
+        when(wls.findByIdOrThrow(newWishlist.getId())).thenReturn(newWishlist);
+
+        wishService.update(patchDto);
+
+        assertEquals("old title", existing.getTitle());
+        assertEquals("old description", existing.getDescription());
+        assertEquals("http://old.url", existing.getUrl());
+        assertEquals(newWishlist, existing.getWishlist());
+
+        verify(wr).findById(patchDto.getId());
+        verifyNoInteractions(em);
+    }
+
+    @ParameterizedTest
+    @MethodSource("patchArgs")
+    void testUpdate_whenPatch_onlyUrl(Wish existing, Wishlist oldWishlist, WishPatchDTO patchDto, Wishlist newWishlist) {
+        patchDto.setTitle(null);
+        patchDto.setDescription(null);
+        patchDto.setUrl("http://new.url");
+        patchDto.setWishListId(null);
+
+        when(wr.findById(patchDto.getId())).thenReturn(Optional.of(existing));
+
+        wishService.update(patchDto);
+
+        assertEquals("old title", existing.getTitle());
+        assertEquals("old description", existing.getDescription());
+        assertEquals("http://new.url", existing.getUrl());
+        assertSame(oldWishlist, existing.getWishlist());
+
+        verify(wr).findById(patchDto.getId());
+        verifyNoInteractions(wls, em);
+    }
+
+    @ParameterizedTest
     @MethodSource("putArgs")
     void testUpdate_whenPut(Wish existing, Wishlist oldWishlist, WishPutDTO putDto, Wishlist newWishlist) {
         when(wr.findById(putDto.getId())).thenReturn(Optional.of(existing));
@@ -240,5 +325,58 @@ class WishServiceTest {
         verify(wr, times(1)).findById(patchDto.getId());
         verify(wls, times(1)).findByIdOrThrow(patchDto.getWishListId());
         verifyNoInteractions(em);
+    }
+
+    @Test
+    void testFindById_passthrough() {
+        UUID id = UUID.randomUUID();
+        Wish wish = new Wish();
+        wish.setId(id);
+
+        when(wr.findById(id)).thenReturn(Optional.of(wish));
+
+        Optional<Wish> res = wishService.findById(id);
+
+        assertTrue(res.isPresent());
+        assertSame(wish, res.get());
+        verify(wr).findById(id);
+        verifyNoInteractions(em, wls);
+    }
+
+    @Test
+    void testFindByIdOrThrow_whenExists() {
+        UUID id = UUID.randomUUID();
+        Wish wish = new Wish();
+        wish.setId(id);
+
+        when(wr.findById(id)).thenReturn(Optional.of(wish));
+
+        Wish res = wishService.findByIdOrThrow(id);
+
+        assertSame(wish, res);
+        verify(wr).findById(id);
+        verifyNoInteractions(em, wls);
+    }
+
+    @Test
+    void testFindByIdOrThrow_whenMissing() {
+        UUID id = UUID.randomUUID();
+
+        when(wr.findById(id)).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class,
+                () -> wishService.findByIdOrThrow(id));
+        verify(wr).findById(id);
+        verifyNoInteractions(em, wls);
+    }
+
+    @Test
+    void testDeleteById_passthrough() {
+        UUID id = UUID.randomUUID();
+
+        wishService.deleteById(id);
+
+        verify(wr).deleteById(id);
+        verifyNoInteractions(em, wls);
     }
 }
