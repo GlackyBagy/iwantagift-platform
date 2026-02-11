@@ -30,10 +30,13 @@ public class Wish {
     @Column(name = "url")
     private String url;
 
-    @Column(name = "createdAt")
+    @Column(name = "created_at")
     private Instant createdAt;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "wishlist_id", nullable = false)
     private Wishlist wishlist;
+
+    @Column(name = "owner_id")
+    private UUID ownerId;
 }
