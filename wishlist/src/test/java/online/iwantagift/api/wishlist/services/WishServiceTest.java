@@ -10,6 +10,7 @@ import online.iwantagift.api.wishlist.models.dto.abstracts.WishWriteDTO;
 import online.iwantagift.api.wishlist.models.entities.Wish;
 import online.iwantagift.api.wishlist.models.entities.Wishlist;
 import online.iwantagift.api.wishlist.repositories.WishRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -17,7 +18,9 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -42,7 +45,13 @@ class WishServiceTest {
     @Test
     void testCreate() {
         Wish wish = new Wish();
-        wish.setId(UUID.randomUUID());
+        wish.setTitle("title");
+        wish.setDescription("new description");
+
+        doAnswer(invocation -> {
+            wish.setId(UUID.randomUUID());
+            return null;
+        }).when(em).flush();
 
         wishService.create(wish);
 
@@ -67,7 +76,7 @@ class WishServiceTest {
         oldWishlist.setId(UUID.randomUUID());
 
         Wish existingWish = new Wish(UUID.randomUUID(), "old title", "old description",
-                "http://old.url", null, oldWishlist);
+                "http://old.url", null, oldWishlist, UUID.randomUUID());
 
         Wishlist newWishlist = new Wishlist();
         newWishlist.setId(UUID.randomUUID());
@@ -126,7 +135,7 @@ class WishServiceTest {
         oldWishlist.setId(UUID.randomUUID());
 
         Wish existingWish = new Wish(UUID.randomUUID(), "old title", "old description",
-                "http://old.url", null, oldWishlist);
+                "http://old.url", null, oldWishlist, UUID.randomUUID());
 
         Wishlist newWishlist = new Wishlist();
         newWishlist.setId(UUID.randomUUID());

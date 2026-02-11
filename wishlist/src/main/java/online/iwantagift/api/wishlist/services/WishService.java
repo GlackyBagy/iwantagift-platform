@@ -44,7 +44,7 @@ public class WishService {
      *
      * <p>
      * This method is <b>insert-only</b> and guarantees that a new wish
-     * is persisted using {@link EntityManager#persist(Object)}.
+     * is persisted using {@link EntityManager#persist(Object)} and returns generated UUID.
      * </p>
      *
      * <h3>Contract</h3>
@@ -58,10 +58,11 @@ public class WishService {
      * @throws AlreadyExistsException if a wish with the same id already exists
      */
     @Transactional
-    public void create(Wish wish) {
+    public UUID create(Wish wish) {
         try {
             em.persist(wish);
             em.flush();
+            return wish.getId();
         } catch (PersistenceException e) {
             throw new AlreadyExistsException("Wish with id %s already exists"
                     .formatted(wish.getId()), e);
