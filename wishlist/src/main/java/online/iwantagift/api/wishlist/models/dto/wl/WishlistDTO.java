@@ -64,5 +64,6 @@ public class WishlistDTO {
      * List of wishes associated with this wishlist.
      */
     @JsonProperty("wishes")
+    @Builder.Default
     private List<WishDTO> wishes = Collections.emptyList();
 }
