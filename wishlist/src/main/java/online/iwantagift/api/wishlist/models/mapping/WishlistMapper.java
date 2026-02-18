@@ -26,5 +26,9 @@ public abstract class WishlistMapper {
                     ")")
     public abstract WishlistDTO toDTO(Wishlist entity);
 
+    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "createdAt", ignore = true)
+    @Mapping(target = "ownerId", ignore = true)
+    @Mapping(target = "wishes", ignore = true)
     public abstract Wishlist toEntity(WishlistCreateDTO dto);
 }
