@@ -27,7 +27,7 @@ public class Wishlist {
     @Column(name = "description")
     private String description;
 
-    @Column(name = "createdAt")
+    @Column(name = "created_at")
     private Instant createdAt;
 
     @Column(name = "owner_id")
