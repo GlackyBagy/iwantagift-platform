@@ -41,7 +41,7 @@ public class WishlistService {
     private final WishlistRepository listRepository;
 
     /**
-     * Creates a new {@link Wishlist} entity.
+     * Creates a new {@link Wishlist} entity and returns generated UUID.
      *
      * <p>
      * This method is <b>insert-only</b>. It uses {@link EntityManager#persist(Object)}
@@ -63,10 +63,11 @@ public class WishlistService {
      * @param wishlist new wishlist entity to persist
      * @throws AlreadyExistsException if a wishlist with the same id already exists
      */
-    public void create(Wishlist wishlist) {
+    public UUID create(Wishlist wishlist) {
         try {
             em.persist(wishlist);
             em.flush();
+            return wishlist.getId();
         } catch (PersistenceException e) {
             throw new AlreadyExistsException("Wishlist with id %s already exists"
                     .formatted(wishlist.getId()), e);

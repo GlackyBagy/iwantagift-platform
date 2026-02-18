@@ -38,7 +38,11 @@ class WishlistServiceTest {
     @Test
     void testCreate() {
         Wishlist wishlist = new Wishlist();
-        wishlist.setId(UUID.randomUUID());
+
+        doAnswer(invocation -> {
+            wishlist.setId(UUID.randomUUID());
+            return null;
+        }).when(em).flush();
 
         service.create(wishlist);
 
