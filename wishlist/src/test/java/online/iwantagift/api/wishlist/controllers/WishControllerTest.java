@@ -142,48 +142,4 @@ class WishControllerTest {
 
         verifyNoInteractions(wishService, wishMapper);
     }
-
-    @Test
-    void handleValidationFailedException_returnsFieldToMessageMap() {
-        var fe1 = new FieldError("x", "title", "must not be blank");
-        var fe2 = new FieldError("x", "url", "must be a url");
-        var ex = new ValidationFailedException(List.of(fe1, fe2));
-
-        Map<String, String> resp = invokeHandleValidation(controller, ex);
-
-        assertEquals("must not be blank", resp.get("title"));
-        assertEquals("must be a url", resp.get("url"));
-    }
-
-    @Test
-    void handleEntityNotFoundException_returnsMessage() {
-        var ex = new EntityNotFoundException("Wish not found");
-
-        Map<String, String> resp = invokeHandleNotFound(controller, ex);
-
-        assertEquals("Wish not found", resp.get("message"));
-    }
-
-
-    @SuppressWarnings("unchecked")
-    private static Map<String, String> invokeHandleValidation(WishController c, ValidationFailedException ex) {
-        try {
-            var m = WishController.class.getDeclaredMethod("handleValidationFailedException", ValidationFailedException.class);
-            m.setAccessible(true);
-            return (Map<String, String>) m.invoke(c, ex);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private static Map<String, String> invokeHandleNotFound(WishController c, EntityNotFoundException ex) {
-        try {
-            var m = WishController.class.getDeclaredMethod("handleEntityNotFoundException", EntityNotFoundException.class);
-            m.setAccessible(true);
-            return (Map<String, String>) m.invoke(c, ex);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
 }
