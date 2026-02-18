@@ -1,8 +1,10 @@
 package online.iwantagift.api.wishlist.models.dto.abstracts;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nullable;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Null;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -102,5 +104,6 @@ public abstract class WishWriteDTO {
      */
     @JsonProperty("owner_id")
     @NotNull(groups = ValidationGroups.Create.class)
+    @Null(groups = {ValidationGroups.Put.class, ValidationGroups.Patch.class}, message = "Now allowed to transfer wisher")
     protected UUID ownerId;
 }
