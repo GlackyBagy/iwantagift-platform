@@ -5,13 +5,13 @@ import online.iwantagift.api.wishlist.models.dto.WishDTO;
 import online.iwantagift.api.wishlist.models.entities.Wish;
 import online.iwantagift.api.wishlist.models.entities.Wishlist;
 import online.iwantagift.api.wishlist.services.WishlistService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
+import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -23,13 +23,7 @@ class WishMapperTest {
     @Mock
     private WishlistService wlService;
 
-    private WishMapper mapper;
-
-    @BeforeEach
-    void setUp() {
-        mapper = new WishMapperImpl();
-        mapper.wlService = wlService;
-    }
+    private final WishMapper mapper = new WishMapperImpl();
 
     @Test
     void toEntity_resolvesWishlistViaService_andMapsFields() {
@@ -37,7 +31,7 @@ class WishMapperTest {
         Wishlist wishlist = new Wishlist();
         wishlist.setId(wishListId);
 
-        when(wlService.findByIdOrThrow(wishListId)).thenReturn(wishlist);
+        when(wlService.findById(wishListId)).thenReturn(Optional.of(wishlist));
 
         WishCreateDTO dto = new WishCreateDTO();
         dto.setWishListId(wishListId);
@@ -45,7 +39,7 @@ class WishMapperTest {
         dto.setDescription("Slim");
         dto.setUrl("https://example.com/ps5");
 
-        Wish entity = mapper.toEntity(dto);
+        Wish entity = mapper.toEntity(dto, wlService);
 
         assertNotNull(entity);
         assertEquals("PS5", entity.getTitle());
@@ -53,7 +47,7 @@ class WishMapperTest {
         assertEquals("https://example.com/ps5", entity.getUrl());
         assertSame(wishlist, entity.getWishlist());
 
-        verify(wlService, times(1)).findByIdOrThrow(wishListId);
+        verify(wlService, times(1)).findById(wishListId);
     }
 
     @Test

@@ -5,9 +5,9 @@ import online.iwantagift.api.wishlist.models.dto.wl.WishlistDTO;
 import online.iwantagift.api.wishlist.models.entities.Wish;
 import online.iwantagift.api.wishlist.models.entities.Wishlist;
 import online.iwantagift.api.wishlist.services.WishlistService;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mapstruct.factory.Mappers;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -26,18 +26,9 @@ class WishlistMapperTest {
     private WishlistService wlService;
 
     @Spy
-    private WishMapperImpl wishMapper = new WishMapperImpl();
+    private WishMapper wishMapper = Mappers.getMapper(WishMapper.class);
 
-    private WishlistMapperImpl mapper;
-
-    @BeforeEach
-    void setUp() {
-        wishMapper.wlService = wlService;
-
-        mapper = new WishlistMapperImpl();
-        mapper.wlService = wlService;
-        mapper.wishMapper = wishMapper;
-    }
+    private final WishlistMapper mapper = Mappers.getMapper(WishlistMapper.class);
 
     @Test
     void toDTO_mapsFields_andMapsWishesUsingWishMapper() {
@@ -76,7 +67,7 @@ class WishlistMapperTest {
         wishlist.setWishes(List.of(w1, w2));
 
         // when
-        WishlistDTO dto = mapper.toDTO(wishlist);
+        WishlistDTO dto = mapper.toDTO(wishlist, wishMapper);
 
         // then: top-level fields
         assertNotNull(dto);
@@ -121,7 +112,7 @@ class WishlistMapperTest {
         wishlist.setWishes(List.of()); // NOT null
 
         // when
-        WishlistDTO dto = mapper.toDTO(wishlist);
+        WishlistDTO dto = mapper.toDTO(wishlist, wishMapper);
 
         // then
         assertNotNull(dto);

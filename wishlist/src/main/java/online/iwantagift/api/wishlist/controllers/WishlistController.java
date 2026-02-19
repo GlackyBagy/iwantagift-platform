@@ -7,6 +7,7 @@ import online.iwantagift.api.wishlist.models.dto.wl.WishlistCreateDTO;
 import online.iwantagift.api.wishlist.models.dto.wl.WishlistDTO;
 import online.iwantagift.api.wishlist.models.dto.wl.WishlistPatchDTO;
 import online.iwantagift.api.wishlist.models.dto.wl.WishlistPutDTO;
+import online.iwantagift.api.wishlist.models.mapping.WishMapper;
 import online.iwantagift.api.wishlist.models.mapping.WishlistMapper;
 import online.iwantagift.api.wishlist.services.WishlistService;
 import org.springframework.http.HttpStatus;
@@ -24,12 +25,13 @@ import java.util.UUID;
 public class WishlistController {
     private final WishlistService listService;
     private final WishlistMapper wishlistMapper;
+    private final WishMapper wishMapper;
 
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public WishlistDTO getWishlist(@PathVariable UUID id) {
         return wishlistMapper.toDTO(
-                listService.findByIdOrThrow(id)
+                listService.findByIdOrThrow(id), wishMapper
         );
     }
 

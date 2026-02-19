@@ -1,7 +1,7 @@
 package online.iwantagift.api.wishlist.controllers;
 
-import jakarta.persistence.EntityNotFoundException;
 import online.iwantagift.api.wishlist.exceptions.ValidationFailedException;
+import online.iwantagift.api.wishlist.messaging.kafka.NewWishProducer;
 import online.iwantagift.api.wishlist.models.dto.WishCreateDTO;
 import online.iwantagift.api.wishlist.models.dto.WishDTO;
 import online.iwantagift.api.wishlist.models.dto.WishPatchDTO;
@@ -9,7 +9,7 @@ import online.iwantagift.api.wishlist.models.dto.WishPutDTO;
 import online.iwantagift.api.wishlist.models.entities.Wish;
 import online.iwantagift.api.wishlist.models.mapping.WishMapper;
 import online.iwantagift.api.wishlist.services.WishService;
-import org.junit.jupiter.api.BeforeEach;
+import online.iwantagift.api.wishlist.services.WishlistService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,18 +30,22 @@ class WishControllerTest {
     @Mock
     private WishService wishService;
     @Mock
+    private WishlistService wlService;
+    @Mock
     private WishMapper wishMapper;
+    @Mock
+    private NewWishProducer wishProducer;
     @InjectMocks
     private WishController controller;
 
     @Test
-    void createWish_whenNoValidationErrors_returnsIdAndCallsService() {
+    void createWish_whenNoValidationErrors_returnsIdAndCallsService_andSendsKafka() {
         var dto = mock(WishCreateDTO.class);
         var bindingResult = mock(BindingResult.class);
         when(bindingResult.hasErrors()).thenReturn(false);
 
         var wishEntity = new Wish();
-        when(wishMapper.toEntity(dto)).thenReturn(wishEntity);
+        when(wishMapper.toEntity(dto, wlService)).thenReturn(wishEntity);
 
         var id = UUID.randomUUID();
         when(wishService.create(wishEntity)).thenReturn(id);
@@ -49,9 +53,11 @@ class WishControllerTest {
         Map<String, UUID> resp = controller.createWish(dto, bindingResult);
 
         assertEquals(id, resp.get("id"));
-        verify(wishMapper).toEntity(dto);
+        verify(wishMapper).toEntity(dto, wlService);
         verify(wishService).create(wishEntity);
-        verifyNoMoreInteractions(wishMapper, wishService);
+        verify(wishProducer).send(dto);
+
+        verifyNoMoreInteractions(wishMapper, wishService, wishProducer);
     }
 
     @Test
@@ -60,6 +66,7 @@ class WishControllerTest {
         var bindingResult = mock(BindingResult.class);
 
         when(bindingResult.hasErrors()).thenReturn(true);
+
         var fe = new FieldError("wishCreateDTO", "title", "must not be blank");
         when(bindingResult.getFieldErrors()).thenReturn(List.of(fe));
 
@@ -68,8 +75,8 @@ class WishControllerTest {
                 () -> controller.createWish(dto, bindingResult)
         );
 
-        verifyNoInteractions(wishMapper, wishService);
         assertNotNull(ex.getFieldErrors());
+        verifyNoInteractions(wishMapper, wishService, wishProducer);
     }
 
     @Test
@@ -87,6 +94,7 @@ class WishControllerTest {
         verify(wishService).findByIdOrThrow(id);
         verify(wishMapper).toDTO(wish);
         verifyNoMoreInteractions(wishService, wishMapper);
+        verifyNoInteractions(wishProducer);
     }
 
     @Test
@@ -99,7 +107,7 @@ class WishControllerTest {
 
         verify(wishService).update(dto);
         verifyNoMoreInteractions(wishService);
-        verifyNoInteractions(wishMapper);
+        verifyNoInteractions(wishMapper, wishProducer);
     }
 
     @Test
@@ -113,7 +121,7 @@ class WishControllerTest {
 
         assertThrows(ValidationFailedException.class, () -> controller.patchWish(dto, bindingResult));
 
-        verifyNoInteractions(wishService, wishMapper);
+        verifyNoInteractions(wishService, wishMapper, wishProducer);
     }
 
     @Test
@@ -126,7 +134,7 @@ class WishControllerTest {
 
         verify(wishService).update(dto);
         verifyNoMoreInteractions(wishService);
-        verifyNoInteractions(wishMapper);
+        verifyNoInteractions(wishMapper, wishProducer);
     }
 
     @Test
@@ -140,6 +148,6 @@ class WishControllerTest {
 
         assertThrows(ValidationFailedException.class, () -> controller.putWish(dto, bindingResult));
 
-        verifyNoInteractions(wishService, wishMapper);
+        verifyNoInteractions(wishService, wishMapper, wishProducer);
     }
 }

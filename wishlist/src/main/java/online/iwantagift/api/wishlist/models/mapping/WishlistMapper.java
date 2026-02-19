@@ -1,34 +1,33 @@
 package online.iwantagift.api.wishlist.models.mapping;
 
-import lombok.NoArgsConstructor;
 import online.iwantagift.api.wishlist.models.dto.wl.WishlistCreateDTO;
 import online.iwantagift.api.wishlist.models.dto.wl.WishlistDTO;
 import online.iwantagift.api.wishlist.models.entities.Wishlist;
-import online.iwantagift.api.wishlist.services.WishlistService;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.mapstruct.*;
 
 @Mapper(componentModel = "spring")
-@NoArgsConstructor
-public abstract class WishlistMapper {
-    protected WishlistService wlService;
-    protected WishMapper wishMapper;
+public interface WishlistMapper {
 
-    @Autowired
-    protected WishlistMapper(WishlistService wlService) {
-        this.wlService = wlService;
+    @Mapping(target = "wishes", ignore = true)
+    WishlistDTO toDTO(Wishlist entity,
+                      @Context WishMapper wishMapper);
+
+    @AfterMapping
+    default void fillWishes(Wishlist entity,
+                            @MappingTarget WishlistDTO.WishlistDTOBuilder dto,
+                            @Context WishMapper wishMapper) {
+        if (entity == null || entity.getWishes() == null) {
+            dto.wishes(java.util.List.of());
+            return;
+        }
+        dto.wishes(entity.getWishes().stream()
+                .map(wishMapper::toDTO)
+                .toList());
     }
-
-    @Mapping(target = "wishes",
-            expression = "java(" +
-                    "entity.getWishes().stream().map(wishMapper::toDTO).toList()" +
-                    ")")
-    public abstract WishlistDTO toDTO(Wishlist entity);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "ownerId", ignore = true)
     @Mapping(target = "wishes", ignore = true)
-    public abstract Wishlist toEntity(WishlistCreateDTO dto);
+    Wishlist toEntity(WishlistCreateDTO dto);
 }
