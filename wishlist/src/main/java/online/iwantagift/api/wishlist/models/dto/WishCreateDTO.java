@@ -3,6 +3,7 @@ package online.iwantagift.api.wishlist.models.dto;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
+import lombok.ToString;
 import online.iwantagift.api.wishlist.models.dto.abstracts.WishWriteDTO;
 
 /**
@@ -20,5 +21,6 @@ import online.iwantagift.api.wishlist.models.dto.abstracts.WishWriteDTO;
 @EqualsAndHashCode(callSuper = true)
 @Data
 @NoArgsConstructor
+@ToString(callSuper = true)
 public class WishCreateDTO extends WishWriteDTO {
 }

@@ -2,6 +2,7 @@ package online.iwantagift.api.wishlist.controllers;
 
 import lombok.RequiredArgsConstructor;
 import online.iwantagift.api.wishlist.exceptions.ValidationFailedException;
+import online.iwantagift.api.wishlist.messaging.kafka.NewWishProducer;
 import online.iwantagift.api.wishlist.models.dto.WishCreateDTO;
 import online.iwantagift.api.wishlist.models.dto.WishDTO;
 import online.iwantagift.api.wishlist.models.dto.WishPatchDTO;
@@ -28,6 +29,7 @@ public class WishController {
     private static final Logger log = LoggerFactory.getLogger(WishController.class);
     private final WishService wishService;
     private final WishMapper wishMapper;
+    private final NewWishProducer wishProducer;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -36,9 +38,12 @@ public class WishController {
                                         BindingResult bindingResult) {
         if (bindingResult.hasErrors())
             throw new ValidationFailedException(bindingResult.getFieldErrors());
+        log.info("WishController::createWish, DTO got: {}", dto.toString());
 
-        return Collections.singletonMap("id",
+        Map<String, UUID> response = Collections.singletonMap("id",
                 wishService.create(wishMapper.toEntity(dto)));
+        wishProducer.send(dto);
+        return response;
     }
 
     @GetMapping("/{id}")
