@@ -22,7 +22,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/wish")
+@RequestMapping("/api/v1/wish")
 @RequiredArgsConstructor
 public class WishController {
     private static final Logger log = LoggerFactory.getLogger(WishController.class);

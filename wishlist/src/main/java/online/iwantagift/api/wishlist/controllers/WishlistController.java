@@ -19,7 +19,7 @@ import java.util.Map;
 import java.util.UUID;
 
 @RestController
-@RequestMapping("/list")
+@RequestMapping("/api/v1/list")
 @RequiredArgsConstructor
 public class WishlistController {
     private final WishlistService listService;
