@@ -1,13 +1,13 @@
 <header th:fragment="header" xmlns:sec="http://www.w3.org/1999/xhtml">
     <nav class="navbar navbar-dark navbar-expand-sm bg-transparent">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center gap-3 m-0" href="#">
+            <a class="navbar-brand d-flex align-items-center gap-3 m-0" href="/">
                 <img th:src="@{/img/favicon.png}" alt="Logo" style="width:40px;">
                 <span class="fw-semibold fs-5 text-white">iwag</span>
             </a>
 
             <div sec:authorize="isAnonymous()" class="ms-auto d-flex gap-2 auth-buttons">
-                <a href="/auth/login" class="btn btn-auth btn-signin">Login</a>
+                <a href="/auth/signin" class="btn btn-auth btn-signin">Sign In</a>
                 <a href="/auth/signup" class="btn btn-auth btn-signup">Sign Up</a>
             </div>
 
