@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head th:replace="~{fragments/head :: head(title='iwag — Sign up', extraCss=${{'/css/auth/authStyle.css'}})}">
+    <title></title>
+</head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+    <main>
+        <div class="container">
+            <div class="card hero-card mx-auto">
+                <div class="card-body text-center py-5 px-1">
+                    <h1 class="hero-title mb-4">Sign up</h1>
+                    <form id="signupForm" th:action="@{/auth/signup}" th:object="${credentialsDTO}" method="post"
+                          class="w-100" style="max-width: 420px; margin: 0 auto;">
+
+                        <!-- Username -->
+                        <div class="mb-3 text-start">
+                            <label class="form-label text-light">Username</label>
+                            <input type="text" class="form-control form-control-dark"
+                                   placeholder="Enter username" th:field="*{username}"
+                                   th:classappend="${#fields.hasErrors('username')} ? 'is-invalid' : ''">
+
+                            <div class="invalid-feedback"
+                                 th:if="${#fields.hasErrors('username')}"
+                                 th:errors="*{username}">
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="mb-3 text-start">
+                            <label class="form-label text-light">Email</label>
+                            <input type="email" class="form-control form-control-dark"
+                                   placeholder="Enter email" th:field="*{email}"
+                                   th:classappend="${#fields.hasErrors('email')}? 'is-invalid' : ''">
+
+                            <div class="invalid-feedback"
+                                 th:if="${#fields.hasErrors('email')}"
+                                 th:errors="*{email}">
+                            </div>
+                        </div>
+
+                        <!-- Password -->
+                        <div class="mb-3 text-start">
+                            <label class="form-label text-light">Password</label>
+                            <input type="password" class="form-control form-control-dark"
+                                   placeholder="Enter password" th:field="*{password}" id="password"
+                                th:classappend="${#fields.hasErrors('password')}? 'is-invalid' : ''">>
+
+                            <div class="invalid-feedback"
+                                 th:if="${#fields.hasErrors('password')}"
+                                 th:errors="*{password}">
+                            </div>
+                        </div>
+
+                        <!-- Confirm Password -->
+                        <div class="mb-3 text-start">
+                            <label class="form-label text-light">Confirm Password</label>
+                            <input type="password" class="form-control form-control-dark"
+                                   placeholder="Repeat password" th:field="*{confirmPassword}" id="confirmPassword"
+                                   th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid' : ''">
+
+                            <div class="invalid-feedback"
+                                 th:if="${#fields.hasErrors('confirmPassword')}"
+                                 th:errors="*{confirmPassword}">
+                            </div>
+                        </div>
+
+                        <div id="validationError" class="text-danger small mb-3 d-none"></div>
+
+                        <!-- Submit -->
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-auth">Create account</button>
+                        </div>
+
+                        <!-- Divider -->
+                        <div class="text-center text-secondary mb-3">or</div>
+
+                        <!-- OAuth -->
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-outline-light">
+                                Continue with Google
+                            </button>
+                            <button type="button" class="btn btn-outline-light">
+                                Continue with GitHub
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+
+
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/js/credentialsValidation.js}"></script>
+</body>
+</html>

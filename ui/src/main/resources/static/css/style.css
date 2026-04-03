@@ -5,8 +5,27 @@
     --grad-orange-dark: #fa667b;
 }
 
-body{
+html, body {
+    height: 100%;
+}
+body {
     background-color: #202020;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+main {
+    flex: 1 0 auto;
+    padding-bottom: 2rem;
+}
+
+a{
+    color: var(--grad-orange-dark);
+    text-decoration: none;
+    font-weight: 500;
+}
+a:hover{
+    color: var(--grad-orange-light);
 }
 .btn-auth{
     background-color: var(--grad-orange-dark);
@@ -31,6 +50,7 @@ footer {
     text-align: center;
     padding: 1rem 0;
     margin-top: auto;
+    flex-shrink: 0;
 }
 .footer-link {
   text-decoration: none;

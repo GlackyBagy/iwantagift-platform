@@ -1,0 +1,26 @@
+.auth-divider hr {
+    border-color: #2c2c2c;
+    opacity: 1;
+}
+
+.hero-card {
+    width: 100%;
+    max-width: 450px;
+    border: 0;
+    border-radius: 28px;
+    background: #121212;
+    box-shadow: 0 18px 60px rgba(33, 37, 41, 0.08);
+}
+
+.btn-auth {
+    font-weight: 600;
+}
+
+.form-control-dark.is-invalid {
+    border-color: #fa667b;
+    box-shadow: 0 0 0 0.2rem rgba(250, 102, 123, 0.25);
+}
+
+.invalid-feedback {
+    color: #fa667b;
+}
