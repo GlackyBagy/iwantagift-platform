@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (!form) return;
 
-    const usernameInput = form.querySelector('input[name="username"]');
+    const nicknameInput = form.querySelector('input[name="nickname"]');
     const emailInput = form.querySelector('input[name="email"]');
     const passwordInput = document.getElementById("password");
     const confirmPasswordInput = document.getElementById("confirmPassword");
@@ -31,16 +31,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function validateForm() {
-        const username = usernameInput.value.trim();
+        const nickname = nicknameInput.value.trim();
         const email = emailInput.value.trim();
         const password = passwordInput.value;
         const confirmPassword = confirmPasswordInput.value;
 
         clearError();
-        clearInvalid(usernameInput, emailInput, passwordInput, confirmPasswordInput);
+        clearInvalid(nicknameInput, emailInput, passwordInput, confirmPasswordInput);
 
-        if (username.length < 1) {
-            showError("Username must contain at least 1 character.", usernameInput);
+        if (nickname.length < 1) {
+            showError("Username must contain at least 1 character.", nicknameInput);
             return false;
         }
 

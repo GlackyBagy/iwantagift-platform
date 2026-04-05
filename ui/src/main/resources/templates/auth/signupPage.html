@@ -13,16 +13,16 @@
                     <form id="signupForm" th:action="@{/auth/signup}" th:object="${credentialsDTO}" method="post"
                           class="w-100" style="max-width: 420px; margin: 0 auto;">
 
-                        <!-- Username -->
+                        <!-- Nickname -->
                         <div class="mb-3 text-start">
-                            <label class="form-label text-light">Username</label>
+                            <label class="form-label text-light">Nickname</label>
                             <input type="text" class="form-control form-control-dark"
-                                   placeholder="Enter username" th:field="*{username}"
-                                   th:classappend="${#fields.hasErrors('username')} ? 'is-invalid' : ''">
+                                   placeholder="Enter nickname" th:field="*{nickname}"
+                                   th:classappend="${#fields.hasErrors('nickname')} ? 'is-invalid' : ''">
 
                             <div class="invalid-feedback"
-                                 th:if="${#fields.hasErrors('username')}"
-                                 th:errors="*{username}">
+                                 th:if="${#fields.hasErrors('nickname')}"
+                                 th:errors="*{nickname}">
                             </div>
                         </div>
 
