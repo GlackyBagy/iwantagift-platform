@@ -18,3 +18,7 @@ iwag:
     wishlist:
       kafka-topics:
         - deletedUser
+jwt:
+  secret: "change-this-to-a-long-random-secret-key-with-at-least-32-bytes"
+  expiration: 86400000 # 24h in ms
+  cookie-name: AUTH_TOKEN
