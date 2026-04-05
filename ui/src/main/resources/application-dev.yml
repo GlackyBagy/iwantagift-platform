@@ -1,0 +1,20 @@
+spring:
+  application:
+    name: "ui"
+  datasource:
+    url: jdbc:postgresql://localhost:9912/auth
+    username: "postgres"
+    password: "postgres"
+    driver-class-name: org.postgresql.Driver
+  data:
+    redis:
+      host: localhost
+      port: 9922
+      password: RDSpassword
+server:
+  port: 8080
+iwag:
+  services:
+    wishlist:
+      kafka-topics:
+        - deletedUser
