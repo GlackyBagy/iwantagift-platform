@@ -11,7 +11,7 @@ public class CredentialsDTO {
     @NotBlank(message = "Username must not be blank")
     @Size(min = 1, max = 64, groups = ValidationGroups.SignUp.class,
             message = "Username must be at least 1 char, and not longer than 64")
-    private String username;
+    private String nickname;
 
     @NotBlank(message = "Email must not be blank")
     @Email(message = "Invalid email format")
