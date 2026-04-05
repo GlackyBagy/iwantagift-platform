@@ -8,7 +8,7 @@ import online.iwantagift.ui.models.dto.abstracts.ValidationGroups;
 
 @Data
 public class CredentialsDTO {
-    @NotBlank(message = "Username must not be blank")
+    @NotBlank(message = "Username must not be blank", groups = ValidationGroups.SignUp.class)
     @Size(min = 1, max = 64, groups = ValidationGroups.SignUp.class,
             message = "Username must be at least 1 char, and not longer than 64")
     private String nickname;
