@@ -1,0 +1,8 @@
+{
+  "properties": [
+    {
+      "name": "iwag.services.wishlist.kafka-topics",
+      "type": "java.util.List",
+      "description": "Kafka topics the service reads from."
+  }
+] }
