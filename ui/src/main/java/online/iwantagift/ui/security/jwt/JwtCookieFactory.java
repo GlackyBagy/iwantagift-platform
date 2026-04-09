@@ -17,10 +17,10 @@ public class JwtCookieFactory {
     @Value("${jwt.cookie.name.refresh}")
     private String refreshCookieName;
 
-    @Value("${jwt.cookie.max-age-seconds")
+    @Value("${jwt.cookie.max-age-seconds}")
     private int maxAgeSeconds;
 
-    @Value("${jwt.cookie.set-secure")
+    @Value("${jwt.cookie.set-secure}")
     private boolean secure;
 
     public List<Cookie> createAuthCookies(String jwt, String refreshToken) {
