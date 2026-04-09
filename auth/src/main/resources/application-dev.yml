@@ -1,4 +1,9 @@
 spring:
+  docker:
+    compose:
+      enabled: true
+      file: auth/compose.yml
+      lifecycle-management: start-only
   application:
     name: "auth"
   datasource:
@@ -12,7 +17,7 @@ spring:
       port: 9922
       password: RDSpassword
 server:
-  port: 8000
+  port: 8091
 iwag:
   services:
     wishlist:
@@ -21,4 +26,3 @@ iwag:
 jwt:
   secret: "change-this-to-a-long-random-secret-key-with-at-least-32-bytes"
   expiration: 86400000 # 24h in ms
-  cookie-name: AUTH_TOKEN
