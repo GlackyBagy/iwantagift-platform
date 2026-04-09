@@ -13,7 +13,7 @@ services:
 #      - cache
 #      - broker
 
-  db:
+  wl-db:
     image: postgres:18
     environment:
       POSTGRES_USER: "postgres"
@@ -22,13 +22,13 @@ services:
     ports:
       - "9911:5432"
 
-  cache:
+  wl-cache:
     image: redis:8.6
     command: redis-server --requirepass RDSpassword
     ports:
       - "9921:6379"
 
-  broker:
+  wl-broker:
     image: apache/kafka:4.2.0
     ports:
       - "9092:9092"
