@@ -1,0 +1,24 @@
+{
+  "properties": [
+    {
+      "name": "jwt.cookie.name.access",
+      "type": "java.lang.String",
+      "description": "Name of the cookie used to store the access JWT token."
+    },
+    {
+      "name": "jwt.cookie.name.refresh",
+      "type": "java.lang.String",
+      "description": "Name of the cookie used to store the refresh JWT token."
+    },
+    {
+      "name": "jwt.cookie.max-age-seconds",
+      "type": "java.lang.Integer",
+      "description": "Maximum lifetime of JWT cookies in seconds. Determines how long the cookie is valid in the browser."
+    },
+    {
+      "name": "jwt.cookie.set-secure",
+      "type": "java.lang.Boolean",
+      "description": "Indicates whether cookies should only be sent over secure connections (HTTPS). Should be enabled in production."
+    }
+  ]
+}
