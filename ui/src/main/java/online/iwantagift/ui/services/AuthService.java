@@ -35,8 +35,8 @@ public class AuthService {
     @PostConstruct
     private void init() {
         var authService = iwagProperties.getRequiredService("auth");
-        scheme = authService.isUseHttps() ? "https" : "http";
-        authServiceUrl = authService.getUrl();
+        scheme = authService.isUseHttps() ? "https://" : "http://";
+        authServiceUrl = scheme + authService.getUrl();
     }
 
     public PublicKey getPublicKey() {
@@ -54,7 +54,6 @@ public class AuthService {
 
     private PublicKey fetchPublicKey() {
         URI uri = UriComponentsBuilder.fromUriString(authServiceUrl)
-                .scheme(scheme)
                 .path("/.well-known/jwks.json")
                 .build()
                 .toUri();
@@ -94,7 +93,7 @@ public class AuthService {
                 .path(path)
                 .build()
                 .toUri();
-
+        System.out.println("Request POST " + uri);
         var response = restClient.post()
                 .uri(uri)
                 .body(body)
@@ -107,6 +106,7 @@ public class AuthService {
 
     public TokenDTO refresh(String refreshToken) throws AuthServiceException {
         URI uri = UriComponentsBuilder.fromUriString(authServiceUrl)
+                .scheme(scheme)
                 .path("/refresh")
                 .queryParam("token", refreshToken)
                 .build()
