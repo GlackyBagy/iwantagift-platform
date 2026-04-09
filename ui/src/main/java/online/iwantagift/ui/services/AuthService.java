@@ -5,11 +5,12 @@ import io.jsonwebtoken.security.JwkSet;
 import io.jsonwebtoken.security.Jwks;
 import io.jsonwebtoken.security.PublicJwk;
 import jakarta.annotation.PostConstruct;
+import lombok.RequiredArgsConstructor;
+import online.iwantagift.ui.IwagProperties;
 import online.iwantagift.ui.models.dto.CredentialsDTO;
 import online.iwantagift.ui.models.dto.TokenDTO;
 import online.iwantagift.ui.util.AuthErrorHandler;
 import online.iwantagift.ui.util.exceptions.AuthServiceException;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -18,9 +19,11 @@ import java.net.URI;
 import java.security.PublicKey;
 
 @Service
+@RequiredArgsConstructor
 public class AuthService {
 
-    @Value("${iwag.services.auth.url}")
+    private final IwagProperties iwagProperties;
+
     private String authServiceUrl;
 
     private String scheme;
@@ -30,8 +33,10 @@ public class AuthService {
     private volatile PublicKey cachedPublicKey;
 
     @PostConstruct
-    private void init(@Value("${iwag.services.auth.use-https}") boolean useHttps) {
-        scheme = useHttps ? "https" : "http";
+    private void init() {
+        var authService = iwagProperties.getRequiredService("auth");
+        scheme = authService.isUseHttps() ? "https" : "http";
+        authServiceUrl = authService.getUrl();
     }
 
     public PublicKey getPublicKey() {

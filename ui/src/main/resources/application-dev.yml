@@ -1,12 +1,20 @@
 spring:
   application:
     name: "ui"
+
 server:
   port: 8080
+
 iwag:
   services:
     auth:
       url: localhost:8091
-#    wishlist:
-#      kafka-topics:
-#        - deletedUser
+      use-https: false
+
+jwt:
+  cookie:
+    name:
+      access: "IWAG-ACCESS-COOKIE"
+      refresh: "IWAG-REFRASH-COOKIE"
+    max-age-seconds: 900
+    set-secure: true
