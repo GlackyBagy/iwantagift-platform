@@ -1,21 +1,21 @@
 package online.iwantagift.ui.security.jwt;
 
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import online.iwantagift.ui.services.JwtService;
 import org.jspecify.annotations.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.Optional;
 
 @Component
@@ -23,7 +23,6 @@ import java.util.Optional;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
-    private final JwtCookieFactory jwtCookieFactory;
 
     @Override
     protected void doFilterInternal(@NonNull HttpServletRequest request,
@@ -36,40 +35,20 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             return;
         }
 
-        String token = extractTokenFromCookies(request);
+        Optional<String> token = jwtService.extractAccessToken(request);
 
-        if (token != null) {
+        if (token.isPresent() && jwtService.isValid(token.get())) {
+            Claims claims = jwtService.parseClaims(token.get());
 
+            Authentication authentication = new UsernamePasswordAuthenticationToken(
+                    claims.getSubject(),
+                    null,
+                    Collections.emptyList()
+            );
+
+            SecurityContextHolder.getContext().setAuthentication(authentication);
         }
 
-//        if (token != null) {
-//            String username = jwtService.extractUsername(token);
-//            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-//
-//            if (jwtService.isValid(token, userDetails)) {
-//                UsernamePasswordAuthenticationToken auth =
-//                        new UsernamePasswordAuthenticationToken(
-//                                userDetails,
-//                                null,
-//                                userDetails.getAuthorities()
-//                        );
-//
-//                auth.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-//                SecurityContextHolder.getContext().setAuthentication(auth);
-//            }
-//        }
-
         filterChain.doFilter(request, response);
-    }
-
-    private String extractTokenFromCookies(HttpServletRequest request) {
-        Cookie[] cookies = request.getCookies();
-        if (cookies == null) return null;
-
-        Optional<Cookie> authCookie = Arrays.stream(cookies)
-                .filter(cookie -> jwtCookieFactory.getCookieName().equals(cookie.getName()))
-                .findFirst();
-
-        return authCookie.map(Cookie::getValue).orElse(null);
     }
 }

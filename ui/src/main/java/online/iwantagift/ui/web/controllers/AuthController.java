@@ -3,8 +3,10 @@ package online.iwantagift.ui.web.controllers;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import online.iwantagift.ui.models.dto.CredentialsDTO;
+import online.iwantagift.ui.models.dto.TokenDTO;
 import online.iwantagift.ui.models.dto.abstracts.ValidationGroups;
 import online.iwantagift.ui.security.jwt.JwtCookieFactory;
+import online.iwantagift.ui.services.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -18,6 +20,7 @@ import java.util.Objects;
 @RequiredArgsConstructor
 public class AuthController {
     private final JwtCookieFactory jwtCookieFactory;
+    private final AuthService authService;
 
     @GetMapping("/signin")
     @ResponseStatus(HttpStatus.OK)
@@ -34,7 +37,8 @@ public class AuthController {
     @PostMapping(path = "/signup")
     public String signUp(@ModelAttribute @Validated(ValidationGroups.SignUp.class)
                          CredentialsDTO credentials,
-                         BindingResult bindingResult) {
+                         BindingResult bindingResult,
+                         HttpServletResponse response) {
         if (Objects.nonNull(credentials.getConfirmPassword()) &&
                 !Objects.equals(credentials.getConfirmPassword(), credentials.getPassword())) {
             bindingResult.rejectValue("confirmPassword",
@@ -44,9 +48,12 @@ public class AuthController {
         if (bindingResult.hasErrors())
             return "auth/signupPage";
 
-        //todo request JWT from auth server
+        TokenDTO dto = authService.signUp(credentials);
 
-        return "redirect:/auth/signin";
+        jwtCookieFactory.createAuthCookies(dto.getJwtToken(), dto.getRefreshToken())
+                .forEach(response::addCookie);
+
+        return "redirect:/";
     }
 
     @PostMapping(path = "/signin")
@@ -60,16 +67,18 @@ public class AuthController {
             return "auth/signinPage";
         }
 
-        //todo request JWT from auth server
+        TokenDTO dto = authService.signIn(credentials);
 
-//        response.addCookie(jwtCookieFactory.createAuthCookie(jwt, 24 * 60 * 60));
+        jwtCookieFactory.createAuthCookies(dto.getJwtToken(), dto.getRefreshToken())
+                .forEach(response::addCookie);
 
         return "redirect:/";
     }
 
     @PostMapping("/logout")
     public String logout(HttpServletResponse response) {
-        response.addCookie(jwtCookieFactory.createLogoutCookie());
+        jwtCookieFactory.createLogoutCookies()
+                .forEach(response::addCookie);
         return "redirect:/";
     }
 
