@@ -2,50 +2,36 @@ package online.iwantagift.ui.security.services;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.security.Keys;
+import io.jsonwebtoken.security.Jwk;
+import io.jsonwebtoken.security.JwkSet;
+import io.jsonwebtoken.security.PublicJwk;
 import jakarta.annotation.PostConstruct;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.GrantedAuthority;
+import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
-import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
+import java.net.URISyntaxException;
+import java.security.PublicKey;
 import java.util.Date;
-import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class JwtService {
+    private final AuthService authService;
 
-    @Value("${jwt.secret}")
-    private String secret;
-
-    @Value("${jwt.expiration}")
-    private long expiration;
-
-    private SecretKey key;
+    private PublicKey publicKey;
 
     @PostConstruct
-    void init() {
-        byte[] keyBytes = secret.getBytes(StandardCharsets.UTF_8);
-        this.key = Keys.hmacShaKeyFor(keyBytes);
-    }
+    protected void init() throws URISyntaxException {
+        JwkSet set = authService.getJwkSet(); //todo handle exception
 
-    public String generateToken(UserDetails userDetails) {
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .toList();
-
-        Date now = new Date();
-        Date expiry = new Date(now.getTime() + expiration);
-
-        return Jwts.builder()
-                .subject(userDetails.getUsername())
-                .claim("roles", roles)
-                .issuedAt(now)
-                .expiration(expiry)
-                .signWith(key)
-                .compact();
+        PublicKey publicKey = set.getKeys().stream()
+                .filter(jwk -> "jwt-sign".equals(jwk.getId()))
+                .filter(jwk -> jwk instanceof PublicJwk<?>)
+                .map(jwk -> (PublicJwk<?>) jwk)
+                .map(pj -> (PublicKey) pj.toKey())
+                .findFirst()
+                .orElse(null);
     }
 
     public String extractUsername(String token) {
@@ -63,7 +49,7 @@ public class JwtService {
 
     private Claims parseClaims(String token) {
         return Jwts.parser()
-                .verifyWith(key)
+                .verifyWith(publicKey)
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();

@@ -1,8 +1,8 @@
-package online.iwantagift.ui.security.services;
+package online.iwantagift.auth.services;
 
 import lombok.RequiredArgsConstructor;
-import online.iwantagift.ui.models.entities.Account;
-import online.iwantagift.ui.security.repositories.AccountRepository;
+import online.iwantagift.auth.models.entities.Account;
+import online.iwantagift.auth.repositories.AccountRepository;
 import org.springframework.stereotype.Service;
 
 @Service

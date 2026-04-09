@@ -4,17 +4,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import online.iwantagift.ui.models.dto.CredentialsDTO;
 import online.iwantagift.ui.models.dto.abstracts.ValidationGroups;
-import online.iwantagift.ui.models.entities.Account;
-import online.iwantagift.ui.models.entities.AccountFactory;
 import online.iwantagift.ui.security.jwt.JwtCookieFactory;
-import online.iwantagift.ui.security.services.AccountService;
-import online.iwantagift.ui.security.services.JwtService;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
@@ -26,10 +17,6 @@ import java.util.Objects;
 @Controller
 @RequiredArgsConstructor
 public class AuthController {
-    private final AccountService accountService;
-    private final AccountFactory accountFactory;
-    private final AuthenticationManager authenticationManager;
-    private final JwtService jwtService;
     private final JwtCookieFactory jwtCookieFactory;
 
     @GetMapping("/signin")
@@ -57,9 +44,8 @@ public class AuthController {
         if (bindingResult.hasErrors())
             return "auth/signupPage";
 
-        Account account = accountFactory.create(credentials);
-        accountService.save(account);
-        System.out.println("SAVED");
+        //todo request JWT from auth server
+
         return "redirect:/auth/signin";
     }
 
@@ -74,23 +60,9 @@ public class AuthController {
             return "auth/signinPage";
         }
 
-        Authentication authentication;
-        try {
-            authentication = authenticationManager.authenticate(
-                    UsernamePasswordAuthenticationToken.unauthenticated(
-                            credentials.getEmail(),
-                            credentials.getPassword()
-                    )
-            );
-        } catch (BadCredentialsException ex) {
-            bindingResult.reject("auth.invalid", "Wrong email or password");
-            return "auth/signinPage";
-        }
+        //todo request JWT from auth server
 
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-        String jwt = jwtService.generateToken(Objects.requireNonNull(userDetails));
-
-        response.addCookie(jwtCookieFactory.createAuthCookie(jwt, 24 * 60 * 60));
+//        response.addCookie(jwtCookieFactory.createAuthCookie(jwt, 24 * 60 * 60));
 
         return "redirect:/";
     }

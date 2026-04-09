@@ -36,6 +36,7 @@
         <module>wishlist</module>
         <module>productprice</module>
         <module>ui</module>
+        <module>auth</module>
     </modules>
 
     <dependencies>

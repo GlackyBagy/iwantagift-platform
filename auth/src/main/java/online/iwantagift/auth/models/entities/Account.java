@@ -1,4 +1,4 @@
-package online.iwantagift.ui.models.entities;
+package online.iwantagift.auth.models.entities;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;

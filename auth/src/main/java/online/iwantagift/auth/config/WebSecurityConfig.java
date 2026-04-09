@@ -1,7 +1,8 @@
-package online.iwantagift.ui.security.config;
+package online.iwantagift.auth.config;
 
 import lombok.RequiredArgsConstructor;
-import online.iwantagift.ui.security.jwt.JwtAuthenticationFilter;
+import online.iwantagift.auth.jwt.JwtAuthenticationFilter;
+import online.iwantagift.auth.services.AccountUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
@@ -21,14 +22,14 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class WebSecurityConfig {
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final AccountUserDetailsService userDetailsService;
 
     @Bean
     @DependsOn("authenticationProvider")
     SecurityFilterChain securityFilterChain(HttpSecurity http) {
         http
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/css/*", "/js/*", "/img/*", "/fonts/*",
-                                "/", "/landing", "/auth/*")
+                        .requestMatchers("/auth/*")
                         .permitAll()
                         .anyRequest().authenticated()
                 )

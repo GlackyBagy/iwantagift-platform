@@ -1,7 +1,7 @@
-package online.iwantagift.ui.models.entities;
+package online.iwantagift.auth.models.entities;
 
 import lombok.RequiredArgsConstructor;
-import online.iwantagift.ui.models.dto.CredentialsDTO;
+import online.iwantagift.auth.models.dto.CredentialsDTO;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 

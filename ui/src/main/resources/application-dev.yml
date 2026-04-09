@@ -1,24 +1,12 @@
 spring:
   application:
     name: "ui"
-  datasource:
-    url: jdbc:postgresql://localhost:9912/auth
-    username: "postgres"
-    password: "postgres"
-    driver-class-name: org.postgresql.Driver
-  data:
-    redis:
-      host: localhost
-      port: 9922
-      password: RDSpassword
 server:
   port: 8080
 iwag:
   services:
-    wishlist:
-      kafka-topics:
-        - deletedUser
-jwt:
-  secret: "change-this-to-a-long-random-secret-key-with-at-least-32-bytes"
-  expiration: 86400000 # 24h in ms
-  cookie-name: AUTH_TOKEN
+    auth:
+      url: localhost:8091
+#    wishlist:
+#      kafka-topics:
+#        - deletedUser
