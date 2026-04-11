@@ -7,6 +7,13 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * Factory for JWT-related HTTP cookies used by the UI application.
+ *
+ * <p>The created cookies are marked {@code HttpOnly}, use the configured security flag, are scoped
+ * to the application root path, and either carry token values or immediately expire to clear
+ * authentication state in the browser.
+ */
 @Component
 @Getter
 public class JwtCookieFactory {
@@ -23,6 +30,14 @@ public class JwtCookieFactory {
     @Value("${jwt.cookie.set-secure}")
     private boolean secure;
 
+    /**
+     * Creates the cookies used to store the current authentication tokens.
+     *
+     * @param jwt the access-token value to store
+     * @param refreshToken the refresh-token value to store
+     * @return a list containing the access-token cookie and the second token cookie created for the
+     *     supplied refresh-token value
+     */
     public List<Cookie> createAuthCookies(String jwt, String refreshToken) {
         return List.of(createAccessCookie(jwt),
                 createRefreshCookie(refreshToken));
@@ -46,6 +61,11 @@ public class JwtCookieFactory {
         return cookie;
     }
 
+    /**
+     * Creates cookies that clear the stored authentication tokens in the browser.
+     *
+     * @return a list containing immediately expiring cookies for both configured token cookie names
+     */
     public List<Cookie> createLogoutCookies() {
         return List.of(killAccessCookie(),
                 killRefreshCookie());

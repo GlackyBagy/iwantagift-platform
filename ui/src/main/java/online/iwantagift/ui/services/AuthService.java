@@ -18,6 +18,13 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
 import java.security.PublicKey;
 
+/**
+ * Client for the authentication microservice.
+ *
+ * <p>This service caches the JWT verification key exposed by the auth service JWKS endpoint
+ * and forwards sign-in, sign-up, and refresh requests to the corresponding auth endpoints.
+ * The cached key is loaded lazily and replaced atomically when refreshed.
+ */
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -39,6 +46,16 @@ public class AuthService {
         authServiceUrl = scheme + authService.getUrl();
     }
 
+    /**
+     * Returns the public key used to verify JWT signatures.
+     *
+     * <p>If no key has been cached yet, this method fetches it from the auth service before
+     * returning.
+     *
+     * @return the cached or freshly fetched JWT verification key
+     * @throws IllegalStateException if the JWKS response is empty or does not contain the
+     *     expected signing key
+     */
     public PublicKey getPublicKey() {
         if (cachedPublicKey == null)
             refreshPublicKey();
@@ -46,6 +63,14 @@ public class AuthService {
         return cachedPublicKey;
     }
 
+    /**
+     * Replaces the cached JWT verification key with the current key from the auth service.
+     *
+     * <p>The cache update is synchronized so concurrent callers observe a fully replaced key.
+     *
+     * @throws IllegalStateException if the JWKS response is empty or does not contain the
+     *     expected signing key
+     */
     public void refreshPublicKey() {
         synchronized (this) {
             cachedPublicKey = fetchPublicKey();
@@ -80,10 +105,26 @@ public class AuthService {
         throw new IllegalStateException("Public key with kid='jwt-sign' not found");
     }
 
+    /**
+     * Authenticates an existing user with the auth service.
+     *
+     * @param credentials the credentials to submit to the sign-in endpoint
+     * @return the token payload returned by the auth service, or {@code null} if the response
+     *     body is empty
+     * @throws AuthServiceException if the auth service reports an error response
+     */
     public TokenDTO signIn(CredentialsDTO credentials) throws AuthServiceException {
         return postForTokens("/signin", credentials);
     }
 
+    /**
+     * Registers a new user with the auth service.
+     *
+     * @param credentials the credentials to submit to the sign-up endpoint
+     * @return the token payload returned by the auth service, or {@code null} if the response
+     *     body is empty
+     * @throws AuthServiceException if the auth service reports an error response
+     */
     public TokenDTO signUp(CredentialsDTO credentials) throws AuthServiceException {
         return postForTokens("/signup", credentials);
     }
@@ -104,6 +145,14 @@ public class AuthService {
         return response.body(TokenDTO.class);
     }
 
+    /**
+     * Requests a new token payload from the auth service using a refresh token.
+     *
+     * @param refreshToken the refresh token to send to the refresh endpoint
+     * @return the token payload returned by the auth service, or {@code null} if the response
+     *     body is empty
+     * @throws AuthServiceException if the auth service reports an error response
+     */
     public TokenDTO refresh(String refreshToken) throws AuthServiceException {
         URI uri = UriComponentsBuilder.fromUriString(authServiceUrl)
                 .scheme(scheme)

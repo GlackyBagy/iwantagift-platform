@@ -18,6 +18,14 @@ import java.io.IOException;
 import java.util.Collections;
 import java.util.Optional;
 
+/**
+ * Security filter that authenticates requests from the access-token cookie.
+ *
+ * <p>If the security context is already populated, the filter leaves it unchanged. Otherwise, it
+ * reads the configured access token from the request cookies, validates it with
+ * {@link JwtService}, and stores a {@link UsernamePasswordAuthenticationToken} containing the JWT
+ * subject as the principal.
+ */
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {

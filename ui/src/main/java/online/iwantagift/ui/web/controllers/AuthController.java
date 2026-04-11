@@ -15,6 +15,12 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Objects;
 
+/**
+ * Handles browser-based authentication flows for the UI application.
+ *
+ * <p>This controller renders sign-in and sign-up pages, submits credentials to the auth service,
+ * stores returned tokens in HTTP cookies, and clears those cookies on logout.
+ */
 @RequestMapping("/auth")
 @Controller
 @RequiredArgsConstructor
@@ -34,6 +40,18 @@ public class AuthController {
         return "auth/signupPage";
     }
 
+    /**
+     * Registers a new user and stores the returned authentication tokens in cookies.
+     *
+     * <p>If the submitted passwords do not match or bean validation fails, this method returns the
+     * sign-up page without calling the auth service.
+     *
+     * @param credentials the submitted sign-up form data
+     * @param bindingResult the validation result for the submitted form
+     * @param response the HTTP response that receives authentication cookies
+     * @return a redirect to the application root on success, or the sign-up page view on validation
+     *     failure
+     */
     @PostMapping(path = "/signup")
     public String signUp(@ModelAttribute @Validated(ValidationGroups.SignUp.class)
                          CredentialsDTO credentials,
@@ -56,6 +74,18 @@ public class AuthController {
         return "redirect:/";
     }
 
+    /**
+     * Authenticates an existing user and stores the returned authentication tokens in cookies.
+     *
+     * <p>If bean validation fails, this method returns the sign-in page without calling the auth
+     * service.
+     *
+     * @param credentials the submitted sign-in form data
+     * @param bindingResult the validation result for the submitted form
+     * @param response the HTTP response that receives authentication cookies
+     * @return a redirect to the application root on success, or the sign-in page view on validation
+     *     failure
+     */
     @PostMapping(path = "/signin")
     @ResponseStatus(HttpStatus.OK)
     public String signIn(@ModelAttribute @Validated(ValidationGroups.SignIn.class)
@@ -75,6 +105,12 @@ public class AuthController {
         return "redirect:/";
     }
 
+    /**
+     * Clears authentication cookies and redirects the user to the application root.
+     *
+     * @param response the HTTP response that receives the expiring logout cookies
+     * @return a redirect to the application root
+     */
     @PostMapping("/logout")
     public String logout(HttpServletResponse response) {
         jwtCookieFactory.createLogoutCookies()

@@ -6,6 +6,13 @@ import jakarta.validation.constraints.Size;
 import lombok.Data;
 import online.iwantagift.ui.models.dto.abstracts.ValidationGroups;
 
+/**
+ * Form payload for UI authentication requests.
+ *
+ * <p>This DTO is shared by both sign-in and sign-up flows. The {@code nickname} and
+ * {@code confirmPassword} fields are required only for the {@link ValidationGroups.SignUp} validation group, while
+ * {@code email} and {@code password} are required in both flows.
+ */
 @Data
 public class CredentialsDTO {
     @NotBlank(message = "Username must not be blank", groups = ValidationGroups.SignUp.class)

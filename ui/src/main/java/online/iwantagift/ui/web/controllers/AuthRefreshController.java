@@ -15,6 +15,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Optional;
 
+/**
+ * Handles browser token refresh requests for the UI application.
+ *
+ * <p>This controller reads the refresh token from cookies, requests a new token pair from the auth
+ * service, updates browser cookies on success, and clears authentication cookies on failure.
+ */
 @Controller
 @RequiredArgsConstructor
 public class AuthRefreshController {
@@ -23,6 +29,18 @@ public class AuthRefreshController {
     private final AuthService authClient;
     private final JwtService jwtService;
 
+    /**
+     * Refreshes authentication cookies using the refresh token from the current request.
+     *
+     * <p>If the refresh token is missing, blank, or rejected by the auth service, this method
+     * clears authentication cookies and redirects the user to the sign-in page. On success, it
+     * stores the refreshed tokens in cookies and redirects to a sanitized local target.
+     *
+     * @param redirect the optional redirect target requested by the client
+     * @param request the current HTTP request
+     * @param response the HTTP response that receives updated or clearing cookies
+     * @return a redirect to the sanitized target on success, or to the sign-in page on failure
+     */
     @GetMapping("/auth/refresh")
     public String refresh(@RequestParam(name = "redirect", required = false) String redirect,
                           HttpServletRequest request,
@@ -52,6 +70,15 @@ public class AuthRefreshController {
                 .forEach(response::addCookie);
     }
 
+    /**
+     * Normalizes a redirect target so that only local application paths are allowed.
+     *
+     * <p>Absolute URIs, host-qualified values, malformed values, and blank paths are replaced with
+     * the application root path.
+     *
+     * @param redirect the requested redirect target
+     * @return a safe local redirect target beginning with {@code /}
+     */
     private String sanitizeRedirect(String redirect) {
         if (redirect == null || redirect.isBlank()) {
             return "/";

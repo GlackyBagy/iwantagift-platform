@@ -9,6 +9,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 
+/**
+ * Redirects authenticated users away from authentication pages.
+ *
+ * <p>This interceptor is intended for routes such as sign-in and sign-up, where authenticated
+ * users should be sent back to the application root instead of seeing auth forms again.
+ */
 @Component
 public class AuthPageRedirectInterceptor implements HandlerInterceptor {
 
