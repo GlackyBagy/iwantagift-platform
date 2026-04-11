@@ -37,8 +37,8 @@ public class JwtCookieFactory {
         return cookie;
     }
 
-    private Cookie createRefreshCookie(String refreshCookieName) {
-        Cookie cookie = new Cookie(accessCookieName, refreshCookieName);
+    private Cookie createRefreshCookie(String refresh) {
+        Cookie cookie = new Cookie(refreshCookieName, refresh);
         cookie.setHttpOnly(true);
         cookie.setSecure(secure);
         cookie.setPath("/");
