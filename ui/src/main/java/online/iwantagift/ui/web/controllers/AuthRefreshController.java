@@ -31,7 +31,7 @@ public class AuthRefreshController {
 
         if (refreshToken.isEmpty() || refreshToken.get().isBlank()) {
             clearAuthCookies(response);
-            return "redirect:/signin";
+            return "redirect:/auth/signin";
         }
 
         try {
@@ -43,7 +43,7 @@ public class AuthRefreshController {
             return "redirect:" + sanitizeRedirect(redirect);
         } catch (Exception ex) {
             clearAuthCookies(response);
-            return "redirect:/signin";
+            return "redirect:/auth/signin";
         }
     }
 
