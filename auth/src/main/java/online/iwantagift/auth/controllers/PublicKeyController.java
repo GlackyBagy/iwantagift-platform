@@ -10,6 +10,9 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.security.PublicKey;
 
+/**
+ * Publishes the JSON Web Key Set used by clients to verify JWT signatures.
+ */
 @RestController
 @RequestMapping("/.well-known")
 @RequiredArgsConstructor
@@ -17,6 +20,11 @@ public class PublicKeyController {
 
     private final JwtService jwtService;
 
+    /**
+     * Returns the public signing key as a JWKS document.
+     *
+     * @return JSON Web Key Set containing the RSA public key used for JWT verification
+     */
     @GetMapping(value = "/jwks.json")
     public Object jwksJson() {
         PublicJwk<PublicKey> signKey = Jwks.builder()

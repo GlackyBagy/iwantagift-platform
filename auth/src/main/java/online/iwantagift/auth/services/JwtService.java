@@ -16,6 +16,13 @@ import java.security.PublicKey;
 import java.util.Date;
 import java.util.List;
 
+/**
+ * Generates and validates JWT access tokens for authenticated users.
+ *
+ * <p>The service creates an in-memory RSA key pair during application startup and uses it to
+ * sign and verify tokens. Generated tokens include the username as the subject and the user's
+ * authorities in the {@code roles} claim.
+ */
 @Service
 public class JwtService {
 
@@ -27,6 +34,12 @@ public class JwtService {
     @Getter
     private PublicKey publicKey;
 
+    /**
+     * Generates the RSA key pair used to sign and verify JWT tokens.
+     *
+     * <p>The current implementation keeps the keys only in memory for the lifetime of the
+     * application instance.
+     */
     @PostConstruct
     void init() {
         try {
@@ -42,6 +55,12 @@ public class JwtService {
         }
     }
 
+    /**
+     * Creates a signed JWT token for the given user.
+     *
+     * @param userDetails authenticated user details used to populate token subject and roles
+     * @return compact serialized JWT token
+     */
     public String generateToken(UserDetails userDetails) {
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
@@ -59,10 +78,23 @@ public class JwtService {
                 .compact();
     }
 
+    /**
+     * Extracts the username stored in the token subject.
+     *
+     * @param token signed JWT token
+     * @return username from the token subject
+     */
     public String extractUsername(String token) {
         return parseClaims(token).getSubject();
     }
 
+    /**
+     * Checks whether the token belongs to the given user and is not expired.
+     *
+     * @param token signed JWT token
+     * @param userDetails user details expected to match the token subject
+     * @return {@code true} if the token subject matches the user and the token is still valid
+     */
     public boolean isValid(String token, UserDetails userDetails) {
         Claims claims = parseClaims(token);
         String username = claims.getSubject();

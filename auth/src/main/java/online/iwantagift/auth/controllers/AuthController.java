@@ -24,6 +24,12 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
+/**
+ * Exposes authentication endpoints for account registration and login.
+ *
+ * <p>The controller validates incoming credentials, creates accounts during sign-up, authenticates
+ * users through Spring Security, and returns a JWT access token for successful requests.
+ */
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
@@ -33,6 +39,14 @@ public class AuthController {
     private final AccountService accountService;
     private final AccountFactory accountFactory;
 
+    /**
+     * Registers a new account and returns a JWT for the created user.
+     *
+     * @param credentials registration payload containing user credentials
+     * @param bindingResult validation result for the incoming payload
+     * @return signed JWT access token for the newly registered user
+     * @throws ValidationException if validation fails or passwords do not match
+     */
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.OK)
     public String signUp(@RequestBody @Validated(ValidationGroups.SignIn.class)
@@ -52,6 +66,14 @@ public class AuthController {
         return jwtFromCredentials(credentials);
     }
 
+    /**
+     * Authenticates an existing user and returns a JWT for the authenticated account.
+     *
+     * @param credentials sign-in payload containing email and password
+     * @param result validation result for the incoming payload
+     * @return signed JWT access token for the authenticated user
+     * @throws ValidationException if request validation fails
+     */
     @PostMapping("/signin")
     @ResponseStatus(HttpStatus.OK)
     public String signIn(@RequestBody @Validated(ValidationGroups.SignIn.class)
@@ -75,6 +97,12 @@ public class AuthController {
         return jwtService.generateToken(Objects.requireNonNull(userDetails));
     }
 
+    /**
+     * Converts validation errors into a field-to-message response body.
+     *
+     * @param exception validation exception containing binding errors
+     * @return map of field or object names to validation error messages
+     */
     @ExceptionHandler(ValidationException.class)
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     private Map<String, String> handleValidationException(ValidationException exception) {
@@ -92,6 +120,6 @@ public class AuthController {
 
     @ExceptionHandler(BadCredentialsException.class)
     @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    private void handleBadCredentials() {
+    private void handleBadCredentials() { //todo
     }
 }
