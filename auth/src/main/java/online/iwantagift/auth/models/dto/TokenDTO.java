@@ -1,12 +1,12 @@
 package online.iwantagift.auth.models.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import lombok.Builder;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import tools.jackson.databind.ObjectMapper;
 
 @Data
-@Builder
+@AllArgsConstructor
 public class TokenDTO {
     @JsonIgnore
     private static final ObjectMapper mapper = new ObjectMapper();
