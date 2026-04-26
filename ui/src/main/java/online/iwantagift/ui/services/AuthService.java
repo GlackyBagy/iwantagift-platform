@@ -114,7 +114,7 @@ public class AuthService {
      * @throws AuthServiceException if the auth service reports an error response
      */
     public TokenDTO signIn(CredentialsDTO credentials) throws AuthServiceException {
-        return postForTokens("/signin", credentials);
+        return postForTokens("/auth/signin", credentials);
     }
 
     /**
@@ -126,7 +126,7 @@ public class AuthService {
      * @throws AuthServiceException if the auth service reports an error response
      */
     public TokenDTO signUp(CredentialsDTO credentials) throws AuthServiceException {
-        return postForTokens("/signup", credentials);
+        return postForTokens("/auth/signup", credentials);
     }
 
     private TokenDTO postForTokens(String path, Object body) throws AuthServiceException {
@@ -157,7 +157,7 @@ public class AuthService {
         URI uri = UriComponentsBuilder.fromUriString(authServiceUrl)
                 .scheme(scheme)
                 .path("/refresh")
-                .queryParam("token", refreshToken)
+                .queryParam("refreshToken", refreshToken)
                 .build()
                 .toUri();
 
