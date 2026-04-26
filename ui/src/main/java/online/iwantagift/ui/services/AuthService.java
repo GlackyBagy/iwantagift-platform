@@ -11,6 +11,8 @@ import online.iwantagift.ui.models.dto.CredentialsDTO;
 import online.iwantagift.ui.models.dto.TokenDTO;
 import online.iwantagift.ui.util.AuthErrorHandler;
 import online.iwantagift.ui.util.exceptions.AuthServiceException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -28,6 +30,7 @@ import java.security.PublicKey;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+    private static final Logger log = LoggerFactory.getLogger(AuthService.class);
 
     private final IwagProperties iwagProperties;
 
@@ -44,6 +47,7 @@ public class AuthService {
         var authService = iwagProperties.getRequiredService("auth");
         scheme = authService.isUseHttps() ? "https://" : "http://";
         authServiceUrl = scheme + authService.getUrl();
+        log.info("Auth service client initialized for {}", authServiceUrl);
     }
 
     /**
@@ -57,8 +61,10 @@ public class AuthService {
      *     expected signing key
      */
     public PublicKey getPublicKey() {
-        if (cachedPublicKey == null)
+        if (cachedPublicKey == null) {
+            log.info("JWT public key cache is empty, refreshing");
             refreshPublicKey();
+        }
 
         return cachedPublicKey;
     }
@@ -73,7 +79,9 @@ public class AuthService {
      */
     public void refreshPublicKey() {
         synchronized (this) {
+            log.info("Refreshing JWT public key from auth service");
             cachedPublicKey = fetchPublicKey();
+            log.info("JWT public key was refreshed");
         }
     }
 
@@ -82,6 +90,7 @@ public class AuthService {
                 .path("/.well-known/jwks.json")
                 .build()
                 .toUri();
+        log.debug("Requesting JWKS from {}", uri);
 
         String jwksJson = restClient.get()
                 .uri(uri)
@@ -98,9 +107,11 @@ public class AuthService {
             if ("jwt-sign".equals(jwk.getId())
                     && jwk instanceof PublicJwk<?> pj
                     && pj.toKey() instanceof PublicKey pk) {
+                log.info("Found jwt-sign public key in JWKS response");
                 return pk;
             }
         }
+        log.error("JWKS returned unknown jwks {}", set);
 
         throw new IllegalStateException("Public key with kid='jwt-sign' not found");
     }
@@ -134,7 +145,7 @@ public class AuthService {
                 .path(path)
                 .build()
                 .toUri();
-        System.out.println("Request POST " + uri);
+        log.debug("Sending auth request to {}", uri);
         var response = restClient.post()
                 .uri(uri)
                 .body(body)
@@ -142,7 +153,9 @@ public class AuthService {
 
         AuthErrorHandler.handle(response);
 
-        return response.body(TokenDTO.class);
+        TokenDTO tokenDTO = response.body(TokenDTO.class);
+        log.debug("Auth request completed for {}", path);
+        return tokenDTO;
     }
 
     /**
@@ -154,6 +167,7 @@ public class AuthService {
      * @throws AuthServiceException if the auth service reports an error response
      */
     public TokenDTO refresh(String refreshToken) throws AuthServiceException {
+        log.debug("Sending refresh request to auth service");
         URI uri = UriComponentsBuilder.fromUriString(authServiceUrl)
                 .scheme(scheme)
                 .path("/refresh")
@@ -167,6 +181,8 @@ public class AuthService {
 
         AuthErrorHandler.handle(response);
 
-        return response.body(TokenDTO.class);
+        TokenDTO tokenDTO = response.body(TokenDTO.class);
+        log.debug("Refresh request completed");
+        return tokenDTO;
     }
 }

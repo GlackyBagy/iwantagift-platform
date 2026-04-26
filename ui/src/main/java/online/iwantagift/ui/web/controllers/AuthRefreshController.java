@@ -7,6 +7,8 @@ import online.iwantagift.ui.models.dto.TokenDTO;
 import online.iwantagift.ui.security.jwt.JwtCookieFactory;
 import online.iwantagift.ui.services.AuthService;
 import online.iwantagift.ui.services.JwtService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -24,6 +26,7 @@ import java.util.Optional;
 @Controller
 @RequiredArgsConstructor
 public class AuthRefreshController {
+    private static final Logger log = LoggerFactory.getLogger(AuthRefreshController.class);
 
     private final JwtCookieFactory jwtCookieFactory;
     private final AuthService authClient;
@@ -45,9 +48,11 @@ public class AuthRefreshController {
     public String refresh(@RequestParam(name = "redirect", required = false) String redirect,
                           HttpServletRequest request,
                           HttpServletResponse response) {
+        log.info("Handling refresh request with redirect='{}'", redirect);
         Optional<String> refreshToken = jwtService.extractRefreshToken(request);
 
         if (refreshToken.isEmpty() || refreshToken.get().isBlank()) {
+            log.info("Refresh token is missing or blank, redirecting to sign-in");
             clearAuthCookies(response);
             return "redirect:/auth/signin";
         }
@@ -58,14 +63,18 @@ public class AuthRefreshController {
             jwtCookieFactory.createAuthCookies(tokens.getJwtToken(), tokens.getRefreshToken())
                     .forEach(response::addCookie);
 
-            return "redirect:" + sanitizeRedirect(redirect);
+            String safeRedirect = sanitizeRedirect(redirect);
+            log.info("Token refresh succeeded, redirecting to '{}'", safeRedirect);
+            return "redirect:" + safeRedirect;
         } catch (Exception ex) {
+            log.warn("Token refresh failed: {}", ex.getMessage());
             clearAuthCookies(response);
             return "redirect:/auth/signin";
         }
     }
 
     private void clearAuthCookies(HttpServletResponse response) {
+        log.debug("Clearing authentication cookies");
         jwtCookieFactory.createLogoutCookies()
                 .forEach(response::addCookie);
     }
@@ -81,21 +90,26 @@ public class AuthRefreshController {
      */
     private String sanitizeRedirect(String redirect) {
         if (redirect == null || redirect.isBlank()) {
+            log.info("Empty redirect target, using '/'");
             return "/";
         }
 
         try {
             URI uri = new URI(redirect);
 
-            if (uri.isAbsolute() || uri.getHost() != null)
+            if (uri.isAbsolute() || uri.getHost() != null) {
+                log.debug("Rejected non-local redirect target '{}', using '/'", redirect);
                 return "/";
+            }
 
             String path = uri.getRawPath();
             String query = uri.getRawQuery();
             String fragment = uri.getRawFragment();
 
-            if (path == null || path.isBlank() || !path.startsWith("/"))
+            if (path == null || path.isBlank() || !path.startsWith("/")) {
+                log.debug("Rejected malformed redirect path '{}', using '/'", redirect);
                 return "/";
+            }
 
             StringBuilder safe = new StringBuilder(path);
 
@@ -105,8 +119,10 @@ public class AuthRefreshController {
             if (fragment != null && !fragment.isBlank())
                 safe.append('#').append(fragment);
 
+            log.info("Sanitized redirect '{}' to '{}'", redirect, safe);
             return safe.toString();
         } catch (URISyntaxException e) {
+            log.debug("Rejected invalid redirect URI '{}', using '/'", redirect);
             return "/";
         }
     }

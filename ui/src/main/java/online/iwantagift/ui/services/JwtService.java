@@ -6,6 +6,8 @@ import io.jsonwebtoken.Jwts;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -24,6 +26,7 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class JwtService {
+    private static final Logger log = LoggerFactory.getLogger(JwtService.class);
 
     private final AuthService authService;
 
@@ -59,8 +62,10 @@ public class JwtService {
     public boolean isValid(String token) {
         try {
             parseClaims(normalizeToken(token));
+            log.debug("JWT token validation succeeded");
             return true;
         } catch (JwtException | IllegalArgumentException e) {
+            log.debug("JWT token validation failed: {}", e.getMessage());
             return false;
         }
     }
@@ -83,6 +88,7 @@ public class JwtService {
         try {
             return parseClaimsWithKey(normalizedToken, authService.getPublicKey());
         } catch (JwtException e) {
+            log.debug("JWT verification failed with cached key, refreshing public key and retrying");
             authService.refreshPublicKey();
             return parseClaimsWithKey(normalizedToken, authService.getPublicKey());
         }
@@ -105,8 +111,11 @@ public class JwtService {
      * @throws NullPointerException if the request does not expose a cookie array
      */
     public Optional<String> extractAccessToken(HttpServletRequest request) {
-        return extractCookieWithName(request, accessCookieName)
+        Optional<String> token = extractCookieWithName(request, accessCookieName)
                 .map(Cookie::getValue);
+        log.debug("Access token cookie {}",
+                token.isPresent() ? "found" : "not found");
+        return token;
     }
 
     /**
@@ -118,8 +127,11 @@ public class JwtService {
      * @throws NullPointerException if the request does not expose a cookie array
      */
     public Optional<String> extractRefreshToken(HttpServletRequest request) {
-        return extractCookieWithName(request, refreshCookieName)
+        Optional<String> token = extractCookieWithName(request, refreshCookieName)
                 .map(Cookie::getValue);
+        log.debug("Refresh token cookie {}",
+                token.isPresent() ? "found" : "not found");
+        return token;
     }
 
     private Optional<Cookie> extractCookieWithName(HttpServletRequest request, String name) {

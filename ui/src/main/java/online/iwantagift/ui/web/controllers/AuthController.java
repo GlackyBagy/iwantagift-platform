@@ -7,6 +7,8 @@ import online.iwantagift.ui.models.dto.TokenDTO;
 import online.iwantagift.ui.models.dto.abstracts.ValidationGroups;
 import online.iwantagift.ui.security.jwt.JwtCookieFactory;
 import online.iwantagift.ui.services.AuthService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
@@ -25,18 +27,22 @@ import java.util.Objects;
 @Controller
 @RequiredArgsConstructor
 public class AuthController {
+    private static final Logger log = LoggerFactory.getLogger(AuthController.class);
+
     private final JwtCookieFactory jwtCookieFactory;
     private final AuthService authService;
 
     @GetMapping("/signin")
     @ResponseStatus(HttpStatus.OK)
     public String signIn() {
+        log.info("Rendering sign-in page");
         return "auth/signinPage";
     }
 
     @GetMapping("/signup")
     @ResponseStatus(HttpStatus.OK)
     public String signUp() {
+        log.info("Rendering sign-up page");
         return "auth/signupPage";
     }
 
@@ -57,20 +63,26 @@ public class AuthController {
                          CredentialsDTO credentials,
                          BindingResult bindingResult,
                          HttpServletResponse response) {
+        log.info("Handling sign-up request");
+
         if (Objects.nonNull(credentials.getConfirmPassword()) &&
                 !Objects.equals(credentials.getConfirmPassword(), credentials.getPassword())) {
+            log.info("Rejecting sign-up request due to password mismatch");
             bindingResult.rejectValue("confirmPassword",
                     "validation.confirmPassword", "Passwords do not match");
         }
 
-        if (bindingResult.hasErrors())
+        if (bindingResult.hasErrors()) {
+            log.info("Sign-up validation failed: {} error(s)", bindingResult.getErrorCount());
             return "auth/signupPage";
+        }
 
         TokenDTO dto = authService.signUp(credentials);
 
         jwtCookieFactory.createAuthCookies(dto.getJwtToken(), dto.getRefreshToken())
                 .forEach(response::addCookie);
 
+        log.info("Sign-up succeeded, authentication cookies were set");
         return "redirect:/";
     }
 
@@ -92,8 +104,10 @@ public class AuthController {
                          CredentialsDTO credentials,
                          BindingResult bindingResult,
                          HttpServletResponse response) {
+        log.info("Handling sign-in request");
+
         if (bindingResult.hasErrors()) {
-            System.out.println(bindingResult);
+            log.info("Sign-in validation failed: {} error(s)", bindingResult.getErrorCount());
             return "auth/signinPage";
         }
 
@@ -102,6 +116,7 @@ public class AuthController {
         jwtCookieFactory.createAuthCookies(dto.getJwtToken(), dto.getRefreshToken())
                 .forEach(response::addCookie);
 
+        log.info("Sign-in succeeded, authentication cookies were set");
         return "redirect:/";
     }
 
@@ -113,8 +128,10 @@ public class AuthController {
      */
     @PostMapping("/logout")
     public String logout(HttpServletResponse response) {
+        log.info("Handling logout request");
         jwtCookieFactory.createLogoutCookies()
                 .forEach(response::addCookie);
+        log.info("Logout cookies were set");
         return "redirect:/";
     }
 
