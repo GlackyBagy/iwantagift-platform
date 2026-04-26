@@ -26,10 +26,11 @@ public class WebSecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) {
         http
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/auth/*")
+                        .requestMatchers("/auth/*", "/refresh", "/.well-known/jwks.json")
                         .permitAll()
                         .anyRequest().authenticated()
                 )
+                .csrf(AbstractHttpConfigurer::disable)
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable);
 

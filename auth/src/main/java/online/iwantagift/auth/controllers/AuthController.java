@@ -2,18 +2,16 @@ package online.iwantagift.auth.controllers;
 
 import lombok.RequiredArgsConstructor;
 import online.iwantagift.auth.models.dto.CredentialsDTO;
+import online.iwantagift.auth.models.dto.TokenDTO;
 import online.iwantagift.auth.models.dto.abstracts.ValidationGroups;
 import online.iwantagift.auth.models.entities.Account;
 import online.iwantagift.auth.models.entities.AccountFactory;
 import online.iwantagift.auth.services.AccountService;
 import online.iwantagift.auth.services.JwtService;
+import online.iwantagift.auth.services.RefreshTokenService;
 import online.iwantagift.auth.util.exceptions.ValidationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
@@ -34,23 +32,23 @@ import java.util.Objects;
 @RequestMapping("/auth")
 @RequiredArgsConstructor
 public class AuthController {
-    private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
     private final AccountService accountService;
     private final AccountFactory accountFactory;
+    private final RefreshTokenService refreshTokenService;
 
     /**
      * Registers a new account and returns a JWT for the created user.
      *
-     * @param credentials registration payload containing user credentials
+     * @param credentials   registration payload containing user credentials
      * @param bindingResult validation result for the incoming payload
-     * @return signed JWT access token for the newly registered user
+     * @return {@link TokenDTO} of JWT access token for the newly registered user and non-JWT refresh token
      * @throws ValidationException if validation fails or passwords do not match
      */
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.OK)
-    public String signUp(@RequestBody @Validated(ValidationGroups.SignIn.class)
-                         CredentialsDTO credentials, BindingResult bindingResult) {
+    public TokenDTO signUp(@RequestBody @Validated(ValidationGroups.SignUp.class)
+                           CredentialsDTO credentials, BindingResult bindingResult) {
         if (Objects.nonNull(credentials.getConfirmPassword()) &&
                 !Objects.equals(credentials.getConfirmPassword(), credentials.getPassword())) {
             bindingResult.rejectValue("confirmPassword",
@@ -63,38 +61,36 @@ public class AuthController {
         Account account = accountFactory.create(credentials);
         accountService.save(account);
 
-        return jwtFromCredentials(credentials);
+        return tokensFromCredentials(credentials);
     }
 
     /**
      * Authenticates an existing user and returns a JWT for the authenticated account.
      *
      * @param credentials sign-in payload containing email and password
-     * @param result validation result for the incoming payload
-     * @return signed JWT access token for the authenticated user
+     * @param result      validation result for the incoming payload
+     * @return {@link TokenDTO} of JWT access token non-JWT and refresh token
      * @throws ValidationException if request validation fails
      */
     @PostMapping("/signin")
     @ResponseStatus(HttpStatus.OK)
-    public String signIn(@RequestBody @Validated(ValidationGroups.SignIn.class)
-                         CredentialsDTO credentials, BindingResult result) {
+    public TokenDTO signIn(@RequestBody @Validated(ValidationGroups.SignIn.class)
+                           CredentialsDTO credentials, BindingResult result) {
         if (result.hasErrors())
             throw new ValidationException(result);
 
-        return jwtFromCredentials(credentials);
+        return tokensFromCredentials(credentials);
     }
 
-    private String jwtFromCredentials(CredentialsDTO credentials) {
-        Authentication authentication = authenticationManager.authenticate(
-                UsernamePasswordAuthenticationToken.unauthenticated(
-                        credentials.getEmail(),
-                        credentials.getPassword()
-                )
+    private TokenDTO tokensFromCredentials(CredentialsDTO credentials) {
+        String accessToken = jwtService.jwtFromCredentials(credentials);
+        String refreshToken = refreshTokenService.createRefreshTokenByUserId(
+                accountService.userIdByEmail(credentials.getEmail())
+                        .orElseThrow(
+                                () -> new BadCredentialsException("Cannot find account with provided email")
+                        )
         );
-
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-
-        return jwtService.generateToken(Objects.requireNonNull(userDetails));
+        return new TokenDTO(accessToken, refreshToken);
     }
 
     /**

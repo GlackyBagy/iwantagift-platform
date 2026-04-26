@@ -4,9 +4,14 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
+import online.iwantagift.auth.models.dto.CredentialsDTO;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
 import java.security.KeyPair;
@@ -15,6 +20,7 @@ import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Generates and validates JWT access tokens for authenticated users.
@@ -26,6 +32,8 @@ import java.util.List;
 @Service
 public class JwtService {
 
+    private final AuthenticationManager authenticationManager;
+    private final UserDetailsService userDetailsService;
     @Value("${jwt.expiration}")
     private long expiration;
 
@@ -33,6 +41,11 @@ public class JwtService {
 
     @Getter
     private PublicKey publicKey;
+
+    public JwtService(AuthenticationManager authenticationManager, UserDetailsService userDetailsService) {
+        this.authenticationManager = authenticationManager;
+        this.userDetailsService = userDetailsService;
+    }
 
     /**
      * Generates the RSA key pair used to sign and verify JWT tokens.
@@ -110,5 +123,27 @@ public class JwtService {
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
+    }
+
+    public String jwtFromCredentials(CredentialsDTO credentials) {
+        return jwtFromCredentials(credentials.getEmail(), credentials.getPassword());
+    }
+
+    public String jwtFromCredentials(String email,  String password) {
+        Authentication authentication = authenticationManager.authenticate(
+                UsernamePasswordAuthenticationToken.unauthenticated(
+                        email,
+                        password
+                )
+        );
+
+        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+        return generateToken(Objects.requireNonNull(userDetails));
+    }
+
+    public String jwtFromUsername(String username) {
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+        return generateToken(userDetails);
     }
 }
