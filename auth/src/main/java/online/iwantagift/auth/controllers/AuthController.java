@@ -9,17 +9,15 @@ import online.iwantagift.auth.models.entities.AccountFactory;
 import online.iwantagift.auth.services.AccountService;
 import online.iwantagift.auth.services.JwtService;
 import online.iwantagift.auth.services.RefreshTokenService;
+import online.iwantagift.auth.util.exceptions.EmailAlreadyExistsException;
 import online.iwantagift.auth.util.exceptions.ValidationException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
-import org.springframework.validation.ObjectError;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -59,7 +57,11 @@ public class AuthController {
             throw new ValidationException(bindingResult);
 
         Account account = accountFactory.create(credentials);
-        accountService.save(account);
+        try {
+            accountService.save(account);
+        } catch (DataIntegrityViolationException e) {
+            throw new EmailAlreadyExistsException();
+        }
 
         return tokensFromCredentials(credentials);
     }
@@ -86,36 +88,8 @@ public class AuthController {
         String accessToken = jwtService.jwtFromCredentials(credentials);
         String refreshToken = refreshTokenService.createRefreshTokenByUserId(
                 accountService.userIdByEmail(credentials.getEmail())
-                        .orElseThrow(
-                                () -> new BadCredentialsException("Cannot find account with provided email")
-                        )
+                        .orElseThrow(() -> new IllegalStateException("Account with email " + credentials.getEmail() +" does not exist"))
         );
         return new TokenDTO(accessToken, refreshToken);
-    }
-
-    /**
-     * Converts validation errors into a field-to-message response body.
-     *
-     * @param exception validation exception containing binding errors
-     * @return map of field or object names to validation error messages
-     */
-    @ExceptionHandler(ValidationException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    private Map<String, String> handleValidationException(ValidationException exception) {
-        Map<String, String> res = new HashMap<>();
-
-        for (ObjectError error : exception.getResult().getAllErrors()) {
-            if (error instanceof FieldError fieldError)
-                res.put(fieldError.getField(), error.getDefaultMessage());
-            else
-                res.put(error.getObjectName(), error.getDefaultMessage());
-        }
-
-        return res;
-    }
-
-    @ExceptionHandler(BadCredentialsException.class)
-    @ResponseStatus(HttpStatus.UNAUTHORIZED)
-    private void handleBadCredentials() { //todo
     }
 }

@@ -21,7 +21,7 @@ public class Account {
     private UUID id;
     @Column(name = "nickname")
     private String nickname;
-    @Column(name = "email")
+    @Column(name = "email", unique = true)
     private String email;
     @Column(name = "password_hash")
     private String passwordHash;

@@ -23,7 +23,7 @@ public class AuthRefreshController {
     private final AuthService authClient;
     private final JwtService jwtService;
 
-    @GetMapping("/auth/refresh")
+    @GetMapping("/auth/refresh") //todo use
     public String refresh(@RequestParam(name = "redirect", required = false) String redirect,
                           HttpServletRequest request,
                           HttpServletResponse response) {
