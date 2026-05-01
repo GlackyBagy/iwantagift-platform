@@ -38,8 +38,8 @@ public class WebSecurityConfig {
     SecurityFilterChain securityFilterChain(HttpSecurity http) {
         http
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/css/*", "/js/*", "/img/*", "/fonts/*",
-                                "/", "/landing", "/auth/*")
+                        .requestMatchers("/css/**", "/js/**", "/img/**", "/font/**", "/fonts/**",
+                                "/", "/landing", "/auth/*", "/error", "/error/**")
                         .permitAll()
                         .anyRequest().authenticated()
                 )

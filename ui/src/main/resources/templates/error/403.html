@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/head :: head(
+    title='iwag - Access denied',
+    extraCss=${{'/css/error/errorStyle.css'}})}">
+    <title></title>
+</head>
+<body>
+    <header th:replace="~{fragments/header :: header}"></header>
+
+    <main class="error-main d-flex align-items-center py-5">
+        <div class="container">
+            <section class="card error-card mx-auto">
+                <div class="card-body text-center py-5 px-4 px-md-5">
+                    <div class="error-code mb-3">403</div>
+                    <h1 class="error-title mb-3">Access denied</h1>
+                    <p class="error-text mx-auto mb-4">
+                        You do not have permission to view this page with the current account.
+                    </p>
+                    <div class="error-actions d-flex flex-column flex-sm-row justify-content-center">
+                        <a th:href="@{/}" class="btn btn-auth px-4">Go home</a>
+                        <a th:href="@{/auth/signin}" class="btn btn-outline-light btn-error-secondary px-4">Sign in</a>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

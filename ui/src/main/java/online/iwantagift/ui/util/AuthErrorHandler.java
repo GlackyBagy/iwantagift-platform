@@ -2,7 +2,8 @@ package online.iwantagift.ui.util;
 
 import online.iwantagift.ui.util.exceptions.AuthServiceException;
 import online.iwantagift.ui.util.exceptions.BadRequestException;
-import online.iwantagift.ui.util.exceptions.UnauthorizedException;
+import online.iwantagift.ui.util.exceptions.ConflictException;
+import online.iwantagift.ui.util.exceptions.ServiceUnauthorizedException;
 import org.springframework.http.HttpStatusCode;
 import org.springframework.web.client.RestClient;
 
@@ -13,7 +14,11 @@ public final class AuthErrorHandler {
                     String body = new String(response.getBody().readAllBytes());
 
                     if (response.getStatusCode().value() == 401) {
-                        throw new UnauthorizedException(body);
+                        throw new ServiceUnauthorizedException(body);
+                    }
+
+                    if (response.getStatusCode().value() == 409) {
+                        throw new ConflictException(body);
                     }
 
                     if (response.getStatusCode().value() == 400) {

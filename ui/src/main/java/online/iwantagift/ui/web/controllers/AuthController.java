@@ -7,6 +7,9 @@ import online.iwantagift.ui.models.dto.TokenDTO;
 import online.iwantagift.ui.models.dto.abstracts.ValidationGroups;
 import online.iwantagift.ui.security.jwt.JwtCookieFactory;
 import online.iwantagift.ui.services.AuthService;
+import online.iwantagift.ui.util.exceptions.BadRequestException;
+import online.iwantagift.ui.util.exceptions.ConflictException;
+import online.iwantagift.ui.util.exceptions.ServiceUnauthorizedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -52,11 +55,11 @@ public class AuthController {
      * <p>If the submitted passwords do not match or bean validation fails, this method returns the
      * sign-up page without calling the auth service.
      *
-     * @param credentials the submitted sign-up form data
+     * @param credentials   the submitted sign-up form data
      * @param bindingResult the validation result for the submitted form
-     * @param response the HTTP response that receives authentication cookies
+     * @param response      the HTTP response that receives authentication cookies
      * @return a redirect to the application root on success, or the sign-up page view on validation
-     *     failure
+     * failure
      */
     @PostMapping(path = "/signup")
     public String signUp(@ModelAttribute @Validated(ValidationGroups.SignUp.class)
@@ -77,7 +80,16 @@ public class AuthController {
             return "auth/signupPage";
         }
 
-        TokenDTO dto = authService.signUp(credentials);
+        TokenDTO dto;
+
+        try {
+            dto = authService.signUp(credentials);
+        } catch (ConflictException e) {
+            bindingResult.rejectValue("email",
+                    "validation.emailTaken", "Email already exists");
+            log.info("Sign-up failed on conflict");
+            return "auth/signupPage";
+        }
 
         jwtCookieFactory.createAuthCookies(dto.getJwtToken(), dto.getRefreshToken())
                 .forEach(response::addCookie);
@@ -92,14 +104,13 @@ public class AuthController {
      * <p>If bean validation fails, this method returns the sign-in page without calling the auth
      * service.
      *
-     * @param credentials the submitted sign-in form data
+     * @param credentials   the submitted sign-in form data
      * @param bindingResult the validation result for the submitted form
-     * @param response the HTTP response that receives authentication cookies
+     * @param response      the HTTP response that receives authentication cookies
      * @return a redirect to the application root on success, or the sign-in page view on validation
-     *     failure
+     * failure
      */
     @PostMapping(path = "/signin")
-    @ResponseStatus(HttpStatus.OK)
     public String signIn(@ModelAttribute @Validated(ValidationGroups.SignIn.class)
                          CredentialsDTO credentials,
                          BindingResult bindingResult,
@@ -110,8 +121,15 @@ public class AuthController {
             log.info("Sign-in validation failed: {} error(s)", bindingResult.getErrorCount());
             return "auth/signinPage";
         }
+        TokenDTO dto;
 
-        TokenDTO dto = authService.signIn(credentials);
+        try {
+            dto = authService.signIn(credentials);
+        } catch (BadRequestException e) {
+            bindingResult.reject("invalidCredentials", "Wrong password or email");
+            log.info("Sign-in failed: {}", e.getMessage());
+            return "auth/signinPage";
+        }
 
         jwtCookieFactory.createAuthCookies(dto.getJwtToken(), dto.getRefreshToken())
                 .forEach(response::addCookie);
@@ -126,7 +144,7 @@ public class AuthController {
      * @param response the HTTP response that receives the expiring logout cookies
      * @return a redirect to the application root
      */
-    @PostMapping("/logout")
+    @GetMapping("/logout")
     public String logout(HttpServletResponse response) {
         log.info("Handling logout request");
         jwtCookieFactory.createLogoutCookies()
@@ -138,6 +156,13 @@ public class AuthController {
     @ModelAttribute
     public CredentialsDTO putCredentials() {
         return new CredentialsDTO();
+    }
+
+    @ExceptionHandler(ServiceUnauthorizedException.class)
+    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    protected String handleUnauthorizedException(ServiceUnauthorizedException e) {
+        log.error("Service unauthorized", e);
+        return "error/500";
     }
 
 }
