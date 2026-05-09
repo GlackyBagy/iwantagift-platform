@@ -57,7 +57,7 @@ public class JwtService {
      *
      * @param token the token to validate
      * @return {@code true} if the token is structurally valid and signature verification succeeds;
-     *     {@code false} otherwise
+     * {@code false} otherwise
      */
     public boolean isValid(String token) {
         try {
@@ -79,8 +79,8 @@ public class JwtService {
      * @param token the token to parse, either as a raw JWT or as a {@code Bearer } header value
      * @return the parsed JWT claims
      * @throws IllegalArgumentException if the token is {@code null}, blank, or otherwise invalid
-     * @throws JwtException if parsing or signature verification still fails after refreshing the key
-     * @throws IllegalStateException if the public key cannot be loaded from the auth service
+     * @throws JwtException             if parsing or signature verification still fails after refreshing the key
+     * @throws IllegalStateException    if the public key cannot be loaded from the auth service
      */
     public Claims parseClaims(String token) {
         String normalizedToken = normalizeToken(token);
@@ -107,7 +107,7 @@ public class JwtService {
      *
      * @param request the HTTP request to inspect
      * @return an {@link Optional} containing the cookie value when present, or an empty optional
-     *     otherwise
+     * otherwise
      * @throws NullPointerException if the request does not expose a cookie array
      */
     public Optional<String> extractAccessToken(HttpServletRequest request) {
@@ -123,7 +123,7 @@ public class JwtService {
      *
      * @param request the HTTP request to inspect
      * @return an {@link Optional} containing the cookie value when present, or an empty optional
-     *     otherwise
+     * otherwise
      * @throws NullPointerException if the request does not expose a cookie array
      */
     public Optional<String> extractRefreshToken(HttpServletRequest request) {
@@ -135,7 +135,8 @@ public class JwtService {
     }
 
     private Optional<Cookie> extractCookieWithName(HttpServletRequest request, String name) {
-        return Arrays.stream(request.getCookies())
+        Cookie[] cookies = request.getCookies();
+        return cookies == null ? Optional.empty() : Arrays.stream(cookies)
                 .filter(cookie -> cookie.getName().equals(name))
                 .findFirst();
     }
