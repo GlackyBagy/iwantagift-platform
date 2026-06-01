@@ -60,6 +60,8 @@ public class WishService {
     @Transactional
     public UUID create(Wish wish) {
         try {
+            wish.setId(null);
+            attachManagedWishlist(wish);
             em.persist(wish);
             em.flush();
             return wish.getId();
@@ -67,6 +69,13 @@ public class WishService {
             throw new AlreadyExistsException("Wish with id %s already exists"
                     .formatted(wish.getId()), e);
         }
+    }
+
+    private void attachManagedWishlist(Wish wish) {
+        if (wish.getWishlist() == null || wish.getWishlist().getId() == null)
+            return;
+
+        wish.setWishlist(wishlistService.findByIdOrThrow(wish.getWishlist().getId()));
     }
 
     /**

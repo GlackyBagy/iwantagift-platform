@@ -2,6 +2,7 @@ package online.iwantagift.api.wishlist.models.dto.abstracts;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,8 @@ import online.iwantagift.api.wishlist.models.dto.wl.WishlistCreateDTO;
 import online.iwantagift.api.wishlist.models.dto.wl.WishlistPatchDTO;
 import online.iwantagift.api.wishlist.models.dto.wl.WishlistPutDTO;
 import org.hibernate.validator.constraints.Length;
+
+import java.util.UUID;
 
 /**
  * Base Data Transfer Object for write operations on wishlists.
@@ -94,4 +97,8 @@ public abstract class WishlistWriteDTO {
      */
     @JsonProperty("description")
     protected String description;
+
+    @JsonProperty("owner_id")
+    @NotNull
+    protected UUID ownerId;
 }

@@ -1,6 +1,7 @@
 package online.iwantagift.api.wishlist.models.mapping;
 
 import online.iwantagift.api.wishlist.models.dto.WishDTO;
+import online.iwantagift.api.wishlist.models.dto.wl.WishlistCreateDTO;
 import online.iwantagift.api.wishlist.models.dto.wl.WishlistDTO;
 import online.iwantagift.api.wishlist.models.entities.Wish;
 import online.iwantagift.api.wishlist.models.entities.Wishlist;
@@ -29,6 +30,24 @@ class WishlistMapperTest {
     private WishMapper wishMapper = Mappers.getMapper(WishMapper.class);
 
     private final WishlistMapper mapper = Mappers.getMapper(WishlistMapper.class);
+
+    @Test
+    void toEntity_fromCreateDTO_mapsWritableFields() {
+        WishlistCreateDTO dto = new WishlistCreateDTO();
+        dto.setTitle("Birthday");
+        dto.setDescription("Gift ideas");
+
+        Wishlist entity = mapper.toEntity(dto);
+
+        assertNotNull(entity);
+        assertEquals("Birthday", entity.getTitle());
+        assertEquals("Gift ideas", entity.getDescription());
+        assertNull(entity.getId());
+        assertNull(entity.getOwnerId());
+        assertNull(entity.getCreatedAt());
+        assertNotNull(entity.getWishes());
+        assertTrue(entity.getWishes().isEmpty());
+    }
 
     @Test
     void toDTO_mapsFields_andMapsWishesUsingWishMapper() {

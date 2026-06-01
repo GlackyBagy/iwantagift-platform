@@ -61,6 +61,34 @@ class WishServiceTest {
     }
 
     @Test
+    void testCreate_attachesManagedWishlistBeforePersist() {
+        UUID wishlistId = UUID.randomUUID();
+        Wishlist detachedWishlist = new Wishlist();
+        detachedWishlist.setId(wishlistId);
+
+        Wishlist managedWishlist = new Wishlist();
+        managedWishlist.setId(wishlistId);
+
+        Wish wish = new Wish();
+        wish.setTitle("title");
+        wish.setWishlist(detachedWishlist);
+
+        when(wls.findByIdOrThrow(wishlistId)).thenReturn(managedWishlist);
+        doAnswer(invocation -> {
+            wish.setId(UUID.randomUUID());
+            return null;
+        }).when(em).flush();
+
+        wishService.create(wish);
+
+        assertSame(managedWishlist, wish.getWishlist());
+        verify(wls, times(1)).findByIdOrThrow(wishlistId);
+        verify(em, times(1)).persist(wish);
+        verify(em, times(1)).flush();
+        verifyNoInteractions(wr);
+    }
+
+    @Test
     void testCreate_whenAlreadyExists() {
         Wish wish = new Wish();
         wish.setId(UUID.randomUUID());

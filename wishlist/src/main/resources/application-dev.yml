@@ -1,4 +1,9 @@
 spring:
+  docker:
+    compose:
+      enabled: true
+      file: wishlist/compose.yml
+      lifecycle-management: start-only
   kafka:
     bootstrap-servers: localhost:9092
     admin:

@@ -37,6 +37,9 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class WishlistService {
+    private static final String DEFAULT_WISHLIST_TITLE = "DEFAULT_WISHLIST";
+    private static final String DEFAULT_WISHLIST_DESCRIPTION = "Default wishlist";
+
     private final EntityManager em;
     private final WishlistRepository listRepository;
 
@@ -63,8 +66,10 @@ public class WishlistService {
      * @param wishlist new wishlist entity to persist
      * @throws AlreadyExistsException if a wishlist with the same id already exists
      */
+    @Transactional
     public UUID create(Wishlist wishlist) {
         try {
+            wishlist.setId(null);
             em.persist(wishlist);
             em.flush();
             return wishlist.getId();
@@ -164,6 +169,18 @@ public class WishlistService {
 
     public Optional<Wishlist> findById(UUID id) {
         return listRepository.findById(id);
+    }
+
+    @Transactional
+    public Wishlist createDefaultList(UUID userId){
+        return listRepository.findByOwnerIdAndTitle(userId, DEFAULT_WISHLIST_TITLE)
+                .orElseGet(() -> {
+                    Wishlist wishlist = new Wishlist();
+                    wishlist.setOwnerId(userId);
+                    wishlist.setTitle(DEFAULT_WISHLIST_TITLE);
+                    wishlist.setDescription(DEFAULT_WISHLIST_DESCRIPTION);
+                    return listRepository.save(wishlist);
+                });
     }
 
     public void deleteById(UUID id) {

@@ -18,7 +18,10 @@ public interface WishMapper {
     default void fillWishlist(WishCreateDTO dto,
                               @MappingTarget Wish.WishBuilder wish,
                               @Context WishlistService wlService) {
-        wish.wishlist(wlService.findById(dto.getWishListId()).orElse(null));
+        if (dto.getWishListId() == null)
+            wish.wishlist(wlService.createDefaultList(dto.getOwnerId()));
+        else
+            wish.wishlist(wlService.findById(dto.getWishListId()).orElse(null));
     }
 
     @Mapping(target = "wishListId", expression = "java(entity.getWishlist().getId())")

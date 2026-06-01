@@ -27,7 +27,6 @@ public interface WishlistMapper {
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
-    @Mapping(target = "ownerId", ignore = true)
     @Mapping(target = "wishes", ignore = true)
     Wishlist toEntity(WishlistCreateDTO dto);
 }
