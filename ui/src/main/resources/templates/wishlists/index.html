@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/head :: head(
+    title=${wishlist.title},
+    extraCss=null)}">
+    <title></title>
+</head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="wishlist-page">
+    <div class="container">
+        <section class="wishlist-heading mx-auto">
+            <h1 class="wishlist-title" th:text="${wishlist.title}">Wishlist title</h1>
+
+            <div th:if="${wishlist.description != null and !#strings.isEmpty(wishlist.description)}"
+                 class="wishlist-description">
+                <p th:if="${#strings.length(wishlist.description) <= 100}"
+                   th:text="${wishlist.description}">Description</p>
+
+                <div th:if="${#strings.length(wishlist.description) > 100}">
+                    <p id="wishlistShortDescription"
+                       class="collapse show wishlist-description-toggle mb-2"
+                       th:text="${#strings.substring(wishlist.description, 0, 100) + '...'}">Short description</p>
+                    <p id="wishlistFullDescription"
+                       class="collapse wishlist-description-toggle mb-2"
+                       th:text="${wishlist.description}">Full description</p>
+                    <button class="btn btn-link wishlist-read-more collapsed"
+                            type="button"
+                            data-bs-toggle="collapse"
+                            data-bs-target=".wishlist-description-toggle"
+                            aria-expanded="false"
+                            aria-controls="wishlistShortDescription wishlistFullDescription">
+                        <span class="read-more-text">Read more</span>
+                        <span class="read-less-text">Show less</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <section class="wish-grid" th:if="${wishlist.wishes != null and !#lists.isEmpty(wishlist.wishes)}">
+            <article class="wish-tile" th:each="wish : ${wishlist.wishes}">
+                <img class="wish-image"
+                     th:src="@{/img/logo_load_error.png}"
+                     alt="">
+
+                <div>
+                    <h2 class="wish-title" th:text="${wish.title}">Wish title</h2>
+                    <p class="wish-description"
+                       th:if="${wish.description != null and !#strings.isEmpty(wish.description)}"
+                       th:text="${wish.description}">Wish description</p>
+                </div>
+
+                <a class="wish-link"
+                   th:if="${wish.url != null and !#strings.isEmpty(wish.url)}"
+                   th:href="${wish.url}"
+                   target="_blank"
+                   rel="noopener noreferrer">Open link</a>
+            </article>
+        </section>
+
+        <section class="wishlist-empty mx-auto" th:if="${wishlist.wishes == null or #lists.isEmpty(wishlist.wishes)}">
+            <p>This wishlist has no wishes yet.</p>
+        </section>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

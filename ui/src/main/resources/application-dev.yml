@@ -10,6 +10,9 @@ iwag:
     auth:
       url: localhost:8091
       use-https: false
+    wishlists:
+      url: localhost:8001
+      use-https: false
 
 jwt:
   cookie:

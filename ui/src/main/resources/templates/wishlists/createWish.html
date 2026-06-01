@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/head :: head(
+    title='iwag - Add wish',
+    extraCss=${{'/css/auth/authStyle.css'}})}">
+    <title></title>
+</head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main>
+    <div class="container">
+        <div class="card hero-card mx-auto">
+            <div class="card-body text-center py-5 px-1">
+                <h1 class="hero-title mb-4">Add wish</h1>
+                <form id="createWish" th:action="@{/wish/new}"
+                      th:object="${wishPayload}" method="post"
+                      class="w-100" style="max-width: 420px; margin: 0 auto;">
+
+                    <div class="mb-3 text-start">
+                        <label class="form-label text-light">Title</label>
+                        <input type="text" class="form-control form-control-dark"
+                               placeholder="Enter wish title" th:field="*{title}"
+                               th:classappend="${#fields.hasErrors('title')} ? 'is-invalid' : ''">
+
+                        <div class="invalid-feedback"
+                             th:if="${#fields.hasErrors('title')}"
+                             th:errors="*{title}">
+                        </div>
+                    </div>
+
+                    <div class="mb-3 text-start">
+                        <label class="form-label text-light">Wishlist</label>
+                        <select class="form-control form-control-dark" th:field="*{wishlistId}"
+                                th:classappend="${#fields.hasErrors('wishlistId')} ? 'is-invalid' : ''">
+                            <option value="">Select wishlist</option>
+                            <option th:each="wishlist : ${wlList}"
+                                    th:value="${wishlist.id}"
+                                    th:text="${wishlist.title}">
+                                Wishlist
+                            </option>
+                        </select>
+
+                        <div class="invalid-feedback"
+                             th:if="${#fields.hasErrors('wishlistId')}"
+                             th:errors="*{wishlistId}">
+                        </div>
+                    </div>
+
+                    <div class="mb-3 text-start">
+                        <label class="form-label text-light">URL</label>
+                        <input type="url" class="form-control form-control-dark"
+                               placeholder="https://example.com" th:field="*{url}"
+                               th:classappend="${#fields.hasErrors('url')} ? 'is-invalid' : ''">
+
+                        <div class="invalid-feedback"
+                             th:if="${#fields.hasErrors('url')}"
+                             th:errors="*{url}">
+                        </div>
+                    </div>
+
+                    <div class="mb-3 text-start">
+                        <label class="form-label text-light">Default price</label>
+                        <input type="number" class="form-control form-control-dark"
+                               placeholder="0" min="0" step="1" th:field="*{defaultPrice}"
+                               th:classappend="${#fields.hasErrors('defaultPrice')} ? 'is-invalid' : ''">
+
+                        <div class="invalid-feedback"
+                             th:if="${#fields.hasErrors('defaultPrice')}"
+                             th:errors="*{defaultPrice}">
+                        </div>
+                    </div>
+
+                    <div class="mb-4 text-start">
+                        <label class="form-label text-light">Description</label>
+                        <textarea class="form-control form-control-dark" rows="5"
+                                  placeholder="Add details" th:field="*{description}"
+                                  th:classappend="${#fields.hasErrors('description')} ? 'is-invalid' : ''"></textarea>
+
+                        <div class="invalid-feedback"
+                             th:if="${#fields.hasErrors('description')}"
+                             th:errors="*{description}">
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-auth">Add wish</button>
+                        <a th:href="@{/}" class="btn btn-outline-light">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+</body>
+</html>

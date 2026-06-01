@@ -7,6 +7,7 @@ import online.iwantagift.api.wishlist.models.dto.wl.WishlistCreateDTO;
 import online.iwantagift.api.wishlist.models.dto.wl.WishlistDTO;
 import online.iwantagift.api.wishlist.models.dto.wl.WishlistPatchDTO;
 import online.iwantagift.api.wishlist.models.dto.wl.WishlistPutDTO;
+import online.iwantagift.api.wishlist.models.entities.Wishlist;
 import online.iwantagift.api.wishlist.models.mapping.WishMapper;
 import online.iwantagift.api.wishlist.models.mapping.WishlistMapper;
 import online.iwantagift.api.wishlist.services.WishlistService;
@@ -16,6 +17,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
@@ -33,6 +35,19 @@ public class WishlistController {
         return wishlistMapper.toDTO(
                 listService.findByIdOrThrow(id), wishMapper
         );
+    }
+
+    @GetMapping("/userLists")
+    @ResponseStatus(HttpStatus.OK)
+    public List<WishlistDTO> getUserLists(@RequestParam UUID userId) {
+        List<WishlistDTO> res = listService.findAllByOwnerId(userId).stream()
+                .map(x -> wishlistMapper.toDTO(x, wishMapper))
+                .toList();
+        if (res.isEmpty())
+            return List.of(
+                    wishlistMapper.toDTO(listService.createDefaultList(userId), wishMapper)
+            );
+        return res;
     }
 
     @PostMapping

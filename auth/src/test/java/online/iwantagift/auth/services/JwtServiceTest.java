@@ -4,6 +4,7 @@ import online.iwantagift.auth.models.dto.CredentialsDTO;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -14,6 +15,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Collections;
+import java.util.Optional;
+import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatException;
@@ -36,16 +39,20 @@ class JwtServiceTest {
     @Mock
     UserDetailsService userDetailsService;
 
+    @Mock
+    AccountService accountService;
+
+    @InjectMocks
     JwtService jwtService;
 
     private static final long EXPIRATION_MS = 3_600_000L; // 1 hour
 
     @BeforeEach
     void setUp() {
-        jwtService = new JwtService(authenticationManager, userDetailsService);
         ReflectionTestUtils.setField(jwtService, "expiration", EXPIRATION_MS);
         // triggers @PostConstruct key generation
         ReflectionTestUtils.invokeMethod(jwtService, "init");
+        when(accountService.userIdByEmail(any())).thenReturn(Optional.of(UUID.randomUUID()));
     }
 
     private UserDetails userDetails(String email) {

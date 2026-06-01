@@ -4,7 +4,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import online.iwantagift.ui.models.dto.auth.CredentialsDTO;
 import online.iwantagift.ui.models.dto.auth.TokenDTO;
-import online.iwantagift.ui.models.dto.auth.abstracts.ValidationGroups;
+import online.iwantagift.ui.models.validation.AuthValidationGroups;
 import online.iwantagift.ui.security.jwt.JwtCookieFactory;
 import online.iwantagift.ui.services.AuthService;
 import online.iwantagift.ui.util.exceptions.BadRequestException;
@@ -62,7 +62,7 @@ public class AuthController {
      * failure
      */
     @PostMapping(path = "/signup")
-    public String signUp(@ModelAttribute @Validated(ValidationGroups.SignUp.class)
+    public String signUp(@ModelAttribute @Validated(AuthValidationGroups.SignUp.class)
                          CredentialsDTO credentials,
                          BindingResult bindingResult,
                          HttpServletResponse response) {
@@ -111,7 +111,7 @@ public class AuthController {
      * failure
      */
     @PostMapping(path = "/signin")
-    public String signIn(@ModelAttribute @Validated(ValidationGroups.SignIn.class)
+    public String signIn(@ModelAttribute @Validated(AuthValidationGroups.SignIn.class)
                          CredentialsDTO credentials,
                          BindingResult bindingResult,
                          HttpServletResponse response) {

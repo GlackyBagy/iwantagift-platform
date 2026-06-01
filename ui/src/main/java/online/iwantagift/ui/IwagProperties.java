@@ -47,5 +47,17 @@ public class IwagProperties {
          * Kafka topics this service consumes messages from.
          */
         private Set<String> kafkaConsumeTopics;
+
+        public String getBaseUrl() {
+            if (url == null || url.isBlank()) {
+                return url;
+            }
+
+            if (url.startsWith("http://") || url.startsWith("https://")) {
+                return url;
+            }
+
+            return (useHttps ? "https://" : "http://") + url;
+        }
     }
 }

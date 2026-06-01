@@ -12,6 +12,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.security.KeyPair;
@@ -21,6 +22,7 @@ import java.security.PublicKey;
 import java.util.Date;
 import java.util.List;
 import java.util.Objects;
+import java.util.UUID;
 
 /**
  * Generates and validates JWT access tokens for authenticated users.
@@ -34,6 +36,7 @@ public class JwtService {
 
     private final AuthenticationManager authenticationManager;
     private final UserDetailsService userDetailsService;
+    private final AccountService accountService;
     @Value("${jwt.expiration}")
     private long expiration;
 
@@ -42,9 +45,10 @@ public class JwtService {
     @Getter
     private PublicKey publicKey;
 
-    public JwtService(AuthenticationManager authenticationManager, UserDetailsService userDetailsService) {
+    public JwtService(AuthenticationManager authenticationManager, UserDetailsService userDetailsService, AccountService accountService) {
         this.authenticationManager = authenticationManager;
         this.userDetailsService = userDetailsService;
+        this.accountService = accountService;
     }
 
     /**
@@ -69,12 +73,12 @@ public class JwtService {
     }
 
     /**
-     * Creates a signed JWT token for the given user.
+     * Creates a signed JWT token for the given user
      *
      * @param userDetails authenticated user details used to populate token subject and roles
      * @return compact serialized JWT token
      */
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(UserDetails userDetails, UUID userId) {
         List<String> roles = userDetails.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .toList();
@@ -85,10 +89,22 @@ public class JwtService {
         return Jwts.builder()
                 .subject(userDetails.getUsername())
                 .claim("roles", roles)
+                .claim("userId", userId)
                 .issuedAt(now)
                 .expiration(expiry)
                 .signWith(privateKey)
                 .compact();
+    }
+
+    /**
+     * Creates a signed JWT token for the given user, looks for userId in database by provided email
+     *
+     * @param userDetails authenticated user details used to populate token subject and roles
+     * @return compact serialized JWT token
+     */
+    public String generateToken(UserDetails userDetails) {
+        UUID userId = accountService.userIdByEmail(userDetails.getUsername()).get();
+        return generateToken(userDetails, userId);
     }
 
     /**

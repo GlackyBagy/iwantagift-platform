@@ -36,8 +36,6 @@ public class AuthService {
 
     private String authServiceUrl;
 
-    private String scheme;
-
     private final RestClient restClient = RestClient.create();
 
     private volatile PublicKey cachedPublicKey;
@@ -45,8 +43,7 @@ public class AuthService {
     @PostConstruct
     private void init() {
         var authService = iwagProperties.getRequiredService("auth");
-        scheme = authService.isUseHttps() ? "https://" : "http://";
-        authServiceUrl = scheme + authService.getUrl();
+        authServiceUrl = authService.getBaseUrl();
         log.info("Auth service client initialized for {}", authServiceUrl);
     }
 
@@ -169,7 +166,6 @@ public class AuthService {
     public TokenDTO refresh(String refreshToken) throws RemoteServiceException {
         log.debug("Sending refresh request to auth service");
         URI uri = UriComponentsBuilder.fromUriString(authServiceUrl)
-                .scheme(scheme)
                 .path("/refresh")
                 .queryParam("refreshToken", refreshToken)
                 .build()

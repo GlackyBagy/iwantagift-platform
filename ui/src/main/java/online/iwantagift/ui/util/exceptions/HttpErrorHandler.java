@@ -30,6 +30,10 @@ public class HttpErrorHandler implements ResponseErrorHandler {
             throw new BadRequestException(body);
         }
 
+        if (response.getStatusCode().value() == 404) {
+            throw new NotFoundException(body);
+        }
+
         if (response.getStatusCode().is5xxServerError())
             throw new RemoteServiceException("Remote service error [URL: " + url + " ], body: " + body);
 

@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.security.PublicKey;
 import java.util.Arrays;
 import java.util.Optional;
+import java.util.UUID;
 
 /**
  * Service for validating JWTs issued by the authentication microservice.
@@ -100,6 +101,13 @@ public class JwtService {
                 .build()
                 .parseSignedClaims(token)
                 .getPayload();
+    }
+
+    public Optional<UUID> retrieveUserIdFromCookie(HttpServletRequest request) {
+        return extractAccessToken(request)
+                .map(this::parseClaims)
+                .map(x-> x.get("userId", String.class))
+                .map(UUID::fromString);
     }
 
     /**

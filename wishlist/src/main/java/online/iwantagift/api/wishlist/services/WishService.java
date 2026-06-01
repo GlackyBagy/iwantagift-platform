@@ -121,7 +121,7 @@ public class WishService {
         if (dto.getUrl() != null) wish.setUrl(dto.getUrl());
         if (dto.getWishListId() != null)
             wish.setWishlist(
-                    wishlistService.findByIdOrThrow(dto.getWishListId())
+                    wishlistService.findByIdOrThrow(dto.getWishListId()) // todo reject on stranger's wishlist
             );
     }
 

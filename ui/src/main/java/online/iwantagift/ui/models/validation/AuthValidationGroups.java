@@ -1,8 +1,8 @@
-package online.iwantagift.ui.models.dto.auth.abstracts;
+package online.iwantagift.ui.models.validation;
 
 import jakarta.validation.groups.Default;
 
-public final class ValidationGroups {
+public final class AuthValidationGroups {
     public interface SignUp extends SignIn {
     }
 

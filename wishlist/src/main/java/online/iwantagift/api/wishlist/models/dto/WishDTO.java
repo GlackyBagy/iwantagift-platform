@@ -67,4 +67,7 @@ public class WishDTO {
      */
     @JsonProperty("wish_list_id")
     private UUID wishListId;
+
+    @JsonProperty("owner_id")
+    private UUID ownerId;
 }

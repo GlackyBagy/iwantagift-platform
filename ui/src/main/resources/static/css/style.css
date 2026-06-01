@@ -118,3 +118,109 @@ footer {
     font-size: 0.95rem;
     color: #495057;
 }
+
+.wishlist-page {
+    padding-top: 2.5rem;
+}
+
+.wishlist-heading {
+    max-width: 860px;
+    margin-bottom: 2rem;
+}
+
+.wishlist-title {
+    color: whitesmoke;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    line-height: 1.08;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.wishlist-description {
+    color: #d6d6d6;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    max-width: 720px;
+}
+
+.wishlist-read-more {
+    color: var(--grad-orange-dark);
+    padding: 0;
+    border: 0;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.wishlist-read-more:hover {
+    color: var(--grad-orange-light);
+}
+
+.wishlist-read-more .read-less-text {
+    display: inline;
+}
+
+.wishlist-read-more.collapsed .read-less-text {
+    display: none;
+}
+
+.wishlist-read-more.collapsed .read-more-text {
+    display: inline;
+}
+
+.wishlist-read-more:not(.collapsed) .read-more-text {
+    display: none;
+}
+
+.wish-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+}
+
+.wish-tile {
+    display: flex;
+    min-height: 260px;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1.25rem;
+    padding: 1.25rem;
+    border: 1px solid #2f2f2f;
+    border-radius: 8px;
+    background-color: #151515;
+}
+
+.wish-image {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    border-radius: 6px;
+    object-fit: cover;
+    background-color: #222;
+}
+
+.wish-title {
+    color: whitesmoke;
+    font-size: 1.2rem;
+    line-height: 1.25;
+    margin-bottom: 0.75rem;
+}
+
+.wish-description {
+    color: #bdbdbd;
+    line-height: 1.5;
+    margin-bottom: 0;
+    overflow-wrap: anywhere;
+}
+
+.wish-link {
+    align-self: flex-start;
+}
+
+.wishlist-empty {
+    max-width: 520px;
+    padding: 2rem;
+    border: 1px solid #2f2f2f;
+    border-radius: 8px;
+    background-color: #151515;
+    color: #d6d6d6;
+    text-align: center;
+}
