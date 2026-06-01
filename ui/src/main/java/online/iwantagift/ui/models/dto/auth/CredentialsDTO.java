@@ -1,10 +1,10 @@
-package online.iwantagift.ui.models.dto;
+package online.iwantagift.ui.models.dto.auth;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
-import online.iwantagift.ui.models.dto.abstracts.ValidationGroups;
+import online.iwantagift.ui.models.dto.auth.abstracts.ValidationGroups;
 
 /**
  * Form payload for UI authentication requests.

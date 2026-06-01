@@ -7,10 +7,10 @@ import io.jsonwebtoken.security.PublicJwk;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import online.iwantagift.ui.IwagProperties;
-import online.iwantagift.ui.models.dto.CredentialsDTO;
-import online.iwantagift.ui.models.dto.TokenDTO;
-import online.iwantagift.ui.util.AuthErrorHandler;
-import online.iwantagift.ui.util.exceptions.AuthServiceException;
+import online.iwantagift.ui.models.dto.auth.CredentialsDTO;
+import online.iwantagift.ui.models.dto.auth.TokenDTO;
+import online.iwantagift.ui.util.exceptions.RemoteServiceException;
+import online.iwantagift.ui.util.exceptions.HttpErrorHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -122,9 +122,9 @@ public class AuthService {
      * @param credentials the credentials to submit to the sign-in endpoint
      * @return the token payload returned by the auth service, or {@code null} if the response
      *     body is empty
-     * @throws AuthServiceException if the auth service reports an error response
+     * @throws RemoteServiceException if the auth service reports an error response
      */
-    public TokenDTO signIn(CredentialsDTO credentials) throws AuthServiceException {
+    public TokenDTO signIn(CredentialsDTO credentials) throws RemoteServiceException {
         return postForTokens("/auth/signin", credentials);
     }
 
@@ -134,13 +134,13 @@ public class AuthService {
      * @param credentials the credentials to submit to the sign-up endpoint
      * @return the token payload returned by the auth service, or {@code null} if the response
      *     body is empty
-     * @throws AuthServiceException if the auth service reports an error response
+     * @throws RemoteServiceException if the auth service reports an error response
      */
-    public TokenDTO signUp(CredentialsDTO credentials) throws AuthServiceException {
+    public TokenDTO signUp(CredentialsDTO credentials) throws RemoteServiceException {
         return postForTokens("/auth/signup", credentials);
     }
 
-    private TokenDTO postForTokens(String path, Object body) throws AuthServiceException {
+    private TokenDTO postForTokens(String path, Object body) throws RemoteServiceException {
         URI uri = UriComponentsBuilder.fromUriString(authServiceUrl)
                 .path(path)
                 .build()
@@ -151,7 +151,7 @@ public class AuthService {
                 .body(body)
                 .retrieve();
 
-        AuthErrorHandler.handle(response);
+        response.onStatus(new HttpErrorHandler());
 
         TokenDTO tokenDTO = response.body(TokenDTO.class);
         log.debug("Auth request completed for {}", path);
@@ -164,9 +164,9 @@ public class AuthService {
      * @param refreshToken the refresh token to send to the refresh endpoint
      * @return the token payload returned by the auth service, or {@code null} if the response
      *     body is empty
-     * @throws AuthServiceException if the auth service reports an error response
+     * @throws RemoteServiceException if the auth service reports an error response
      */
-    public TokenDTO refresh(String refreshToken) throws AuthServiceException {
+    public TokenDTO refresh(String refreshToken) throws RemoteServiceException {
         log.debug("Sending refresh request to auth service");
         URI uri = UriComponentsBuilder.fromUriString(authServiceUrl)
                 .scheme(scheme)
@@ -179,7 +179,7 @@ public class AuthService {
                 .uri(uri)
                 .retrieve();
 
-        AuthErrorHandler.handle(response);
+        response.onStatus(new HttpErrorHandler());
 
         TokenDTO tokenDTO = response.body(TokenDTO.class);
         log.debug("Refresh request completed");

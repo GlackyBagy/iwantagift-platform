@@ -1,4 +1,4 @@
-package online.iwantagift.ui.models.dto;
+package online.iwantagift.ui.models.dto.auth;
 
 import lombok.Data;
 

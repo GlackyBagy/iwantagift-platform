@@ -1,4 +1,4 @@
-package online.iwantagift.ui.models.dto.abstracts;
+package online.iwantagift.ui.models.dto.auth.abstracts;
 
 import jakarta.validation.groups.Default;
 

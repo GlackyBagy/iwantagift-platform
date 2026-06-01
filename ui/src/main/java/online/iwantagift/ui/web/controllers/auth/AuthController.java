@@ -1,10 +1,10 @@
-package online.iwantagift.ui.web.controllers;
+package online.iwantagift.ui.web.controllers.auth;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import online.iwantagift.ui.models.dto.CredentialsDTO;
-import online.iwantagift.ui.models.dto.TokenDTO;
-import online.iwantagift.ui.models.dto.abstracts.ValidationGroups;
+import online.iwantagift.ui.models.dto.auth.CredentialsDTO;
+import online.iwantagift.ui.models.dto.auth.TokenDTO;
+import online.iwantagift.ui.models.dto.auth.abstracts.ValidationGroups;
 import online.iwantagift.ui.security.jwt.JwtCookieFactory;
 import online.iwantagift.ui.services.AuthService;
 import online.iwantagift.ui.util.exceptions.BadRequestException;

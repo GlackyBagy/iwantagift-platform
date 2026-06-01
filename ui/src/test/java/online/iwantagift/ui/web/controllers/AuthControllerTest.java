@@ -1,11 +1,12 @@
 package online.iwantagift.ui.web.controllers;
 
 import jakarta.servlet.http.Cookie;
-import online.iwantagift.ui.models.dto.CredentialsDTO;
-import online.iwantagift.ui.models.dto.TokenDTO;
+import online.iwantagift.ui.models.dto.auth.CredentialsDTO;
+import online.iwantagift.ui.models.dto.auth.TokenDTO;
 import online.iwantagift.ui.security.jwt.JwtCookieFactory;
 import online.iwantagift.ui.services.AuthService;
 import online.iwantagift.ui.services.JwtService;
+import online.iwantagift.ui.web.controllers.auth.AuthController;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
