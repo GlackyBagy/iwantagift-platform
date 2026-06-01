@@ -8,7 +8,6 @@ import online.iwantagift.auth.services.RefreshTokenService;
 import online.iwantagift.auth.util.exceptions.TokenNotFoundException;
 import org.apache.coyote.BadRequestException;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.NoSuchElementException;
@@ -45,9 +44,9 @@ public class RefreshController {
         );
     }
 
-    @ExceptionHandler({BadCredentialsException.class, TokenNotFoundException.class})
+    @ExceptionHandler({BadRequestException.class, TokenNotFoundException.class})
     @ResponseStatus(HttpStatus.BAD_REQUEST)
-    private String handleBadCredentials(Exception e) {
+    private String handleBadToken(Exception e) {
         return "message: " + e.getMessage();
     }
 }
