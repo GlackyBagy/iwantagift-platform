@@ -110,6 +110,14 @@ public class JwtService {
                 .map(UUID::fromString);
     }
 
+    public Optional<String> retrieveDisplayNameFromCookie(HttpServletRequest request) {
+        return extractAccessToken(request)
+                .map(this::parseClaims)
+                .map(claims -> Optional.ofNullable(claims.get("nickname", String.class))
+                        .filter(nickname -> !nickname.isBlank())
+                        .orElse(claims.getSubject()));
+    }
+
     /**
      * Extracts the configured access-token cookie value from the request.
      *

@@ -5,6 +5,7 @@ import io.jsonwebtoken.Jwts;
 import jakarta.annotation.PostConstruct;
 import lombok.Getter;
 import online.iwantagift.auth.models.dto.CredentialsDTO;
+import online.iwantagift.auth.models.entities.Account;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -12,17 +13,13 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.PrivateKey;
 import java.security.PublicKey;
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * Generates and validates JWT access tokens for authenticated users.
@@ -90,6 +87,10 @@ public class JwtService {
                 .subject(userDetails.getUsername())
                 .claim("roles", roles)
                 .claim("userId", userId)
+                .claim("nickname", Optional.ofNullable(accountService.findById(userId))
+                        .flatMap(account -> account)
+                        .map(Account::getNickname)
+                        .orElse(userDetails.getUsername()))
                 .issuedAt(now)
                 .expiration(expiry)
                 .signWith(privateKey)

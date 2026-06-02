@@ -1,0 +1,191 @@
+.profile-page {
+    padding-top: 2.5rem;
+}
+
+.profile-layout {
+    display: grid;
+    grid-template-columns: minmax(180px, 260px) minmax(0, 860px);
+    gap: 1rem;
+    align-items: start;
+    justify-content: start;
+}
+
+.profile-sidebar {
+    position: sticky;
+    top: 1rem;
+    margin-top: 188px;
+    padding: 1rem;
+    border: 1px solid #2f2f2f;
+    border-radius: 12px;
+    background-color: #151515;
+}
+
+.profile-sidebar-title {
+    color: whitesmoke;
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.85rem;
+}
+
+.profile-wishlist-list {
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+}
+
+.profile-wishlist-link {
+    padding: 0.75rem 0.85rem;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    color: #d6d6d6;
+    overflow-wrap: anywhere;
+}
+
+.profile-wishlist-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.profile-wishlist-title {
+    min-width: 0;
+    color: inherit;
+    overflow-wrap: anywhere;
+}
+
+.profile-wishlist-actions {
+    display: flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 0.45rem;
+}
+
+.profile-wishlist-action {
+    display: inline-flex;
+    width: 20px;
+    height: 20px;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.75;
+}
+
+.profile-wishlist-action:hover {
+    opacity: 1;
+}
+
+.profile-wishlist-action img {
+    width: 16px;
+    height: 16px;
+    filter: brightness(0) invert(1);
+}
+
+.profile-wishlist-link:hover {
+    border-color: #3a3a3a;
+    background-color: #252525;
+    color: var(--grad-orange-light);
+}
+
+.profile-wishlist-link.active {
+    border-color: var(--grad-orange-dark);
+    background: linear-gradient(135deg, rgba(250, 102, 123, 0.22), rgba(254, 173, 123, 0.12));
+    color: whitesmoke;
+    box-shadow: inset 3px 0 0 var(--grad-orange-dark);
+}
+
+.profile-create-list-link {
+    border-style: dashed;
+    color: var(--grad-orange-light);
+}
+
+.profile-main {
+    min-width: 0;
+}
+
+.profile-wishes {
+    display: flex;
+    justify-content: center;
+}
+
+.profile-wishes .wish-grid {
+    width: 100%;
+    max-width: 780px;
+}
+
+.profile-wishes .wishlist-empty {
+    width: 100%;
+}
+
+.profile-hero {
+    margin-bottom: 2rem;
+    text-align: left;
+}
+
+.profile-avatar {
+    width: 116px;
+    height: 116px;
+    border: 1px solid #343434;
+    border-radius: 50%;
+    object-fit: cover;
+    background-color: #151515;
+}
+
+.profile-nickname {
+    color: whitesmoke;
+    font-size: clamp(2rem, 4vw, 3rem);
+    line-height: 1.08;
+    font-weight: 700;
+    margin: 1rem 0;
+}
+
+.profile-action-button {
+    margin-bottom: 1rem;
+}
+
+.profile-subscribe-form {
+    margin: 0;
+}
+
+.profile-description-box {
+    max-width: 720px;
+    padding: 1rem 1.15rem;
+    border: 1px solid #313131;
+    border-radius: 18px;
+    background-color: #252525;
+    color: #d6d6d6;
+    line-height: 1.6;
+}
+
+.profile-description-box p {
+    margin-bottom: 0;
+}
+
+@media (max-width: 768px) {
+    .profile-layout {
+        grid-template-columns: 1fr;
+    }
+
+    .profile-main {
+        order: 1;
+    }
+
+    .profile-sidebar {
+        position: static;
+        margin-top: 0;
+        order: 2;
+    }
+
+    .profile-wishlist-list {
+        flex-direction: row;
+        overflow-x: auto;
+        padding-bottom: 0.25rem;
+    }
+
+    .profile-wishlist-link {
+        flex: 0 0 auto;
+    }
+
+    .profile-wishlist-actions {
+        display: none;
+    }
+}
