@@ -1,0 +1,9 @@
+services:
+  profile-db:
+    image: 'postgres:latest'
+    environment:
+      - 'POSTGRES_DB=profile'
+      - 'POSTGRES_PASSWORD=postgres'
+      - 'POSTGRES_USER=postgres'
+    ports:
+      - '9913:5432'
