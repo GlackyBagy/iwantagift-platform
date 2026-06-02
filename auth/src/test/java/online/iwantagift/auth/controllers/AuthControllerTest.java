@@ -2,6 +2,7 @@ package online.iwantagift.auth.controllers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import online.iwantagift.auth.advice.AuthAdvice;
+import online.iwantagift.auth.messaging.kafka.AccountProducer;
 import online.iwantagift.auth.models.dto.CredentialsDTO;
 import online.iwantagift.auth.models.entities.Account;
 import online.iwantagift.auth.models.entities.AccountFactory;
@@ -42,13 +43,14 @@ class AuthControllerTest {
     @Mock AccountService accountService;
     @Mock AccountFactory accountFactory;
     @Mock RefreshTokenService refreshTokenService;
+    @Mock AccountProducer accountProducer;
 
     MockMvc mockMvc;
     ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     void setUp() {
-        AuthController controller = new AuthController(jwtService, accountService, accountFactory, refreshTokenService);
+        AuthController controller = new AuthController(jwtService, accountService, accountFactory, refreshTokenService, accountProducer);
         mockMvc = MockMvcBuilders.standaloneSetup(controller)
                 .setControllerAdvice(new AuthAdvice())
                 .build();
@@ -74,6 +76,8 @@ class AuthControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.jwtToken").value("jwt-token"))
                 .andExpect(jsonPath("$.refreshToken").value("refresh-token"));
+
+        verify(accountProducer).sendOnCreate(account);
     }
 
     @Test
@@ -132,6 +136,8 @@ class AuthControllerTest {
                         .content(signUpJson("alice", "alice@example.com", "password1", "password1")))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.email").value("Account with provided email already exists"));
+
+        verifyNoInteractions(accountProducer);
     }
 
     // ──────────────────────────────────────────────────────────────

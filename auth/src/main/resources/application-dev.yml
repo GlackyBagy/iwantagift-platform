@@ -6,6 +6,8 @@ spring:
       lifecycle-management: start-only
   application:
     name: "auth"
+  kafka:
+    bootstrap-servers: localhost:9092
   datasource:
     url: jdbc:postgresql://localhost:9912/auth
     username: "postgres"
@@ -22,7 +24,11 @@ iwag:
   services:
     wishlist:
       kafka-topics:
+        - createdUser
         - deletedUser
+    profile:
+      kafka-topics:
+        - createdUser
 jwt:
   secret: "change-this-to-a-long-random-secret-key-with-at-least-32-bytes"
   expiration: 86400000 # 24h in ms

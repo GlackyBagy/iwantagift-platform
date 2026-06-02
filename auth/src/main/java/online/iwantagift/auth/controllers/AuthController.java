@@ -1,6 +1,7 @@
 package online.iwantagift.auth.controllers;
 
 import lombok.RequiredArgsConstructor;
+import online.iwantagift.auth.messaging.kafka.AccountProducer;
 import online.iwantagift.auth.models.dto.CredentialsDTO;
 import online.iwantagift.auth.models.dto.TokenDTO;
 import online.iwantagift.auth.models.dto.abstracts.ValidationGroups;
@@ -34,6 +35,7 @@ public class AuthController {
     private final AccountService accountService;
     private final AccountFactory accountFactory;
     private final RefreshTokenService refreshTokenService;
+    private final AccountProducer accountProducer;
 
     /**
      * Registers a new account and returns a JWT for the created user.
@@ -62,6 +64,7 @@ public class AuthController {
         } catch (DataIntegrityViolationException e) {
             throw new EmailAlreadyExistsException();
         }
+        accountProducer.sendOnCreate(account); // todo guaranty DB + kafka operations atomicity
 
         return tokensFromCredentials(credentials);
     }
