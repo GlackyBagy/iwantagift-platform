@@ -35,6 +35,7 @@
     <modules>
         <module>wishlist</module>
         <module>productprice</module>
+        <module>profile</module>
         <module>ui</module>
         <module>auth</module>
     </modules>

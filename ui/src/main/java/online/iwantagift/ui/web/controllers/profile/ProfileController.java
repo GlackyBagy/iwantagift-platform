@@ -3,10 +3,12 @@ package online.iwantagift.ui.web.controllers.profile;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import online.iwantagift.ui.IwagProperties;
 import online.iwantagift.ui.models.dto.wl.WishlistDTO;
 import online.iwantagift.ui.services.JwtService;
 import online.iwantagift.ui.services.WishlistService;
 import online.iwantagift.ui.util.exceptions.RemoteServiceException;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,18 +26,22 @@ import java.util.UUID;
 public class ProfileController {
     private static final String DEFAULT_WISHLIST_TITLE = "DEFAULT_WISHLIST";
     private static final String DEFAULT_PROFILE_DESCRIPTION = "Profile description is not set yet.";
+    private static final String DEFAULT_PROFILE_NICKNAME = "User";
 
     private final WishlistService wishlistService;
     private final JwtService jwtService;
+    private final IwagProperties iwagProperties;
+
+    @Value("${jwt.cookie.name.access}")
+    private String accessCookieName;
 
     @GetMapping("/profile")
     public String profile(@RequestParam(required = false) UUID listId,
                           Model model,
                           HttpServletRequest request) {
-        UUID userId = jwtService.retrieveUserIdFromCookie(request).orElseThrow(); // todo handle
-        String nickname = jwtService.retrieveDisplayNameFromCookie(request).orElse("User");
+        UUID userId = jwtService.retrieveUserIdFromCookie(request).orElseThrow(); // todo handle redirect to login page
 
-        return renderProfile(userId, listId, nickname, model, "profile/own");
+        return renderProfile(userId, listId, model, "profile/own");
     }
 
     @GetMapping("/profile/{profileOwnerId}")
@@ -43,16 +49,15 @@ public class ProfileController {
                                  @RequestParam(required = false) UUID listId,
                                  Model model,
                                  HttpServletRequest request) {
-        UUID currentUserId = jwtService.retrieveUserIdFromCookie(request).orElseThrow(); // todo handle
+        UUID currentUserId = jwtService.retrieveUserIdFromCookie(request).orElseThrow();
         if (currentUserId.equals(profileOwnerId))
             return listId == null ? "redirect:/profile" : "redirect:/profile?listId=" + listId;
 
-        return renderProfile(profileOwnerId, listId, "User", model, "profile/foreign"); //todo insert real profileNickname
+        return renderProfile(profileOwnerId, listId, model, "profile/foreign");
     }
 
     private String renderProfile(UUID profileOwnerId,
                                  UUID listId,
-                                 String profileNickname,
                                  Model model,
                                  String template) {
         List<WishlistDTO> wishlists;
@@ -69,8 +74,10 @@ public class ProfileController {
             return "error/403";
 
         model.addAttribute("profileOwnerId", profileOwnerId);
-        model.addAttribute("profileNickname", profileNickname);
+        model.addAttribute("profileNickname", DEFAULT_PROFILE_NICKNAME);
         model.addAttribute("profileDescription", DEFAULT_PROFILE_DESCRIPTION);
+        model.addAttribute("profileApiBaseUrl", iwagProperties.getRequiredService("profile").getBaseUrl());
+        model.addAttribute("accessCookieName", accessCookieName);
         model.addAttribute("wishlists", sortDefaultFirst(wishlists));
         model.addAttribute("selectedWishlist", selectedWishlist.get());
         model.addAttribute("profileCss", List.of("/css/profile/profileStyle.css"));

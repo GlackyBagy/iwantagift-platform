@@ -8,7 +8,16 @@
 <body>
 <header th:replace="~{fragments/header :: header}"></header>
 
-<main class="profile-page">
+<main class="profile-page"
+      data-profile-loader
+      data-default-profile-nickname="User"
+      data-nickname-target="#profileNickname"
+      data-description-target="#profileDescription"
+      data-avatar-target="#profileAvatar"
+      th:attr="data-profile-owner-id=${profileOwnerId},
+               data-profile-api-base-url=${profileApiBaseUrl},
+               data-access-cookie-name=${accessCookieName},
+               data-default-profile-description=${profileDescription}">
     <div class="container">
         <div class="profile-layout">
             <aside class="profile-sidebar" aria-label="Wishlists">
@@ -44,14 +53,18 @@
 
             <section class="profile-main">
                 <section class="profile-hero">
-                    <img class="profile-avatar"
+                    <img id="profileAvatar"
+                         class="profile-avatar"
                          th:src="@{/img/logo_load_error.png}"
                          alt="User avatar">
-                    <h1 class="profile-nickname" th:text="${profileNickname}">Nickname</h1>
+                    <h1 id="profileNickname"
+                        class="profile-nickname"
+                        th:text="${profileNickname}">Nickname</h1>
                     <a class="btn btn-auth btn-to-profile profile-action-button"
                        th:href="@{/settings}">Edit</a>
                     <div class="profile-description-box">
-                        <p th:text="${profileDescription}">Profile description</p>
+                        <p id="profileDescription"
+                           th:text="${profileDescription}">Profile description</p>
                     </div>
                 </section>
 
@@ -90,5 +103,6 @@
 
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/js/profileLoader.js}"></script>
 </body>
 </html>

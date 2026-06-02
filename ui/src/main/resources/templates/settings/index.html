@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/head :: head(
+    title='iwag - Settings',
+    extraCss=${settingsCss})}">
+    <title></title>
+</head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="settings-page"
+      data-profile-loader
+      data-default-profile-nickname="User"
+      data-nickname-target="#settings-nickname"
+      data-description-target="#settings-description"
+      data-avatar-target="#settingsAvatar"
+      th:attr="data-profile-owner-id=${profileOwnerId},
+               data-profile-api-base-url=${profileApiBaseUrl},
+               data-access-cookie-name=${accessCookieName},
+               data-default-profile-description=${profileDescription}">
+    <div class="container">
+        <div class="settings-heading">
+            <p class="settings-eyebrow">Account control</p>
+            <h1 class="settings-title">Settings</h1>
+            <p class="settings-subtitle">
+                Manage credentials, public profile details, and irreversible account actions.
+            </p>
+        </div>
+
+        <div class="settings-layout">
+            <section class="settings-card" aria-labelledby="credentials-title">
+                <div class="settings-card-header">
+                    <div>
+                        <p class="settings-section-label">Security</p>
+                        <h2 id="credentials-title" class="settings-card-title">Credentials</h2>
+                    </div>
+                    <span class="settings-status">Private</span>
+                </div>
+
+                <form class="settings-form" aria-label="Credentials settings">
+                    <div class="settings-field">
+                        <label for="settings-email" class="form-label">Email</label>
+                        <div class="settings-inline-control">
+                            <input id="settings-email"
+                                   name="email"
+                                   type="email"
+                                   class="form-control form-control-dark"
+                                   th:value="${email}"
+                                   placeholder="email@example.com"
+                                   autocomplete="email"
+                                   disabled>
+                            <button type="button" class="btn btn-auth" disabled>Change</button>
+                            <button type="button" class="btn btn-outline-light" disabled>Confirm email</button>
+                        </div>
+                    </div>
+
+                    <div class="settings-field">
+                        <label for="settings-password" class="form-label">Password</label>
+                        <div class="settings-inline-control">
+                            <input id="settings-password"
+                                   name="password"
+                                   type="password"
+                                   class="form-control form-control-dark"
+                                   value="********"
+                                   autocomplete="current-password"
+                                   disabled>
+                            <button type="button" class="btn btn-auth" disabled>Change</button>
+                        </div>
+                    </div>
+
+                    <p class="settings-note">
+                        Credential changes are shown here, but update endpoints are not available yet.
+                    </p>
+                </form>
+            </section>
+
+            <section class="settings-card" aria-labelledby="profile-settings-title">
+                <div class="settings-card-header">
+                    <div>
+                        <p class="settings-section-label">Public identity</p>
+                        <h2 id="profile-settings-title" class="settings-card-title">Profile settings</h2>
+                    </div>
+                    <span class="settings-status">Visible</span>
+                </div>
+
+                <form class="settings-form"
+                      method="post"
+                      enctype="multipart/form-data"
+                      th:action="@{/settings/profile}"
+                      aria-label="Profile settings">
+                    <input th:if="${_csrf != null}"
+                           type="hidden"
+                           th:name="${_csrf.parameterName}"
+                           th:value="${_csrf.token}">
+                    <div class="settings-profile-row">
+                        <img id="settingsAvatar"
+                             class="settings-avatar"
+                             th:src="@{/img/logo_load_error.png}"
+                             alt="Current profile photo">
+                        <div class="settings-photo-actions">
+                            <label for="settings-photo" class="form-label">Profile photo</label>
+                            <input id="settings-photo"
+                                   name="profilePhoto"
+                                   type="file"
+                                   class="form-control form-control-dark"
+                                   accept="image/png,image/jpeg,image/webp">
+                            <p class="settings-note">Upload a PNG, JPEG, or WebP image. Storage handling will be added later.</p>
+                        </div>
+                    </div>
+
+                    <div class="settings-field">
+                        <label for="settings-nickname" class="form-label">Nickname</label>
+                        <input id="settings-nickname"
+                               name="nickname"
+                               type="text"
+                               class="form-control form-control-dark"
+                               th:value="${nickname}"
+                               maxlength="64">
+                    </div>
+
+                    <div class="settings-field">
+                        <label for="settings-description" class="form-label">Description</label>
+                        <textarea id="settings-description"
+                                  name="description"
+                                  class="form-control form-control-dark"
+                                  rows="5"
+                                  maxlength="500"
+                                  th:text="${profileDescription}"></textarea>
+                    </div>
+
+                    <div class="settings-actions">
+                        <button type="submit" class="btn btn-auth">Save profile</button>
+                        <a th:href="@{/profile}" class="btn btn-outline-light">Back to profile</a>
+                    </div>
+                </form>
+            </section>
+
+            <section class="settings-card settings-danger-card" aria-labelledby="danger-zone-title">
+                <div class="settings-card-header">
+                    <div>
+                        <p class="settings-section-label">Irreversible</p>
+                        <h2 id="danger-zone-title" class="settings-card-title">Danger zone</h2>
+                    </div>
+                    <span class="settings-status settings-status-danger">Danger</span>
+                </div>
+
+                <div class="settings-danger-list">
+                    <article class="settings-danger-action">
+                        <div>
+                            <h3>Delete account</h3>
+                            <p>Remove your account and personal identity from iwag.</p>
+                        </div>
+                        <button type="button" class="btn settings-danger-button" disabled>Delete account</button>
+                    </article>
+
+                    <article class="settings-danger-action">
+                        <div>
+                            <h3>Delete all wishes and wishlists</h3>
+                            <p>Clear every wishlist and wish while keeping the account itself.</p>
+                        </div>
+                        <button type="button" class="btn settings-danger-button" disabled>Delete all</button>
+                    </article>
+                </div>
+
+                <p class="settings-note settings-danger-note">
+                    Destructive actions are disabled until backend endpoints and confirmation flow are implemented.
+                </p>
+            </section>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/js/profileLoader.js}"></script>
+</body>
+</html>

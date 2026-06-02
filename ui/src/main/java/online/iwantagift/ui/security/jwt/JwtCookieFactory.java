@@ -10,9 +10,9 @@ import java.util.List;
 /**
  * Factory for JWT-related HTTP cookies used by the UI application.
  *
- * <p>The created cookies are marked {@code HttpOnly}, use the configured security flag, are scoped
- * to the application root path, and either carry token values or immediately expire to clear
- * authentication state in the browser.
+ * <p>The created cookies are readable from browser JavaScript, use the configured security flag,
+ * are scoped to the application root path, and either carry token values or immediately expire to
+ * clear authentication state in the browser.
  */
 @Component
 @Getter
@@ -45,7 +45,6 @@ public class JwtCookieFactory {
 
     private Cookie createAccessCookie(String jwt) {
         Cookie cookie = new Cookie(accessCookieName, jwt);
-        cookie.setHttpOnly(true);
         cookie.setSecure(secure);
         cookie.setPath("/");
         cookie.setMaxAge(maxAgeSeconds);
@@ -54,7 +53,6 @@ public class JwtCookieFactory {
 
     private Cookie createRefreshCookie(String refresh) {
         Cookie cookie = new Cookie(refreshCookieName, refresh);
-        cookie.setHttpOnly(true);
         cookie.setSecure(secure);
         cookie.setPath("/");
         cookie.setMaxAge(maxAgeSeconds);
@@ -73,7 +71,6 @@ public class JwtCookieFactory {
 
     private Cookie killAccessCookie() {
         Cookie cookie = new Cookie(accessCookieName, "");
-        cookie.setHttpOnly(true);
         cookie.setSecure(secure);
         cookie.setPath("/");
         cookie.setMaxAge(0);
@@ -82,7 +79,6 @@ public class JwtCookieFactory {
 
     private Cookie killRefreshCookie() {
         Cookie cookie = new Cookie(refreshCookieName, "");
-        cookie.setHttpOnly(true);
         cookie.setSecure(secure);
         cookie.setPath("/");
         cookie.setMaxAge(0);

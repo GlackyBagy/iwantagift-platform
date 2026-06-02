@@ -11,7 +11,6 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class JwtCookieFactoryTest {
     private static final String ACCESS_COOKIE_NAME = "access_token";
@@ -64,7 +63,7 @@ public class JwtCookieFactoryTest {
     private void assertTokenCookie(Cookie cookie, String name, String value, int maxAge, boolean secure) {
         assertEquals(name, cookie.getName());
         assertEquals(value, cookie.getValue());
-        assertTrue(cookie.isHttpOnly());
+        assertFalse(cookie.isHttpOnly());
         assertEquals(secure, cookie.getSecure());
         assertEquals("/", cookie.getPath());
         assertEquals(maxAge, cookie.getMaxAge());

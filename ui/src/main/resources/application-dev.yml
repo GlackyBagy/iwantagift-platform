@@ -1,6 +1,10 @@
 spring:
   application:
     name: "ui"
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 55MB
 
 server:
   port: 8080
@@ -12,6 +16,9 @@ iwag:
       use-https: false
     wishlists:
       url: localhost:8001
+      use-https: false
+    profile:
+      url: localhost:8002
       use-https: false
 
 jwt:
