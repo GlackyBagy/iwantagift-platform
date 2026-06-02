@@ -1,0 +1,11 @@
+spring:
+  docker:
+    compose:
+      enabled: true
+      file: profile/compose.yaml
+      lifecycle-management: start-only
+  datasource:
+    url: jdbc:postgresql://localhost:9913/profile
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver

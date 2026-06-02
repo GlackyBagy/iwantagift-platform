@@ -1,0 +1,31 @@
+spring:
+  application:
+    name: profile
+  servlet:
+    multipart:
+      max-file-size: ${IWAG_AVATAR_MAX_FILE_SIZE:50MB}
+      max-request-size: ${IWAG_AVATAR_MAX_REQUEST_SIZE:55MB}
+
+server:
+  port: 8002
+
+iwag:
+  services:
+    ui:
+      url: ${IWAG_UI_URL:localhost:8080}
+      use-https: ${IWAG_UI_USE_HTTPS:false}
+    auth:
+      url: ${IWAG_AUTH_URL:localhost:8091}
+      use-https: ${IWAG_AUTH_USE_HTTPS:false}
+  s3:
+    endpoint: ${IWAG_S3_ENDPOINT:https://storage.yandexcloud.net}
+    region: ${IWAG_S3_REGION:ru-central1}
+    bucket: ${IWAG_S3_BUCKET:pictures-iwag}
+    access-key: ${IWAG_S3_ACCESS_KEY}
+    secret-key: ${IWAG_S3_SECRET_KEY}
+
+jwt:
+  cookie:
+    name:
+      access: ${JWT_COOKIE_NAME_ACCESS:accessToken}
+      refresh: ${JWT_COOKIE_NAME_REFRESH:refreshToken}
