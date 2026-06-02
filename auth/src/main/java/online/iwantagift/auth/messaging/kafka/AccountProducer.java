@@ -10,6 +10,7 @@ import tools.jackson.databind.ObjectMapper;
 
 import java.util.Collection;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Component
@@ -23,20 +24,20 @@ public class AccountProducer {
     private final ObjectMapper objectMapper;
     private final IwagProperties iwagProperties;
 
-    public void sendOnCreate(Account account) {
-        sendToTopic(CREATED_USER_TOPIC, account);
+    public void sendOnCreate(UUID userId, String nickname, String email) {
+        sendToTopic(CREATED_USER_TOPIC, new AccountEventDTO(userId, nickname, email));
+    } // todo send nickname
+
+    public void sendOnDelete(UUID userId) {
+        sendToTopic(DELETED_USER_TOPIC, new AccountEventDTO(userId, null, null));
     }
 
-    public void sendOnDelete(Account account) {
-        sendToTopic(DELETED_USER_TOPIC, account);
-    }
-
-    private void sendToTopic(String topic, Account account) {
-        String payload = objectMapper.writeValueAsString(AccountEventDTO.from(account));
+    private void sendToTopic(String topic, AccountEventDTO event) {
+        String payload = objectMapper.writeValueAsString(event);
         kafkaTopics()
                 .stream()
                 .filter(topic::equals)
-                .forEach(kafkaTopic -> kafkaTemplate.send(kafkaTopic, account.getId().toString(), payload));
+                .forEach(kafkaTopic -> kafkaTemplate.send(kafkaTopic, event.id().toString(), payload));
     }
 
     private Set<String> kafkaTopics() {

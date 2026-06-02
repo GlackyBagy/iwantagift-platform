@@ -41,7 +41,6 @@ class AccountFactoryTest {
 
         Account account = factory.create(dto);
 
-        assertThat(account.getNickname()).isEqualTo("alice");
         assertThat(account.getEmail()).isEqualTo("alice@example.com");
     }
 

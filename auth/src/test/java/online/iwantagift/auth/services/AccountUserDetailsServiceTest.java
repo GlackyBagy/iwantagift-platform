@@ -32,7 +32,6 @@ class AccountUserDetailsServiceTest {
                 .id(UUID.randomUUID())
                 .email("alice@example.com")
                 .passwordHash("$2a$hash")
-                .nickname("alice")
                 .build();
         when(accountRepository.findByEmail("alice@example.com")).thenReturn(Optional.of(account));
 

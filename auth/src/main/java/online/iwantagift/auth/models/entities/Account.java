@@ -19,8 +19,6 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "id")
     private UUID id;
-    @Column(name = "nickname")
-    private String nickname;
     @Column(name = "email", unique = true)
     private String email;
     @Column(name = "password_hash")

@@ -64,7 +64,7 @@ public class AuthController {
         } catch (DataIntegrityViolationException e) {
             throw new EmailAlreadyExistsException();
         }
-        accountProducer.sendOnCreate(account); // todo guaranty DB + kafka operations atomicity
+        accountProducer.sendOnCreate(account.getId(), credentials.getNickname(), account.getEmail()); // todo guaranty DB + kafka operations atomicity
 
         return tokensFromCredentials(credentials);
     }

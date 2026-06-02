@@ -77,7 +77,7 @@ class AuthControllerTest {
                 .andExpect(jsonPath("$.jwtToken").value("jwt-token"))
                 .andExpect(jsonPath("$.refreshToken").value("refresh-token"));
 
-        verify(accountProducer).sendOnCreate(account);
+        verify(accountProducer).sendOnCreate(account.getId(), any(), account.getEmail());
     }
 
     @Test

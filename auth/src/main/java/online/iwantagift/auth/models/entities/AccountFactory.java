@@ -24,7 +24,6 @@ public final class AccountFactory {
      */
     public Account create(CredentialsDTO credentialsDTO) {
         return Account.builder()
-                .nickname(credentialsDTO.getNickname())
                 .email(credentialsDTO.getEmail())
                 .passwordHash(passwordEncoder.encode(credentialsDTO.getPassword()))
                 .build();

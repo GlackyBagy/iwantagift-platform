@@ -7,7 +7,7 @@ spring:
   application:
     name: "auth"
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: localhost:9094
   datasource:
     url: jdbc:postgresql://localhost:9912/auth
     username: "postgres"
