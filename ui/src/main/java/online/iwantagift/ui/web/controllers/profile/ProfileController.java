@@ -1,14 +1,14 @@
 package online.iwantagift.ui.web.controllers.profile;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import online.iwantagift.ui.IwagProperties;
+import online.iwantagift.ui.models.dto.profile.ProfileDTO;
 import online.iwantagift.ui.models.dto.wl.WishlistDTO;
-import online.iwantagift.ui.services.JwtService;
+import online.iwantagift.ui.services.CurrentUserService;
+import online.iwantagift.ui.services.ProfileService;
 import online.iwantagift.ui.services.WishlistService;
 import online.iwantagift.ui.util.exceptions.RemoteServiceException;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -26,20 +26,16 @@ import java.util.UUID;
 public class ProfileController {
     private static final String DEFAULT_WISHLIST_TITLE = "DEFAULT_WISHLIST";
     private static final String DEFAULT_PROFILE_DESCRIPTION = "Profile description is not set yet.";
-    private static final String DEFAULT_PROFILE_NICKNAME = "User";
 
     private final WishlistService wishlistService;
-    private final JwtService jwtService;
-    private final IwagProperties iwagProperties;
-
-    @Value("${jwt.cookie.name.access}")
-    private String accessCookieName;
+    private final ProfileService profileService;
+    private final CurrentUserService currentUserService;
 
     @GetMapping("/profile")
     public String profile(@RequestParam(required = false) UUID listId,
                           Model model,
-                          HttpServletRequest request) {
-        UUID userId = jwtService.retrieveUserIdFromCookie(request).orElseThrow(); // todo handle redirect to login page
+                          Authentication authentication) {
+        UUID userId = currentUserService.requireUserId(authentication);
 
         return renderProfile(userId, listId, model, "profile/own");
     }
@@ -48,8 +44,8 @@ public class ProfileController {
     public String foreignProfile(@PathVariable UUID profileOwnerId,
                                  @RequestParam(required = false) UUID listId,
                                  Model model,
-                                 HttpServletRequest request) {
-        UUID currentUserId = jwtService.retrieveUserIdFromCookie(request).orElseThrow();
+                                 Authentication authentication) {
+        UUID currentUserId = currentUserService.requireUserId(authentication);
         if (currentUserId.equals(profileOwnerId))
             return listId == null ? "redirect:/profile" : "redirect:/profile?listId=" + listId;
 
@@ -73,11 +69,17 @@ public class ProfileController {
         if (selectedWishlist.isEmpty())
             return "error/403";
 
+        ProfileDTO profile = profileService.getProfile(profileOwnerId);
+
         model.addAttribute("profileOwnerId", profileOwnerId);
-        model.addAttribute("profileNickname", DEFAULT_PROFILE_NICKNAME);
-        model.addAttribute("profileDescription", DEFAULT_PROFILE_DESCRIPTION);
-        model.addAttribute("profileApiBaseUrl", iwagProperties.getRequiredService("profile").getBaseUrl());
-        model.addAttribute("accessCookieName", accessCookieName);
+        model.addAttribute("profileNickname", profile.nickname());
+        model.addAttribute("profileDescription",
+                profile.description() != null ?
+                        profile.description() :
+                        DEFAULT_PROFILE_DESCRIPTION);
+        model.addAttribute("profileAvatarUrl", profile.hasAvatar() ?
+                profileService.avatarUrl(profileOwnerId) :
+                "/img/logo_load_error.png");
         model.addAttribute("wishlists", sortDefaultFirst(wishlists));
         model.addAttribute("selectedWishlist", selectedWishlist.get());
         model.addAttribute("profileCss", List.of("/css/profile/profileStyle.css"));
@@ -101,7 +103,7 @@ public class ProfileController {
     private List<WishlistDTO> sortDefaultFirst(List<WishlistDTO> wishlists) {
         return wishlists.stream()
                 .sorted(Comparator.comparing((WishlistDTO wishlist) ->
-                        !DEFAULT_WISHLIST_TITLE.equals(wishlist.getTitle()))
+                                !DEFAULT_WISHLIST_TITLE.equals(wishlist.getTitle()))
                         .thenComparing(WishlistDTO::getTitle, Comparator.nullsLast(String::compareToIgnoreCase)))
                 .toList();
     }

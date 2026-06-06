@@ -13,45 +13,10 @@
             <div class="card hero-card mx-auto">
                 <div class="card-body text-center py-5 px-1">
                     <h1 class="hero-title mb-4">Sign in</h1>
-                    <form id="signupForm" th:action="@{/auth/signin}" th:object="${credentialsDTO}" method="post"
+                    <form id="signupForm" th:action="@{/oauth2/authorization/iwag-ui}" method="get"
                           class="w-100" style="max-width: 420px; margin: 0 auto;">
-                        <div class="alert alert-danger text-start"
-                             th:if="${#fields.hasGlobalErrors()}"
-                             th:each="error : ${#fields.globalErrors()}"
-                             th:text="${error}">
-                            Invalid credentials
-                        </div>
-
-                        <div class="mb-3 text-start">
-                            <label class="form-label text-light">Email</label>
-                            <input type="email" class="form-control form-control-dark"
-                                   placeholder="Enter email" th:field="*{email}"
-                                   th:classappend="${#fields.hasErrors('email')}? 'is-invalid' : ''">
-
-                            <div class="invalid-feedback"
-                                 th:if="${#fields.hasErrors('email')}"
-                                 th:errors="*{email}">
-                            </div>
-                        </div>
-
-                        <!-- Password -->
-                        <div class="mb-3 text-start">
-                            <label class="form-label text-light">Password</label>
-                            <input type="password" class="form-control form-control-dark"
-                                   placeholder="Enter password" th:field="*{password}" id="password"
-                                   th:classappend="${#fields.hasErrors('password')}? 'is-invalid' : ''">
-
-                            <div class="invalid-feedback"
-                                 th:if="${#fields.hasErrors('password')}"
-                                 th:errors="*{password}">
-                            </div>
-                        </div>
-
-                        <div id="validationError" class="text-danger small mb-3 d-none"></div>
-
-                        <!-- Submit -->
                         <div class="d-grid mb-3">
-                            <button type="submit" class="btn btn-auth">Sign in</button>
+                            <button type="submit" class="btn btn-auth">Continue to sign in</button>
                         </div>
                         
                         <!-- Divider -->
@@ -84,7 +49,6 @@
 
 
     <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
-    <script th:src="@{/js/credentialsValidation.js}"></script>
     <footer th:replace="~{fragments/footer :: footer}"></footer>
 </body>
 </html>

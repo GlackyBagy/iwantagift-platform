@@ -1,0 +1,226 @@
+:root{
+    --grad-blue-light: #69e2d7;
+    --grad-blue-dark: #1778c1;
+    --grad-orange-light: #fead7b;
+    --grad-orange-dark: #fa667b;
+}
+
+html, body {
+    height: 100%;
+}
+body {
+    background-color: #202020;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+main {
+    flex: 1 0 auto;
+    padding-bottom: 2rem;
+}
+
+a{
+    color: var(--grad-orange-dark);
+    text-decoration: none;
+    font-weight: 500;
+}
+a:hover{
+    color: var(--grad-orange-light);
+}
+.btn-auth{
+    background-color: var(--grad-orange-dark);
+    color: var(--bs-light);
+    border: none;
+    border-radius: 12px;
+}
+.btn-auth:hover{
+    background-color: #D65A6C;
+    color: var(--bs-light);
+    border: none;
+    border-radius: 12px;
+}
+.btn-auth:disabled,
+.btn-auth.disabled {
+    background-color: var(--grad-orange-dark);
+    color: var(--bs-light);
+    border: none;
+    opacity: 0.65;
+}
+@media (max-width: 380px) {
+  .btn-signup {
+    display: none;
+  }
+}
+footer {
+    background-color: #111111;
+    color: #757779;
+    text-align: center;
+    padding: 1rem 0;
+    margin-top: auto;
+    flex-shrink: 0;
+}
+.footer-link {
+  text-decoration: none;
+  color: #6e7377;
+}
+ .spacer1 {
+    flex-grow: 1;
+ }
+ .spacer2 {
+    flex-grow: 2;
+ }
+.hero-badge{
+    color: var(--bs-light);
+    display: inline-block;
+    padding: 0.45rem 0.8rem;
+    border-radius: 999px;
+    background-color: gray;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+}
+.hero-card {
+   width: 100%;
+    max-width: 860px;
+    border: 0;
+    border-radius: 28px;
+    background: #121212;
+    /* backdrop-filter: blur(8px); */
+    box-shadow: 0 18px 60px rgba(33, 37, 41, 0.08);
+}
+.hero-title {
+    color: whitesmoke;
+    font-size: clamp(2rem, 5vw, 3.6rem);
+    line-height: 1.05;
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin-bottom: 1rem;
+}
+
+.hero-text {
+    font-size: 1.05rem;
+    color: whitesmoke;
+    max-width: 580px;
+    margin: 0 auto 1.75rem;
+}
+.feature-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    justify-content: center;
+}
+
+.feature-pill {
+    padding: 0.7rem 1rem;
+    border-radius: 999px;
+    background-color: #f8f9fa;
+    border: 1px solid #e9ecef;
+    font-size: 0.95rem;
+    color: #495057;
+}
+
+.wishlist-page {
+    padding-top: 2.5rem;
+}
+
+.wishlist-heading {
+    max-width: 860px;
+    margin-bottom: 2rem;
+}
+
+.wishlist-title {
+    color: whitesmoke;
+    font-size: clamp(2rem, 4vw, 3.2rem);
+    line-height: 1.08;
+    font-weight: 700;
+    margin-bottom: 1rem;
+}
+
+.wishlist-description {
+    color: #d6d6d6;
+    font-size: 1.05rem;
+    line-height: 1.6;
+    max-width: 720px;
+}
+
+.wishlist-read-more {
+    color: var(--grad-orange-dark);
+    padding: 0;
+    border: 0;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.wishlist-read-more:hover {
+    color: var(--grad-orange-light);
+}
+
+.wishlist-read-more .read-less-text {
+    display: inline;
+}
+
+.wishlist-read-more.collapsed .read-less-text {
+    display: none;
+}
+
+.wishlist-read-more.collapsed .read-more-text {
+    display: inline;
+}
+
+.wishlist-read-more:not(.collapsed) .read-more-text {
+    display: none;
+}
+
+.wish-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 1rem;
+}
+
+.wish-tile {
+    display: flex;
+    min-height: 260px;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: 1.25rem;
+    padding: 1.25rem;
+    border: 1px solid #2f2f2f;
+    border-radius: 8px;
+    background-color: #151515;
+}
+
+.wish-image {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    border-radius: 6px;
+    object-fit: cover;
+    background-color: #222;
+}
+
+.wish-title {
+    color: whitesmoke;
+    font-size: 1.2rem;
+    line-height: 1.25;
+    margin-bottom: 0.75rem;
+}
+
+.wish-description {
+    color: #bdbdbd;
+    line-height: 1.5;
+    margin-bottom: 0;
+    overflow-wrap: anywhere;
+}
+
+.wish-link {
+    align-self: flex-start;
+}
+
+.wishlist-empty {
+    max-width: 520px;
+    padding: 2rem;
+    border: 1px solid #2f2f2f;
+    border-radius: 8px;
+    background-color: #151515;
+    color: #d6d6d6;
+    text-align: center;
+}

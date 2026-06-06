@@ -1,16 +1,17 @@
-package online.iwantagift.auth.config;
+package online.iwantagift.auth.config.security;
 
 import lombok.RequiredArgsConstructor;
 import online.iwantagift.auth.services.AccountUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.core.annotation.Order;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -23,16 +24,23 @@ public class WebSecurityConfig {
 
     @Bean
     @DependsOn("authenticationProvider")
+    @Order(2)
     SecurityFilterChain securityFilterChain(HttpSecurity http) {
         http
                 .authorizeHttpRequests((requests) -> requests
-                        .requestMatchers("/auth/*", "/refresh", "/.well-known/jwks.json")
+                        .requestMatchers("/auth/signup")
                         .permitAll()
-                        .anyRequest().authenticated()
+                        .requestMatchers("/login", "/css/**", "/js/**", "/img/**")
+                        .permitAll()
+                        .anyRequest()
+                        .authenticated()
                 )
-                .csrf(AbstractHttpConfigurer::disable)
-                .formLogin(AbstractHttpConfigurer::disable)
-                .logout(AbstractHttpConfigurer::disable);
+                .csrf(csrf -> csrf.ignoringRequestMatchers("/auth/signup"))
+                .formLogin(form -> form
+                        .loginPage("/login")
+                        .permitAll()
+                )
+                .logout(Customizer.withDefaults());
 
         return http.build();
     }

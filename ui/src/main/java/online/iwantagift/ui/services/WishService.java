@@ -18,7 +18,6 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class WishService {
-    private final JwtService jwtService;
     private RestClient restClients;
     private final IwagProperties iwagProperties;
 

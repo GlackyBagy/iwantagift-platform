@@ -5,7 +5,6 @@ import online.iwantagift.auth.controllers.AuthController;
 import online.iwantagift.auth.util.exceptions.EmailAlreadyExistsException;
 import online.iwantagift.auth.util.exceptions.ValidationException;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.ObjectError;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -36,14 +35,8 @@ public class AuthAdvice {
 
     @ExceptionHandler(EmailAlreadyExistsException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
-    private Map<String, String> handleEmailAlreadyExistsException(EmailAlreadyExistsException exception) {
+    private Map<String, String> handleEmailAlreadyExistsException(EmailAlreadyExistsException ignored) {
         return Map.of("email", "Account with provided email already exists");
-    }
-
-    @ExceptionHandler(BadCredentialsException.class)
-    @ResponseStatus(HttpStatus.BAD_REQUEST)
-    private Map<String, String> handleBadCredentials(BadCredentialsException exception) {
-        return Map.of("credentials", "Bad credentials");
     }
 
     @ExceptionHandler(IllegalStateException.class)

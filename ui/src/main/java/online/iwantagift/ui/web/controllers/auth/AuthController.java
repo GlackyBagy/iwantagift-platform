@@ -1,13 +1,9 @@
 package online.iwantagift.ui.web.controllers.auth;
 
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import online.iwantagift.ui.models.dto.auth.CredentialsDTO;
-import online.iwantagift.ui.models.dto.auth.TokenDTO;
 import online.iwantagift.ui.models.validation.AuthValidationGroups;
-import online.iwantagift.ui.security.jwt.JwtCookieFactory;
 import online.iwantagift.ui.services.AuthService;
-import online.iwantagift.ui.util.exceptions.BadRequestException;
 import online.iwantagift.ui.util.exceptions.ConflictException;
 import online.iwantagift.ui.util.exceptions.ServiceUnauthorizedException;
 import org.slf4j.Logger;
@@ -23,8 +19,8 @@ import java.util.Objects;
 /**
  * Handles browser-based authentication flows for the UI application.
  *
- * <p>This controller renders sign-in and sign-up pages, submits credentials to the auth service,
- * stores returned tokens in HTTP cookies, and clears those cookies on logout.
+ * <p>Login is handled by Spring Security OAuth2. This controller only keeps the custom sign-up
+ * page and redirects sign-in requests into the OAuth2 authorization flow.
  */
 @RequestMapping("/auth")
 @Controller
@@ -32,40 +28,35 @@ import java.util.Objects;
 public class AuthController {
     private static final Logger log = LoggerFactory.getLogger(AuthController.class);
 
-    private final JwtCookieFactory jwtCookieFactory;
     private final AuthService authService;
 
     @GetMapping("/signin")
-    @ResponseStatus(HttpStatus.OK)
     public String signIn() {
-        log.info("Rendering sign-in page");
-        return "auth/signinPage";
+        log.info("Redirecting sign-in request to OAuth2 login");
+        return "redirect:/oauth2/authorization/iwag-ui";
     }
 
     @GetMapping("/signup")
-    @ResponseStatus(HttpStatus.OK)
     public String signUp() {
         log.info("Rendering sign-up page");
         return "auth/signupPage";
     }
 
     /**
-     * Registers a new user and stores the returned authentication tokens in cookies.
+     * Registers a new user and redirects to OAuth2 login.
      *
      * <p>If the submitted passwords do not match or bean validation fails, this method returns the
      * sign-up page without calling the auth service.
      *
      * @param credentials   the submitted sign-up form data
      * @param bindingResult the validation result for the submitted form
-     * @param response      the HTTP response that receives authentication cookies
      * @return a redirect to the application root on success, or the sign-up page view on validation
      * failure
      */
     @PostMapping(path = "/signup")
     public String signUp(@ModelAttribute @Validated(AuthValidationGroups.SignUp.class)
                          CredentialsDTO credentials,
-                         BindingResult bindingResult,
-                         HttpServletResponse response) {
+                         BindingResult bindingResult) {
         log.info("Handling sign-up request");
 
         if (Objects.nonNull(credentials.getConfirmPassword()) &&
@@ -80,10 +71,8 @@ public class AuthController {
             return "auth/signupPage";
         }
 
-        TokenDTO dto;
-
         try {
-            dto = authService.signUp(credentials);
+            authService.signUp(credentials);
         } catch (ConflictException e) {
             bindingResult.rejectValue("email",
                     "validation.emailTaken", "Email already exists");
@@ -91,66 +80,8 @@ public class AuthController {
             return "auth/signupPage";
         }
 
-        jwtCookieFactory.createAuthCookies(dto.getJwtToken(), dto.getRefreshToken())
-                .forEach(response::addCookie);
-
-        log.info("Sign-up succeeded, authentication cookies were set");
-        return "redirect:/";
-    }
-
-    /**
-     * Authenticates an existing user and stores the returned authentication tokens in cookies.
-     *
-     * <p>If bean validation fails, this method returns the sign-in page without calling the auth
-     * service.
-     *
-     * @param credentials   the submitted sign-in form data
-     * @param bindingResult the validation result for the submitted form
-     * @param response      the HTTP response that receives authentication cookies
-     * @return a redirect to the application root on success, or the sign-in page view on validation
-     * failure
-     */
-    @PostMapping(path = "/signin")
-    public String signIn(@ModelAttribute @Validated(AuthValidationGroups.SignIn.class)
-                         CredentialsDTO credentials,
-                         BindingResult bindingResult,
-                         HttpServletResponse response) {
-        log.info("Handling sign-in request");
-
-        if (bindingResult.hasErrors()) {
-            log.info("Sign-in validation failed: {} error(s)", bindingResult.getErrorCount());
-            return "auth/signinPage";
-        }
-        TokenDTO dto;
-
-        try {
-            dto = authService.signIn(credentials);
-        } catch (BadRequestException e) {
-            bindingResult.reject("invalidCredentials", "Wrong password or email");
-            log.info("Sign-in failed: {}", e.getMessage());
-            return "auth/signinPage";
-        }
-
-        jwtCookieFactory.createAuthCookies(dto.getJwtToken(), dto.getRefreshToken())
-                .forEach(response::addCookie);
-
-        log.info("Sign-in succeeded, authentication cookies were set");
-        return "redirect:/";
-    }
-
-    /**
-     * Clears authentication cookies and redirects the user to the application root.
-     *
-     * @param response the HTTP response that receives the expiring logout cookies
-     * @return a redirect to the application root
-     */
-    @GetMapping("/logout")
-    public String logout(HttpServletResponse response) {
-        log.info("Handling logout request");
-        jwtCookieFactory.createLogoutCookies()
-                .forEach(response::addCookie);
-        log.info("Logout cookies were set");
-        return "redirect:/";
+        log.info("Sign-up succeeded, redirecting to OAuth2 login");
+        return "redirect:/oauth2/authorization/iwag-ui";
     }
 
     @ModelAttribute

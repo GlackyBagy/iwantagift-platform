@@ -1,17 +1,17 @@
 package online.iwantagift.ui.web.controllers.wl;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import online.iwantagift.ui.models.dto.wl.WishlistDTO;
 import online.iwantagift.ui.models.mappers.WishlistMapper;
 import online.iwantagift.ui.models.payloads.WishlistPayload;
 import online.iwantagift.ui.models.validation.WishlistValidationGroups;
-import online.iwantagift.ui.services.JwtService;
+import online.iwantagift.ui.services.CurrentUserService;
 import online.iwantagift.ui.services.WishlistService;
 import online.iwantagift.ui.util.exceptions.NotFoundException;
 import online.iwantagift.ui.util.exceptions.RemoteServiceException;
 import online.iwantagift.ui.util.exceptions.ServiceUnauthorizedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -26,7 +26,7 @@ import java.util.UUID;
 @Slf4j
 public class ListsController {
     private final WishlistService wishlistService;
-    private final JwtService jwtService;
+    private final CurrentUserService currentUserService;
     private final WishlistMapper wishlistMapper;
 
     @GetMapping("/new")
@@ -38,11 +38,11 @@ public class ListsController {
     @PostMapping("/new")
     public String createWish(@ModelAttribute @Validated(WishlistValidationGroups.CreateWishlist.class)
                              WishlistPayload wishlistPayload,
-                             BindingResult bindingResult, HttpServletRequest request) {
+                             BindingResult bindingResult, Authentication authentication) {
         if (bindingResult.hasErrors())
             return "wishlists/createList";
 
-        UUID userId = jwtService.retrieveUserIdFromCookie(request).get();
+        UUID userId = currentUserService.requireUserId(authentication);
         wishlistPayload.setOwnerId(userId);
 
         UUID createWishlistId;
@@ -73,8 +73,8 @@ public class ListsController {
     }
 
     @GetMapping("/{listId}/edit")
-    public String editWishlist(@PathVariable UUID listId, Model model, HttpServletRequest request) {
-        UUID userId = jwtService.retrieveUserIdFromCookie(request).get();
+    public String editWishlist(@PathVariable UUID listId, Model model, Authentication authentication) {
+        UUID userId = currentUserService.requireUserId(authentication);
         WishlistLookup lookup = findOwnedWishlist(listId, userId);
         if (lookup.errorView() != null)
             return lookup.errorView();
@@ -88,8 +88,8 @@ public class ListsController {
     public String editWishlist(@ModelAttribute @Validated(WishlistValidationGroups.UpdateWishlist.class)
                                WishlistPayload wishlistPayload,
                                BindingResult bindingResult, @PathVariable UUID listId,
-                               Model model, HttpServletRequest request) {
-        UUID userId = jwtService.retrieveUserIdFromCookie(request).get();
+                               Model model, Authentication authentication) {
+        UUID userId = currentUserService.requireUserId(authentication);
 
         if (bindingResult.hasErrors()) {
             model.addAttribute("listId", listId);

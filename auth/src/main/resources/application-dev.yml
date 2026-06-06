@@ -6,6 +6,10 @@ spring:
       lifecycle-management: start-only
   application:
     name: "auth"
+  security:
+    oauth2:
+      authorizationserver:
+        issuer: http://localhost:8091
   kafka:
     bootstrap-servers: localhost:9094
   datasource:
@@ -29,6 +33,3 @@ iwag:
     profile:
       kafka-topics:
         - createdUser
-jwt:
-  secret: "change-this-to-a-long-random-secret-key-with-at-least-32-bytes"
-  expiration: 86400000 # 24h in ms

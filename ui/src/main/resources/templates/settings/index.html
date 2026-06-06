@@ -8,16 +8,7 @@
 <body>
 <header th:replace="~{fragments/header :: header}"></header>
 
-<main class="settings-page"
-      data-profile-loader
-      data-default-profile-nickname="User"
-      data-nickname-target="#settings-nickname"
-      data-description-target="#settings-description"
-      data-avatar-target="#settingsAvatar"
-      th:attr="data-profile-owner-id=${profileOwnerId},
-               data-profile-api-base-url=${profileApiBaseUrl},
-               data-access-cookie-name=${accessCookieName},
-               data-default-profile-description=${profileDescription}">
+<main class="settings-page">
     <div class="container">
         <div class="settings-heading">
             <p class="settings-eyebrow">Account control</p>
@@ -95,7 +86,7 @@
                     <div class="settings-profile-row">
                         <img id="settingsAvatar"
                              class="settings-avatar"
-                             th:src="@{/img/logo_load_error.png}"
+                             th:src="${profileAvatarUrl}"
                              alt="Current profile photo">
                         <div class="settings-photo-actions">
                             <label for="settings-photo" class="form-label">Profile photo</label>
@@ -172,6 +163,5 @@
 
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
-<script th:src="@{/js/profileLoader.js}"></script>
 </body>
 </html>

@@ -1,12 +1,11 @@
 package online.iwantagift.ui.web.controllers.settings;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import online.iwantagift.ui.IwagProperties;
+import online.iwantagift.ui.models.dto.profile.ProfileDTO;
 import online.iwantagift.ui.models.payloads.ProfilePayload;
-import online.iwantagift.ui.services.JwtService;
+import online.iwantagift.ui.services.CurrentUserService;
 import online.iwantagift.ui.services.ProfileService;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -24,23 +23,27 @@ import java.util.UUID;
 public class SettingsController {
     private static final String DEFAULT_PROFILE_DESCRIPTION = "Profile description is not set yet.";
 
-    private final JwtService jwtService;
+    private final CurrentUserService currentUserService;
     private final ProfileService profileService;
-    private final IwagProperties iwagProperties;
-
-    @Value("${jwt.cookie.name.access}")
-    private String accessCookieName;
 
     @GetMapping("/settings")
-    public String settings(Model model, HttpServletRequest request) {
-        UUID userId = jwtService.retrieveUserIdFromCookie(request).orElseThrow(); // todo handle
+    public String settings(Model model, Authentication authentication) {
+        UUID userId = currentUserService.requireUserId(authentication);
+        ProfileDTO profile = profileService.getProfile(userId);
 
-        model.addAttribute("email", jwtService.retrieveEmailFromCookie(request).orElse(""));
-        model.addAttribute("nickname", "User");
-        model.addAttribute("profileDescription", DEFAULT_PROFILE_DESCRIPTION);
+        model.addAttribute("email", currentUserService.email(authentication));
+        model.addAttribute("nickname", profile.nickname() );
+
+        model.addAttribute("profileDescription",
+                profile.description() != null ?
+                        profile.description() :
+                        DEFAULT_PROFILE_DESCRIPTION);
         model.addAttribute("profileOwnerId", userId);
-        model.addAttribute("profileApiBaseUrl", iwagProperties.getRequiredService("profile").getBaseUrl());
-        model.addAttribute("accessCookieName", accessCookieName);
+        model.addAttribute("profileAvatarUrl",
+                profile.hasAvatar() ?
+                        profileService.avatarUrl(userId) :
+                        "/img/logo_load_error.png");
+
         model.addAttribute("settingsCss", List.of("/css/settings/settingsStyle.css"));
 
         return "settings/index";
@@ -49,15 +52,14 @@ public class SettingsController {
     @PostMapping("/settings/profile")
     public String updateProfile(@ModelAttribute @Validated ProfilePayload profilePayload,
                                 BindingResult bindingResult,
-                                HttpServletRequest request,
+                                Authentication authentication,
                                 RedirectAttributes redirectAttributes) {
         if (bindingResult.hasErrors()) {
             redirectAttributes.addFlashAttribute("profileValidationFailed", true);
             return "redirect:/settings";
         }
 
-        String accessToken = jwtService.extractAccessToken(request)
-                .orElseThrow(() -> new IllegalStateException("Access token cookie is missing"));
+        String accessToken = currentUserService.requireAccessToken(authentication);
         profileService.updateProfile(profilePayload, accessToken);
 
         redirectAttributes.addFlashAttribute("profileUpdated", true);

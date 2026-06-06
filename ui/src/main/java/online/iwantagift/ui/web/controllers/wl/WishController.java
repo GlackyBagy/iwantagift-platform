@@ -1,17 +1,17 @@
 package online.iwantagift.ui.web.controllers.wl;
 
-import jakarta.servlet.http.HttpServletRequest;
 import lombok.extern.slf4j.Slf4j;
 import online.iwantagift.ui.models.dto.wl.WishDTO;
 import online.iwantagift.ui.models.mappers.WishMapper;
 import online.iwantagift.ui.models.payloads.WishPayload;
 import online.iwantagift.ui.models.validation.WishValidationGroups;
-import online.iwantagift.ui.services.JwtService;
+import online.iwantagift.ui.services.CurrentUserService;
 import online.iwantagift.ui.services.WishService;
 import online.iwantagift.ui.services.WishlistService;
 import online.iwantagift.ui.util.exceptions.NotFoundException;
 import online.iwantagift.ui.util.exceptions.RemoteServiceException;
 import online.iwantagift.ui.util.exceptions.ServiceUnauthorizedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -26,34 +26,34 @@ import java.util.UUID;
 public class WishController {
 
     private final WishService wishService;
-    private final JwtService jwtService;
+    private final CurrentUserService currentUserService;
     private final WishlistService wishlistService;
     private final WishMapper wishMapper;
 
-    public WishController(WishService wishService, JwtService jwtService, WishlistService wishlistService, WishMapper wishMapper) {
+    public WishController(WishService wishService, CurrentUserService currentUserService, WishlistService wishlistService, WishMapper wishMapper) {
         this.wishService = wishService;
-        this.jwtService = jwtService;
+        this.currentUserService = currentUserService;
         this.wishlistService = wishlistService;
         this.wishMapper = wishMapper;
     }
 
     @GetMapping("/new")
-    public String createWish(Model model, HttpServletRequest request) {
+    public String createWish(Model model, Authentication authentication) {
         model.addAttribute("wishPayload", new WishPayload());
-        addWishlists(model, request);
+        addWishlists(model, authentication);
         return "wishlists/createWish";
     }
 
     @PostMapping("/new")
     public String createWish(@ModelAttribute @Validated(WishValidationGroups.CreateWish.class)
                              WishPayload wishPayload, BindingResult bindingResult, Model model,
-                             HttpServletRequest request) {
+                             Authentication authentication) {
         if (bindingResult.hasErrors()) {
-            addWishlists(model, request);
+            addWishlists(model, authentication);
             return "wishlists/createWish";
         }
 
-        UUID userId = jwtService.retrieveUserIdFromCookie(request).get();
+        UUID userId = currentUserService.requireUserId(authentication);
         wishPayload.setOwnerId(userId);
 
         UUID createdWishId;
@@ -72,14 +72,14 @@ public class WishController {
     }
 
     @GetMapping("/{wishId}/edit")
-    public String editWish(@PathVariable UUID wishId, Model model, HttpServletRequest request) {
-        WishLookup lookup = findOwnedWish(wishId, request);
+    public String editWish(@PathVariable UUID wishId, Model model, Authentication authentication) {
+        WishLookup lookup = findOwnedWish(wishId, authentication);
         if (lookup.errorView() != null)
             return lookup.errorView();
 
         model.addAttribute("wishPayload", wishMapper.toWishPayload(lookup.wish()));
         model.addAttribute("wishId", wishId);
-        addWishlists(model, request);
+        addWishlists(model, authentication);
 
         return "wishlists/editWish";
     }
@@ -87,14 +87,14 @@ public class WishController {
     @PostMapping("/{wishId}/edit")
     public String editWish(@ModelAttribute @Validated(value = WishValidationGroups.UpdateWish.class)
                            WishPayload wishPayload, BindingResult bindingResult, @PathVariable UUID wishId,
-                           Model model, HttpServletRequest request) {
+                           Model model, Authentication authentication) {
         if (bindingResult.hasErrors()) {
             model.addAttribute("wishId", wishId);
-            addWishlists(model, request);
+            addWishlists(model, authentication);
             return "wishlists/editWish";
         }
 
-        WishLookup lookup = findOwnedWish(wishId, request);
+        WishLookup lookup = findOwnedWish(wishId, authentication);
         if (lookup.errorView() != null)
             return lookup.errorView();
 
@@ -111,13 +111,13 @@ public class WishController {
         } catch (RemoteServiceException e) {
             log.debug(e.getMessage());
             model.addAttribute("wishId", wishId);
-            addWishlists(model, request);
+            addWishlists(model, authentication);
             return "wishlists/editWish";
         }
     }
 
-    private WishLookup findOwnedWish(UUID wishId, HttpServletRequest request) {
-        UUID userId = jwtService.retrieveUserIdFromCookie(request).get();
+    private WishLookup findOwnedWish(UUID wishId, Authentication authentication) {
+        UUID userId = currentUserService.requireUserId(authentication);
         WishDTO wish;
 
         try {
@@ -135,9 +135,9 @@ public class WishController {
         return new WishLookup(wish, null);
     }
 
-    private void addWishlists(Model model, HttpServletRequest request) {
+    private void addWishlists(Model model, Authentication authentication) {
         model.addAttribute("wlList", wishlistService.getAllWishlists(
-                jwtService.retrieveUserIdFromCookie(request).get()));
+                currentUserService.requireUserId(authentication)));
     }
 
     private record WishLookup(WishDTO wish, String errorView) {
