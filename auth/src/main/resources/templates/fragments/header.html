@@ -1,19 +1,19 @@
 <header th:fragment="header" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
     <nav class="navbar navbar-dark navbar-expand-sm bg-transparent">
         <div class="container">
-            <a class="navbar-brand d-flex align-items-center gap-3 m-0" href="http://localhost:8080/">
+            <a class="navbar-brand d-flex align-items-center gap-3 m-0" th:href="${uiBaseUrl} + '/'">
                 <img th:src="@{/img/favicon.png}" alt="Logo" style="width:40px;">
                 <span class="fw-semibold fs-5 text-white">iwag</span>
             </a>
 
             <div sec:authorize="isAnonymous()" class="ms-auto d-flex gap-2 auth-buttons">
-                <a href="/login" class="btn btn-auth btn-signin">Sign In</a>
-                <a href="http://localhost:8080/auth/signup" class="btn btn-auth btn-signup">Sign Up</a>
+                <a th:href="${uiBaseUrl} + '/auth/signin'" class="btn btn-auth btn-signin">Sign In</a>
+                <a th:href="${uiBaseUrl} + '/auth/signup'" class="btn btn-auth btn-signup">Sign Up</a>
             </div>
 
             <div sec:authorize="isAuthenticated()" class="ms-auto d-flex gap-2 auth-buttons">
-                <a href="http://localhost:8080/settings" class="btn btn-outline-light">Settings</a>
-                <a href="http://localhost:8080/profile" class="btn btn-auth btn-to-profile">My profile</a>
+                <a th:href="${uiBaseUrl} + '/settings'" class="btn btn-outline-light">Settings</a>
+                <a th:href="${uiBaseUrl} + '/profile'" class="btn btn-auth btn-to-profile">My profile</a>
             </div>
         </div>
     </nav>

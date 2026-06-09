@@ -18,7 +18,7 @@
                        th:href="@{/wishlist/new}">+ Create list</a>
                     <div th:each="wishlist : ${wishlists}"
                          class="profile-wishlist-link profile-wishlist-row"
-                         th:classappend="${wishlist.id == selectedWishlist.id} ? ' active'">
+                         th:classappend="${selectedWishlist != null and wishlist.id == selectedWishlist.id} ? ' active'">
                         <a class="profile-wishlist-title"
                            th:href="@{/profile(listId=${wishlist.id})}"
                            th:text="${wishlist.title}">Wishlist</a>
@@ -59,7 +59,13 @@
                     </div>
                 </section>
 
-                <div class="profile-wishes">
+                <div class="profile-wishes" th:if="${selectedWishlist == null}">
+                    <section class="wishlist-empty">
+                        <p>You have no wishlists yet. Create your first one!</p>
+                    </section>
+                </div>
+
+                <div class="profile-wishes" th:if="${selectedWishlist != null}">
                     <section class="wish-grid"
                              th:if="${selectedWishlist.wishes != null and !#lists.isEmpty(selectedWishlist.wishes)}">
                         <article class="wish-tile" th:each="wish : ${selectedWishlist.wishes}">

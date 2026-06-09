@@ -38,20 +38,29 @@ public class ProfileService {
 
     @Contract("_ -> !null")
     public ProfileDTO getProfile(UUID profileId) {
-        ProfileDTO res = restClient
-                .get()
-                .uri(uriBuilder -> uriBuilder
-                        .path("/api/v1/profile")
-                        .queryParam("profileId", profileId)
-                        .build())
-                .retrieve()
-                .onStatus(new HttpErrorHandler())
-                .body(ProfileDTO.class);
+        ProfileDTO res;
 
-        if (res == null)
-            throw new NotFoundException("Got null profile with id: " + profileId);
+        try {
+            res = restClient
+                    .get()
+                    .uri(uriBuilder -> uriBuilder
+                            .path("/api/v1/profile")
+                            .queryParam("profileId", profileId)
+                            .build())
+                    .retrieve()
+                    .onStatus(new HttpErrorHandler())
+                    .body(ProfileDTO.class);
+        } catch (NotFoundException e) {
+            // The profile record is created asynchronously (Kafka event from auth),
+            // so it may not exist yet — fall back to defaults instead of failing the page.
+            res = null;
+        }
 
-        return res;
+        return res != null ? res : defaultProfile(profileId);
+    }
+
+    private ProfileDTO defaultProfile(UUID profileId) {
+        return new ProfileDTO(profileId, "New user", null, false);
     }
 
     public String avatarUrl(UUID profileId) {

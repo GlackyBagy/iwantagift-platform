@@ -1,6 +1,7 @@
 package online.iwantagift.auth.config.security;
 
 import lombok.RequiredArgsConstructor;
+import online.iwantagift.auth.config.IwagProperties;
 import online.iwantagift.auth.services.AccountUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -21,6 +22,7 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class WebSecurityConfig {
     private final AccountUserDetailsService userDetailsService;
+    private final IwagProperties iwagProperties;
 
     @Bean
     @DependsOn("authenticationProvider")
@@ -38,6 +40,9 @@ public class WebSecurityConfig {
                 .csrf(csrf -> csrf.ignoringRequestMatchers("/auth/signup"))
                 .formLogin(form -> form
                         .loginPage("/login")
+                        // Used only when there is no saved OAuth2 request (direct visit to /login):
+                        // sends the user into the OAuth2 flow on the ui so the session is not "lost".
+                        .defaultSuccessUrl(iwagProperties.getUiBaseUrl() + "/auth/signin")
                         .permitAll()
                 )
                 .logout(Customizer.withDefaults());

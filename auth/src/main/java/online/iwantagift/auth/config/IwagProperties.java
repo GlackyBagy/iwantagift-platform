@@ -14,6 +14,10 @@ public class IwagProperties {
 
     private final Map<String, ServiceProperties> services = new HashMap<>();
 
+    /** Base URL of the ui service (used for links to signup etc.). */
+    @Setter
+    private String uiBaseUrl;
+
     @Getter
     @Setter
     public static class ServiceProperties {

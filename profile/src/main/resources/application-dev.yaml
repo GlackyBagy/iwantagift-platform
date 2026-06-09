@@ -6,6 +6,12 @@ spring:
       lifecycle-management: start-only
   application:
     name: profile
+  kafka:
+    # shared dev broker from wishlist/compose.yml
+    bootstrap-servers: localhost:9092
+    consumer:
+      # pick up createdUser events published before this service started
+      auto-offset-reset: earliest
   security:
     oauth2:
       resourceserver:

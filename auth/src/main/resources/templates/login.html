@@ -14,14 +14,16 @@
                 <div class="card-body text-center py-5 px-4">
                     <h1 class="hero-title mb-4">Sign in</h1>
 
-                    <div th:if="${param.error}" class="alert alert-danger text-start" role="alert">
+                    <div th:if="${param.error}" id="loginError"
+                         class="alert alert-danger text-start" role="alert">
                         Invalid email or password.
                     </div>
                     <div th:if="${param.logout}" class="alert alert-success text-start" role="alert">
                         You have been signed out.
                     </div>
 
-                    <form th:action="@{/login}" method="post" class="w-100" style="max-width: 420px; margin: 0 auto;">
+                    <form id="loginForm" th:action="@{/login}" method="post" novalidate
+                          class="w-100" style="max-width: 420px; margin: 0 auto;">
                         <input th:if="${_csrf != null}"
                                type="hidden"
                                th:name="${_csrf.parameterName}"
@@ -34,6 +36,7 @@
                                    name="username"
                                    autocomplete="email"
                                    placeholder="Email"
+                                   th:classappend="${param.error} ? 'is-invalid'"
                                    required>
                             <label for="username">Email</label>
                         </div>
@@ -45,9 +48,12 @@
                                    name="password"
                                    autocomplete="current-password"
                                    placeholder="Password"
+                                   th:classappend="${param.error} ? 'is-invalid'"
                                    required>
                             <label for="password">Password</label>
                         </div>
+
+                        <div id="validationError" class="text-danger small mb-3 d-none"></div>
 
                         <div class="d-grid mb-3">
                             <button type="submit" class="btn btn-auth">Continue</button>
@@ -57,7 +63,7 @@
                             <hr class="flex-grow-1">
                             <span class="px-3 text-secondary small">
                                 Don't have an account?
-                                <a href="http://localhost:8080/auth/signup" class="auth-link">Sign up</a>
+                                <a th:href="${uiBaseUrl} + '/auth/signup'" class="auth-link">Sign up</a>
                             </span>
                             <hr class="flex-grow-1">
                         </div>
@@ -68,6 +74,7 @@
     </main>
 
     <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+    <script th:src="@{/js/credentialsValidation.js}"></script>
     <footer th:replace="~{fragments/footer :: footer}"></footer>
 </body>
 </html>

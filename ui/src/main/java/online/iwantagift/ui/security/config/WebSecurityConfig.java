@@ -26,7 +26,12 @@ public class WebSecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
+                        // Replaces Spring's auto-generated "Login with OAuth 2.0" page:
+                        // unauthenticated users are sent into the OAuth2 flow via /auth/signin.
+                        .loginPage("/auth/signin")
                         .defaultSuccessUrl("/", true)
+                        // OAuth2 failures (state mismatch, token/userinfo errors) land on a real page.
+                        .failureUrl("/landing?error=login")
                 )
                 .logout(logout -> logout
                         .logoutSuccessUrl("/")

@@ -11,7 +11,8 @@ spring:
       authorizationserver:
         issuer: http://localhost:8091
   kafka:
-    bootstrap-servers: localhost:9094
+    # shared dev broker from wishlist/compose.yml — events must reach other services
+    bootstrap-servers: localhost:9092
   datasource:
     url: jdbc:postgresql://localhost:9912/auth
     username: "postgres"
@@ -24,7 +25,14 @@ spring:
       password: RDSpassword
 server:
   port: 8091
+  servlet:
+    session:
+      cookie:
+        # ui and auth both run on "localhost" (port is ignored for cookies),
+        # so a shared JSESSIONID would overwrite the ui session and break the OAuth2 flow
+        name: AUTH_SESSIONID
 iwag:
+  ui-base-url: http://localhost:8080
   services:
     wishlist:
       kafka-topics:

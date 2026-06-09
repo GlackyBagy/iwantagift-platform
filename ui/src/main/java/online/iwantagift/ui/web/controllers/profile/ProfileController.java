@@ -37,7 +37,7 @@ public class ProfileController {
                           Authentication authentication) {
         UUID userId = currentUserService.requireUserId(authentication);
 
-        return renderProfile(userId, listId, model, "profile/own");
+        return renderProfile(userId, listId, model, "profile/own", true);
     }
 
     @GetMapping("/profile/{profileOwnerId}")
@@ -49,13 +49,14 @@ public class ProfileController {
         if (currentUserId.equals(profileOwnerId))
             return listId == null ? "redirect:/profile" : "redirect:/profile?listId=" + listId;
 
-        return renderProfile(profileOwnerId, listId, model, "profile/foreign");
+        return renderProfile(profileOwnerId, listId, model, "profile/foreign", false);
     }
 
     private String renderProfile(UUID profileOwnerId,
                                  UUID listId,
                                  Model model,
-                                 String template) {
+                                 String template,
+                                 boolean allowEmptyWishlists) {
         List<WishlistDTO> wishlists;
 
         try {
@@ -66,7 +67,8 @@ public class ProfileController {
         }
 
         Optional<WishlistDTO> selectedWishlist = selectWishlist(wishlists, listId);
-        if (selectedWishlist.isEmpty())
+        // Own profile may have no wishlists yet — render an empty state instead of 403.
+        if (selectedWishlist.isEmpty() && !(allowEmptyWishlists && wishlists.isEmpty()))
             return "error/403";
 
         ProfileDTO profile = profileService.getProfile(profileOwnerId);
@@ -81,7 +83,7 @@ public class ProfileController {
                 profileService.avatarUrl(profileOwnerId) :
                 "/img/logo_load_error.png");
         model.addAttribute("wishlists", sortDefaultFirst(wishlists));
-        model.addAttribute("selectedWishlist", selectedWishlist.get());
+        model.addAttribute("selectedWishlist", selectedWishlist.orElse(null));
         model.addAttribute("profileCss", List.of("/css/profile/profileStyle.css"));
 
         return template;

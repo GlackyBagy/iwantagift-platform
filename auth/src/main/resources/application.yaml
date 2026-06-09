@@ -20,6 +20,10 @@ spring:
 
 server:
   port: ${SERVER_PORT}
+  servlet:
+    session:
+      cookie:
+        name: AUTH_SESSIONID
 
 iwag:
   services:

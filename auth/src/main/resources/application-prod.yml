@@ -5,6 +5,7 @@ spring:
     name: ${SPRING_APPLICATION_NAME:auth}
 
 iwag:
+  ui-base-url: ${IWAG_UI_BASE_URL}
   services:
     wishlist:
       kafka-topics: ${IWAG_WISHLIST_KAFKA_TOPICS:createdUser,deletedUser}

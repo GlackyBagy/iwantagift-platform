@@ -37,6 +37,20 @@ public class ProfileService {
         return profileRepository.findById(profileId);
     }
 
+    /**
+     * Creates a profile for a newly registered account (idempotent, driven by Kafka).
+     */
+    @Transactional
+    public void createProfileIfAbsent(UUID profileId, String nickname) {
+        if (profileRepository.existsById(profileId))
+            return;
+
+        profileRepository.save(Profile.builder()
+                .id(profileId)
+                .nickname(nickname != null && !nickname.isBlank() ? normalizeNickname(nickname) : "New user")
+                .build());
+    }
+
     public Optional<String> getAvatarPublicUrl(UUID profileId) {
         return profileRepository.findById(profileId)
                 .map(Profile::getAvatar)
