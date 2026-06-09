@@ -1,8 +1,7 @@
 package online.iwantagift.api.wishlist.models.mapping;
 
 import online.iwantagift.api.wishlist.models.dto.WishDTO;
-import online.iwantagift.api.wishlist.models.dto.wl.WishlistCreateDTO;
-import online.iwantagift.api.wishlist.models.dto.wl.WishlistDTO;
+import online.iwantagift.api.wishlist.models.dto.WishlistDTO;
 import online.iwantagift.api.wishlist.models.entities.Wish;
 import online.iwantagift.api.wishlist.models.entities.Wishlist;
 import online.iwantagift.api.wishlist.services.WishlistService;
@@ -32,10 +31,14 @@ class WishlistMapperTest {
     private final WishlistMapper mapper = Mappers.getMapper(WishlistMapper.class);
 
     @Test
-    void toEntity_fromCreateDTO_mapsWritableFields() {
-        WishlistCreateDTO dto = new WishlistCreateDTO();
+    void toEntity_mapsWritableFieldsAndIgnoresSystemFields() {
+        WishlistDTO dto = new WishlistDTO();
+        dto.setId(UUID.randomUUID());
+        dto.setOwnerId(UUID.randomUUID());
+        dto.setCreatedAt(Instant.now());
         dto.setTitle("Birthday");
         dto.setDescription("Gift ideas");
+        dto.setWishes(List.of(new WishDTO()));
 
         Wishlist entity = mapper.toEntity(dto);
 
@@ -51,7 +54,6 @@ class WishlistMapperTest {
 
     @Test
     void toDTO_mapsFields_andMapsWishesUsingWishMapper() {
-        // given
         UUID wishlistId = UUID.randomUUID();
         UUID ownerId = UUID.randomUUID();
         Instant createdAt = Instant.parse("2026-02-18T00:00:00Z");
@@ -85,18 +87,14 @@ class WishlistMapperTest {
 
         wishlist.setWishes(List.of(w1, w2));
 
-        // when
         WishlistDTO dto = mapper.toDTO(wishlist, wishMapper);
 
-        // then: top-level fields
         assertNotNull(dto);
         assertEquals(wishlistId, dto.getId());
         assertEquals("My WL", dto.getTitle());
         assertEquals("Desc", dto.getDescription());
         assertEquals(createdAt, dto.getCreatedAt());
         assertEquals(ownerId, dto.getOwnerId());
-
-        // then: wishes list
         assertNotNull(dto.getWishes());
         assertEquals(2, dto.getWishes().size());
 
@@ -116,28 +114,23 @@ class WishlistMapperTest {
         assertEquals(w2.getCreatedAt(), dto2.getCreatedAt());
         assertEquals(wishlistId, dto2.getWishListId());
 
-        // and: verify WishMapper is actually used for each wish
-        verify(wishMapper, times(1)).toDTO(w1);
-        verify(wishMapper, times(1)).toDTO(w2);
+        verify(wishMapper).toDTO(w1);
+        verify(wishMapper).toDTO(w2);
         verifyNoMoreInteractions(wishMapper);
     }
 
     @Test
     void toDTO_whenWishesEmpty_returnsEmptyListNotNull() {
-        // given
         Wishlist wishlist = new Wishlist();
         wishlist.setId(UUID.randomUUID());
         wishlist.setTitle("Empty WL");
-        wishlist.setWishes(List.of()); // NOT null
+        wishlist.setWishes(List.of());
 
-        // when
         WishlistDTO dto = mapper.toDTO(wishlist, wishMapper);
 
-        // then
         assertNotNull(dto);
         assertNotNull(dto.getWishes());
         assertTrue(dto.getWishes().isEmpty());
-
         verifyNoInteractions(wishMapper);
     }
 }

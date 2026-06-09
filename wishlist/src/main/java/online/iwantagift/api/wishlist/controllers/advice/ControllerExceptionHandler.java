@@ -2,7 +2,7 @@ package online.iwantagift.api.wishlist.controllers.advice;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.extern.slf4j.Slf4j;
-import online.iwantagift.api.wishlist.exceptions.ValidationFailedException;
+import online.iwantagift.api.wishlist.util.exceptions.ValidationFailedException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.ExceptionHandler;

@@ -1,20 +1,19 @@
 package online.iwantagift.api.wishlist.controllers;
 
 import lombok.RequiredArgsConstructor;
-import online.iwantagift.api.wishlist.exceptions.ValidationFailedException;
+import online.iwantagift.api.wishlist.util.exceptions.ValidationFailedException;
 import online.iwantagift.api.wishlist.messaging.kafka.NewWishProducer;
-import online.iwantagift.api.wishlist.models.dto.WishCreateDTO;
 import online.iwantagift.api.wishlist.models.dto.WishDTO;
-import online.iwantagift.api.wishlist.models.dto.WishPatchDTO;
-import online.iwantagift.api.wishlist.models.dto.WishPutDTO;
 import online.iwantagift.api.wishlist.models.dto.abstracts.ValidationGroups;
 import online.iwantagift.api.wishlist.models.entities.Wish;
+import online.iwantagift.api.wishlist.models.events.WishCreatedEvent;
 import online.iwantagift.api.wishlist.models.mapping.WishMapper;
 import online.iwantagift.api.wishlist.services.WishService;
 import online.iwantagift.api.wishlist.services.WishlistService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -33,21 +32,6 @@ public class WishController {
     private final WishlistService wishlistService;
     private final NewWishProducer wishProducer;
 
-    @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
-//    @PreAuthorize("hasRole(Authorized)")
-    public Map<String, UUID> createWish(@RequestBody @Validated(ValidationGroups.Create.class) WishCreateDTO dto,
-                                        BindingResult bindingResult) {
-        if (bindingResult.hasErrors())
-            throw new ValidationFailedException(bindingResult.getFieldErrors());
-        log.info("WishController::createWish, DTO got: {}", dto.toString());
-
-        Map<String, UUID> response = Collections.singletonMap("id",
-                wishService.create(wishMapper.toEntity(dto, wishlistService)));
-        wishProducer.send(dto);
-        return response;
-    }
-
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public WishDTO getWish(@PathVariable UUID id) {
@@ -55,23 +39,56 @@ public class WishController {
         return wishMapper.toDTO(wish);
     }
 
-    @PatchMapping
-    @ResponseStatus(HttpStatus.ACCEPTED)
-//    @PreAuthorize("@wishSecurity.canModifyWish(#dto, authentication)")
-    public void patchWish(@RequestBody @Validated({ValidationGroups.Patch.class}) WishPatchDTO dto,
-                          BindingResult bindingResult) {
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public Map<String, UUID> createWish(@RequestBody @Validated(ValidationGroups.Create.class) WishDTO dto,
+                                        BindingResult bindingResult,
+                                        Authentication authentication) {
         if (bindingResult.hasErrors())
             throw new ValidationFailedException(bindingResult.getFieldErrors());
-        wishService.update(dto);
+
+        UUID requesterId = UUID.fromString(authentication.getName());
+
+        log.info("WishController::createWish, DTO got: {}", dto.toString());
+
+        Wish wish = wishMapper.toEntity(dto, requesterId, wishlistService);
+        UUID wishId = wishService.create(requesterId, wish);
+        wishProducer.send(new WishCreatedEvent(
+                wishId,
+                requesterId,
+                dto.getTitle(),
+                dto.getDescription(),
+                dto.getUrl(),
+                wish.getWishlist() == null ? dto.getWishListId() : wish.getWishlist().getId()
+        ));
+
+        Map<String, UUID> response = Collections.singletonMap("id", wishId);
+        return response;
+    }
+
+    @PatchMapping
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public void patchWish(@RequestBody @Validated({ValidationGroups.Patch.class}) WishDTO dto,
+                          BindingResult bindingResult,
+                          Authentication authentication) {
+        if (bindingResult.hasErrors())
+            throw new ValidationFailedException(bindingResult.getFieldErrors());
+
+        UUID requesterId = UUID.fromString(authentication.getName());
+
+        wishService.patch(requesterId, dto);
     }
 
     @PutMapping
     @ResponseStatus(HttpStatus.ACCEPTED)
-//    @PreAuthorize("@wishSecurity.canModifyWish(#dto, authentication)")
-    public void putWish(@RequestBody @Validated({ValidationGroups.Put.class}) WishPutDTO dto,
-                        BindingResult bindingResult) {
+    public void putWish(@RequestBody @Validated({ValidationGroups.Put.class}) WishDTO dto,
+                        BindingResult bindingResult,
+                        Authentication authentication) {
         if (bindingResult.hasErrors())
             throw new ValidationFailedException(bindingResult.getFieldErrors());
-        wishService.update(dto);
+
+        UUID requesterId = UUID.fromString(authentication.getName());
+
+        wishService.put(requesterId, dto);
     }
 }

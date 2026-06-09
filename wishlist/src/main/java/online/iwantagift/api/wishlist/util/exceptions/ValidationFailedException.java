@@ -1,4 +1,4 @@
-package online.iwantagift.api.wishlist.exceptions;
+package online.iwantagift.api.wishlist.util.exceptions;
 
 import lombok.*;
 import org.springframework.validation.FieldError;

@@ -4,6 +4,11 @@ spring:
       enabled: true
       file: wishlist/compose.yml
       lifecycle-management: start-only
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8091
   kafka:
     bootstrap-servers: localhost:9092
     admin:
@@ -24,6 +29,9 @@ server:
   port: 8001
 iwag:
   services:
+    ui:
+      url: localhost:8080
+      use-https: false
     price:
       kafka-topics:
         - newWishes

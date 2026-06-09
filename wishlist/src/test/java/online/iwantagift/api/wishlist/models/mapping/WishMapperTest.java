@@ -1,6 +1,5 @@
 package online.iwantagift.api.wishlist.models.mapping;
 
-import online.iwantagift.api.wishlist.models.dto.WishCreateDTO;
 import online.iwantagift.api.wishlist.models.dto.WishDTO;
 import online.iwantagift.api.wishlist.models.entities.Wish;
 import online.iwantagift.api.wishlist.models.entities.Wishlist;
@@ -33,26 +32,50 @@ class WishMapperTest {
 
         when(wlService.findById(wishListId)).thenReturn(Optional.of(wishlist));
 
-        WishCreateDTO dto = new WishCreateDTO();
+        WishDTO dto = new WishDTO();
         dto.setWishListId(wishListId);
+        dto.setOwnerId(UUID.randomUUID());
         dto.setTitle("PS5");
         dto.setDescription("Slim");
         dto.setUrl("https://example.com/ps5");
 
-        Wish entity = mapper.toEntity(dto, wlService);
+        Wish entity = mapper.toEntity(dto, UUID.randomUUID(), wlService);
 
         assertNotNull(entity);
         assertEquals("PS5", entity.getTitle());
         assertEquals("Slim", entity.getDescription());
         assertEquals("https://example.com/ps5", entity.getUrl());
+        assertNull(entity.getOwnerId());
         assertSame(wishlist, entity.getWishlist());
 
-        verify(wlService, times(1)).findById(wishListId);
+        verify(wlService).findById(wishListId);
+        verifyNoMoreInteractions(wlService);
+    }
+
+    @Test
+    void toEntity_whenWishlistIdIsNull_usesOwnerDefaultWishlist() {
+        UUID ownerId = UUID.randomUUID();
+        Wishlist defaultWishlist = new Wishlist();
+        defaultWishlist.setOwnerId(ownerId);
+
+        when(wlService.createDefaultList(ownerId)).thenReturn(defaultWishlist);
+
+        WishDTO dto = new WishDTO();
+        dto.setTitle("PS5");
+        dto.setUrl("https://example.com/ps5");
+
+        Wish entity = mapper.toEntity(dto, ownerId, wlService);
+
+        assertNull(dto.getOwnerId());
+        assertSame(defaultWishlist, entity.getWishlist());
+        verify(wlService).createDefaultList(ownerId);
+        verifyNoMoreInteractions(wlService);
     }
 
     @Test
     void toDTO_setsWishListIdFromEntityWishlist_andMapsFields() {
         UUID wishId = UUID.randomUUID();
+        UUID ownerId = UUID.randomUUID();
         UUID wishListId = UUID.randomUUID();
         Instant createdAt = Instant.now();
         Wishlist wishlist = new Wishlist();
@@ -65,6 +88,7 @@ class WishMapperTest {
                 .url("https://example.com/airpods")
                 .createdAt(createdAt)
                 .wishlist(wishlist)
+                .ownerId(ownerId)
                 .build();
 
         WishDTO dto = mapper.toDTO(entity);
@@ -76,6 +100,7 @@ class WishMapperTest {
         assertEquals("https://example.com/airpods", dto.getUrl());
         assertEquals(createdAt, dto.getCreatedAt());
         assertEquals(wishListId, dto.getWishListId());
+        assertEquals(ownerId, dto.getOwnerId());
 
         verifyNoInteractions(wlService);
     }

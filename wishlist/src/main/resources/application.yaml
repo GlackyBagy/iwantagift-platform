@@ -1,6 +1,11 @@
 spring:
   application:
     name: ${SPRING_APPLICATION_NAME}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI}
   kafka:
     bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS}
     admin:
@@ -21,5 +26,8 @@ server:
 
 iwag:
   services:
+    ui:
+      url: ${IWAG_UI_URL}
+      use-https: ${IWAG_UI_USE_HTTPS}
     price:
       kafka-topics: ${IWAG_PRICE_KAFKA_TOPICS}

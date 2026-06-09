@@ -1,8 +1,7 @@
 package online.iwantagift.api.wishlist.controllers.advice;
 
 import jakarta.persistence.EntityNotFoundException;
-import online.iwantagift.api.wishlist.controllers.WishController;
-import online.iwantagift.api.wishlist.exceptions.ValidationFailedException;
+import online.iwantagift.api.wishlist.util.exceptions.ValidationFailedException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Spy;

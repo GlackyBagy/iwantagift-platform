@@ -1,36 +1,43 @@
 package online.iwantagift.api.wishlist.messaging.kafka;
 
-import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import online.iwantagift.api.wishlist.config.IwagProperties;
-import online.iwantagift.api.wishlist.models.dto.WishCreateDTO;
+import online.iwantagift.api.wishlist.models.events.WishCreatedEvent;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.ObjectMapper;
 
+import java.util.Collection;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Component
 @RequiredArgsConstructor
 public class NewWishProducer {
-    private final KafkaTemplate<String, String> template;
-    private final ObjectMapper objectMapper;
+    private static final String NEW_WISH_TOPIC = "newWishes";
 
+    private final KafkaTemplate<String, String> kafkaTemplate;
+    private final ObjectMapper objectMapper;
     private final IwagProperties iwagProperties;
 
-    private String topicName;
-
-    @PostConstruct
-    void init() {
-        Set<String> topics = iwagProperties.getRequiredService("price").getKafkaTopics();
-        if (topics.isEmpty()) {
-            throw new IllegalStateException("No Kafka topics configured for price service");
-        }
-
-        topicName = topics.iterator().next();
+    public void send(WishCreatedEvent event) {
+        sendToTopic(NEW_WISH_TOPIC, event);
     }
 
-    public void send(WishCreateDTO dto) {
-        template.send(topicName, objectMapper.writeValueAsString(dto));
+    private void sendToTopic(String topic, WishCreatedEvent event) {
+        String payload = objectMapper.writeValueAsString(event);
+        kafkaTopics()
+                .stream()
+                .filter(topic::equals)
+                .forEach(kafkaTopic -> kafkaTemplate.send(kafkaTopic, event.wishId().toString(), payload));
+    }
+
+    private Set<String> kafkaTopics() {
+        return iwagProperties.getServices()
+                .values()
+                .stream()
+                .map(IwagProperties.ServiceProperties::getKafkaTopics)
+                .flatMap(Collection::stream)
+                .collect(Collectors.toSet());
     }
 }

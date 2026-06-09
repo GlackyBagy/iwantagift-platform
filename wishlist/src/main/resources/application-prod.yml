@@ -9,5 +9,7 @@ spring:
 
 iwag:
   services:
+    ui:
+      use-https: ${IWAG_UI_USE_HTTPS:true}
     price:
       kafka-topics: ${IWAG_PRICE_KAFKA_TOPICS:newWishes}

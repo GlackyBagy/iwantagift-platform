@@ -1,20 +1,22 @@
 package online.iwantagift.api.wishlist.controllers;
 
-import online.iwantagift.api.wishlist.exceptions.ValidationFailedException;
+import online.iwantagift.api.wishlist.util.exceptions.ValidationFailedException;
 import online.iwantagift.api.wishlist.messaging.kafka.NewWishProducer;
-import online.iwantagift.api.wishlist.models.dto.WishCreateDTO;
 import online.iwantagift.api.wishlist.models.dto.WishDTO;
-import online.iwantagift.api.wishlist.models.dto.WishPatchDTO;
-import online.iwantagift.api.wishlist.models.dto.WishPutDTO;
 import online.iwantagift.api.wishlist.models.entities.Wish;
+import online.iwantagift.api.wishlist.models.entities.Wishlist;
+import online.iwantagift.api.wishlist.models.events.WishCreatedEvent;
 import online.iwantagift.api.wishlist.models.mapping.WishMapper;
 import online.iwantagift.api.wishlist.services.WishService;
 import online.iwantagift.api.wishlist.services.WishlistService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
@@ -39,40 +41,56 @@ class WishControllerTest {
     private WishController controller;
 
     @Test
-    void createWish_whenNoValidationErrors_returnsIdAndCallsService_andSendsKafka() {
-        var dto = mock(WishCreateDTO.class);
-        var bindingResult = mock(BindingResult.class);
+    void createWish_whenNoValidationErrors_usesAuthenticatedUserAndSendsKafka() {
+        UUID requesterId = UUID.randomUUID();
+        UUID wishlistId = UUID.randomUUID();
+        Authentication authentication = authentication(requesterId);
+        WishDTO dto = new WishDTO();
+        dto.setTitle("PS5");
+        dto.setDescription("Slim");
+        dto.setUrl("https://example.com/ps5");
+        BindingResult bindingResult = mock(BindingResult.class);
         when(bindingResult.hasErrors()).thenReturn(false);
 
-        var wishEntity = new Wish();
-        when(wishMapper.toEntity(dto, wlService)).thenReturn(wishEntity);
+        Wish wishEntity = new Wish();
+        Wishlist wishlist = new Wishlist();
+        wishlist.setId(wishlistId);
+        wishEntity.setWishlist(wishlist);
+        when(wishMapper.toEntity(dto, requesterId, wlService)).thenReturn(wishEntity);
 
-        var id = UUID.randomUUID();
-        when(wishService.create(wishEntity)).thenReturn(id);
+        UUID id = UUID.randomUUID();
+        when(wishService.create(requesterId, wishEntity)).thenReturn(id);
 
-        Map<String, UUID> resp = controller.createWish(dto, bindingResult);
+        Map<String, UUID> resp = controller.createWish(dto, bindingResult, authentication);
 
         assertEquals(id, resp.get("id"));
-        verify(wishMapper).toEntity(dto, wlService);
-        verify(wishService).create(wishEntity);
-        verify(wishProducer).send(dto);
-
+        assertNull(dto.getOwnerId());
+        verify(wishMapper).toEntity(dto, requesterId, wlService);
+        verify(wishService).create(requesterId, wishEntity);
+        ArgumentCaptor<WishCreatedEvent> eventCaptor = ArgumentCaptor.forClass(WishCreatedEvent.class);
+        verify(wishProducer).send(eventCaptor.capture());
+        WishCreatedEvent event = eventCaptor.getValue();
+        assertEquals(id, event.wishId());
+        assertEquals(requesterId, event.ownerId());
+        assertEquals("PS5", event.title());
+        assertEquals("Slim", event.description());
+        assertEquals("https://example.com/ps5", event.url());
+        assertEquals(wishlistId, event.wishListId());
         verifyNoMoreInteractions(wishMapper, wishService, wishProducer);
     }
 
     @Test
     void createWish_whenValidationErrors_throwsValidationFailedException() {
-        var dto = mock(WishCreateDTO.class);
-        var bindingResult = mock(BindingResult.class);
-
+        WishDTO dto = new WishDTO();
+        BindingResult bindingResult = mock(BindingResult.class);
         when(bindingResult.hasErrors()).thenReturn(true);
-
-        var fe = new FieldError("wishCreateDTO", "title", "must not be blank");
-        when(bindingResult.getFieldErrors()).thenReturn(List.of(fe));
+        when(bindingResult.getFieldErrors()).thenReturn(List.of(
+                new FieldError("wishDTO", "title", "must not be blank")
+        ));
 
         ValidationFailedException ex = assertThrows(
                 ValidationFailedException.class,
-                () -> controller.createWish(dto, bindingResult)
+                () -> controller.createWish(dto, bindingResult, authentication(UUID.randomUUID()))
         );
 
         assertNotNull(ex.getFieldErrors());
@@ -83,7 +101,7 @@ class WishControllerTest {
     void getWish_returnsMappedDto() {
         UUID id = UUID.randomUUID();
         Wish wish = new Wish();
-        WishDTO wishDTO = mock(WishDTO.class);
+        WishDTO wishDTO = new WishDTO();
 
         when(wishService.findByIdOrThrow(id)).thenReturn(wish);
         when(wishMapper.toDTO(wish)).thenReturn(wishDTO);
@@ -98,56 +116,64 @@ class WishControllerTest {
     }
 
     @Test
-    void patchWish_whenNoValidationErrors_callsUpdate() {
-        var dto = mock(WishPatchDTO.class);
-        var bindingResult = mock(BindingResult.class);
+    void patchWish_whenNoValidationErrors_callsPatchWithAuthenticatedUser() {
+        UUID requesterId = UUID.randomUUID();
+        WishDTO dto = new WishDTO();
+        BindingResult bindingResult = mock(BindingResult.class);
         when(bindingResult.hasErrors()).thenReturn(false);
 
-        controller.patchWish(dto, bindingResult);
+        controller.patchWish(dto, bindingResult, authentication(requesterId));
 
-        verify(wishService).update(dto);
+        verify(wishService).patch(requesterId, dto);
         verifyNoMoreInteractions(wishService);
         verifyNoInteractions(wishMapper, wishProducer);
     }
 
     @Test
     void patchWish_whenValidationErrors_throwsValidationFailedException() {
-        var dto = mock(WishPatchDTO.class);
-        var bindingResult = mock(BindingResult.class);
+        WishDTO dto = new WishDTO();
+        BindingResult bindingResult = mock(BindingResult.class);
         when(bindingResult.hasErrors()).thenReturn(true);
         when(bindingResult.getFieldErrors()).thenReturn(List.of(
-                new FieldError("wishPatchDTO", "id", "must not be null")
+                new FieldError("wishDTO", "id", "must not be null")
         ));
 
-        assertThrows(ValidationFailedException.class, () -> controller.patchWish(dto, bindingResult));
+        assertThrows(ValidationFailedException.class,
+                () -> controller.patchWish(dto, bindingResult, authentication(UUID.randomUUID())));
 
         verifyNoInteractions(wishService, wishMapper, wishProducer);
     }
 
     @Test
-    void putWish_whenNoValidationErrors_callsUpdate() {
-        var dto = mock(WishPutDTO.class);
-        var bindingResult = mock(BindingResult.class);
+    void putWish_whenNoValidationErrors_callsPutWithAuthenticatedUser() {
+        UUID requesterId = UUID.randomUUID();
+        WishDTO dto = new WishDTO();
+        BindingResult bindingResult = mock(BindingResult.class);
         when(bindingResult.hasErrors()).thenReturn(false);
 
-        controller.putWish(dto, bindingResult);
+        controller.putWish(dto, bindingResult, authentication(requesterId));
 
-        verify(wishService).update(dto);
+        verify(wishService).put(requesterId, dto);
         verifyNoMoreInteractions(wishService);
         verifyNoInteractions(wishMapper, wishProducer);
     }
 
     @Test
     void putWish_whenValidationErrors_throwsValidationFailedException() {
-        var dto = mock(WishPutDTO.class);
-        var bindingResult = mock(BindingResult.class);
+        WishDTO dto = new WishDTO();
+        BindingResult bindingResult = mock(BindingResult.class);
         when(bindingResult.hasErrors()).thenReturn(true);
         when(bindingResult.getFieldErrors()).thenReturn(List.of(
-                new FieldError("wishPutDTO", "title", "size must be between 1 and 255")
+                new FieldError("wishDTO", "title", "must not be blank")
         ));
 
-        assertThrows(ValidationFailedException.class, () -> controller.putWish(dto, bindingResult));
+        assertThrows(ValidationFailedException.class,
+                () -> controller.putWish(dto, bindingResult, authentication(UUID.randomUUID())));
 
         verifyNoInteractions(wishService, wishMapper, wishProducer);
+    }
+
+    private Authentication authentication(UUID userId) {
+        return new UsernamePasswordAuthenticationToken(userId.toString(), null);
     }
 }

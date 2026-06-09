@@ -1,7 +1,6 @@
 package online.iwantagift.api.wishlist.models.mapping;
 
-import online.iwantagift.api.wishlist.models.dto.wl.WishlistCreateDTO;
-import online.iwantagift.api.wishlist.models.dto.wl.WishlistDTO;
+import online.iwantagift.api.wishlist.models.dto.WishlistDTO;
 import online.iwantagift.api.wishlist.models.entities.Wishlist;
 import org.mapstruct.*;
 
@@ -28,5 +27,6 @@ public interface WishlistMapper {
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
     @Mapping(target = "wishes", ignore = true)
-    Wishlist toEntity(WishlistCreateDTO dto);
+    @Mapping(target = "ownerId", ignore = true)
+    Wishlist toEntity(WishlistDTO dto);
 }

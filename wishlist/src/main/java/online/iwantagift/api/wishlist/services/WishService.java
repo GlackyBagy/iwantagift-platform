@@ -4,14 +4,14 @@ import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceException;
 import lombok.RequiredArgsConstructor;
-import online.iwantagift.api.wishlist.exceptions.AlreadyExistsException;
-import online.iwantagift.api.wishlist.models.dto.WishPatchDTO;
-import online.iwantagift.api.wishlist.models.dto.WishPutDTO;
-import online.iwantagift.api.wishlist.models.dto.abstracts.WishWriteDTO;
+import online.iwantagift.api.wishlist.models.dto.WishDTO;
 import online.iwantagift.api.wishlist.models.entities.Wish;
 import online.iwantagift.api.wishlist.repositories.WishRepository;
+import online.iwantagift.api.wishlist.util.exceptions.AlreadyExistsException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -50,17 +50,19 @@ public class WishService {
      * <h3>Contract</h3>
      * <ul>
      *   <li>The wish must represent a new entity.</li>
-     *   <li>If a wish with the same id already exists, the operation fails.</li>
+     *   <li>The owner is assigned from the authenticated user id.</li>
+     *   <li>If persistence rejects the insert, the operation fails.</li>
      *   <li>This method must not be used for updates.</li>
      * </ul>
      *
+     * @param ownerId authenticated owner id
      * @param wish new wish entity to persist
-     * @throws AlreadyExistsException if a wish with the same id already exists
+     * @throws AlreadyExistsException if persistence rejects the insert as duplicate
      */
     @Transactional
-    public UUID create(Wish wish) {
+    public UUID create(UUID ownerId, Wish wish) {
         try {
-            wish.setId(null);
+            wish.setOwnerId(ownerId);
             attachManagedWishlist(wish);
             em.persist(wish);
             em.flush();
@@ -79,50 +81,43 @@ public class WishService {
     }
 
     /**
-     * Updates an existing wish using a write DTO.
-     *
-     * <p>
-     * Dispatches to PATCH or PUT semantics based on the concrete DTO type.
-     * </p>
-     *
-     * @param dto WriteDTO describing the update operation
-     * @throws IllegalArgumentException if dto is null or of unsupported type
-     * @throws EntityNotFoundException if the target wish does not exist
-     */
-    @Transactional
-    public void update(WishWriteDTO dto) throws EntityNotFoundException {
-        if (dto == null)
-            throw new IllegalArgumentException("Dto is null");
-
-        if (dto instanceof WishPatchDTO)
-            patch((WishPatchDTO) dto);
-        else if (dto instanceof WishPutDTO)
-            put((WishPutDTO) dto);
-        else
-            throw new IllegalArgumentException("Dto type %s not supported".formatted(dto.getClass()));
-    }
-
-    /**
      * Applies a partial update (PATCH) to an existing wish.
      *
      * <p>
      * Only non-null fields in the DTO are applied.
      * Existing values are preserved for omitted fields.
+     * The requester must own the wish and any target wishlist.
      * </p>
      *
+     * @param requesterId authenticated requester id
      * @param dto PATCH DTO
-     * @throws EntityNotFoundException if the target wish or the target wishlist does not exist
+     * @throws EntityNotFoundException if the target wish does not exist
+     * @throws ResponseStatusException with 403 if the requester does not own the resource
+     * @throws ResponseStatusException with 404 if the target wishlist does not exist
      */
-    private void patch(WishPatchDTO dto) throws EntityNotFoundException {
+    @Transactional
+    public void patch(UUID requesterId, WishDTO dto) throws EntityNotFoundException {
         Wish wish = findByIdOrThrow(dto.getId());
+
+        if (!requesterId.equals(wish.getOwnerId()))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Error: requester's id doesn't match to wish's owner id");
 
         if (dto.getTitle() != null) wish.setTitle(dto.getTitle());
         if (dto.getDescription() != null) wish.setDescription(dto.getDescription());
         if (dto.getUrl() != null) wish.setUrl(dto.getUrl());
-        if (dto.getWishListId() != null)
+        if (dto.getWishListId() != null) {
+            boolean allowed = wishlistService
+                    .findById(dto.getWishListId())
+                    .map(x -> requesterId.equals(x.getOwnerId()))
+                    .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Error: Specified wishlist not found."));
+
+            if (!allowed)
+                throw new ResponseStatusException(HttpStatus.FORBIDDEN);
+
             wish.setWishlist(
-                    wishlistService.findByIdOrThrow(dto.getWishListId()) // todo reject on stranger's wishlist
+                    wishlistService.findByIdOrThrow(dto.getWishListId())
             );
+        }
     }
 
     /**
@@ -134,13 +129,18 @@ public class WishService {
      * input was validated earlier (e.g., at the API layer). If {@code dto} contains invalid
      * values (nulls, too-long strings, etc.), persistence/transaction commit may fail.</p>
      *
+     * @param requesterId authenticated requester id
      * @param dto PUT DTO (assumed to be validated)
-     * @throws EntityNotFoundException if the target wish or the target wishlist does not exist
+     * @throws EntityNotFoundException                  if the target wish or the target wishlist does not exist
+     * @throws ResponseStatusException                  with 403 if the requester does not own the wish
      * @throws jakarta.persistence.PersistenceException if the update violates database constraints
-     *         (propagated from the persistence layer, typically on flush/commit)
+     *                                                  (propagated from the persistence layer, typically on flush/commit)
      */
-    private void put(WishPutDTO dto) throws EntityNotFoundException {
+    public void put(UUID requesterId, WishDTO dto) throws EntityNotFoundException {
         Wish wish = findByIdOrThrow(dto.getId());
+
+        if (!requesterId.equals(wish.getOwnerId()))
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Error: requester's id doesn't match to wish's owner id");
 
         wish.setTitle(dto.getTitle());
         wish.setDescription(dto.getDescription());

@@ -3,32 +3,24 @@ package online.iwantagift.api.wishlist.services;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.persistence.PersistenceException;
-import online.iwantagift.api.wishlist.exceptions.AlreadyExistsException;
-import online.iwantagift.api.wishlist.models.dto.WishPatchDTO;
-import online.iwantagift.api.wishlist.models.dto.WishPutDTO;
-import online.iwantagift.api.wishlist.models.dto.abstracts.WishWriteDTO;
+import online.iwantagift.api.wishlist.models.dto.WishDTO;
 import online.iwantagift.api.wishlist.models.entities.Wish;
 import online.iwantagift.api.wishlist.models.entities.Wishlist;
 import online.iwantagift.api.wishlist.repositories.WishRepository;
-import org.junit.jupiter.api.BeforeEach;
+import online.iwantagift.api.wishlist.util.exceptions.AlreadyExistsException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
-
 
 @ExtendWith(MockitoExtension.class)
 class WishServiceTest {
@@ -43,7 +35,8 @@ class WishServiceTest {
     private WishService wishService;
 
     @Test
-    void testCreate() {
+    void create_setsOwnerIdAndPersistsWish() {
+        UUID ownerId = UUID.randomUUID();
         Wish wish = new Wish();
         wish.setTitle("title");
         wish.setDescription("new description");
@@ -53,15 +46,18 @@ class WishServiceTest {
             return null;
         }).when(em).flush();
 
-        wishService.create(wish);
+        UUID id = wishService.create(ownerId, wish);
 
-        verify(em, times(1)).persist(wish);
-        verify(em, times(1)).flush();
+        assertNotNull(id);
+        assertEquals(ownerId, wish.getOwnerId());
+        verify(em).persist(wish);
+        verify(em).flush();
         verifyNoInteractions(wr, wls);
     }
 
     @Test
-    void testCreate_attachesManagedWishlistBeforePersist() {
+    void create_attachesManagedWishlistBeforePersist() {
+        UUID ownerId = UUID.randomUUID();
         UUID wishlistId = UUID.randomUUID();
         Wishlist detachedWishlist = new Wishlist();
         detachedWishlist.setId(wishlistId);
@@ -79,297 +75,174 @@ class WishServiceTest {
             return null;
         }).when(em).flush();
 
-        wishService.create(wish);
+        wishService.create(ownerId, wish);
 
+        assertEquals(ownerId, wish.getOwnerId());
         assertSame(managedWishlist, wish.getWishlist());
-        verify(wls, times(1)).findByIdOrThrow(wishlistId);
-        verify(em, times(1)).persist(wish);
-        verify(em, times(1)).flush();
+        verify(wls).findByIdOrThrow(wishlistId);
+        verify(em).persist(wish);
+        verify(em).flush();
         verifyNoInteractions(wr);
     }
 
     @Test
-    void testCreate_whenAlreadyExists() {
+    void create_whenAlreadyExists_throwsAlreadyExistsException() {
+        UUID ownerId = UUID.randomUUID();
         Wish wish = new Wish();
         wish.setId(UUID.randomUUID());
 
         doThrow(new PersistenceException("duplicated key")).when(em).persist(wish);
 
-        assertThrows(AlreadyExistsException.class,
-                () -> wishService.create(wish));
+        assertThrows(AlreadyExistsException.class, () -> wishService.create(ownerId, wish));
     }
 
-    private static Stream<? extends Arguments> patchArgs() {
-        Wishlist oldWishlist = new Wishlist();
-        oldWishlist.setId(UUID.randomUUID());
+    @Test
+    void patch_whenRequesterOwnsWish_updatesOnlyNonNullFields() {
+        UUID ownerId = UUID.randomUUID();
+        Wishlist oldWishlist = wishlist(UUID.randomUUID());
+        Wishlist newWishlist = wishlist(UUID.randomUUID());
+        Wish existing = new Wish(UUID.randomUUID(), "old title", "old description",
+                "http://old.url", null, oldWishlist, ownerId);
 
-        Wish existingWish = new Wish(UUID.randomUUID(), "old title", "old description",
-                "http://old.url", null, oldWishlist, UUID.randomUUID());
+        WishDTO dto = new WishDTO();
+        dto.setId(existing.getId());
+        dto.setTitle("new title");
+        dto.setDescription("new description");
+        dto.setUrl("http://new.url");
+        dto.setWishListId(newWishlist.getId());
 
-        Wishlist newWishlist = new Wishlist();
-        newWishlist.setId(UUID.randomUUID());
-
-        WishPatchDTO patchDto = new WishPatchDTO();
-        patchDto.setId(existingWish.getId());
-        patchDto.setTitle("new title");
-        patchDto.setDescription("new description");
-        patchDto.setUrl("http://new.url");
-        patchDto.setWishListId(newWishlist.getId());
-
-        return Stream.of(
-                Arguments.of(existingWish, oldWishlist, patchDto, newWishlist));
-    }
-
-    @ParameterizedTest
-    @MethodSource("patchArgs")
-    void testUpdate_whenPatch_nonNull(Wish existing, Wishlist oldWishlist, WishPatchDTO patchDto, Wishlist newWishlist) {
-        when(wr.findById(patchDto.getId())).thenReturn(Optional.of(existing));
+        when(wr.findById(existing.getId())).thenReturn(Optional.of(existing));
         when(wls.findByIdOrThrow(newWishlist.getId())).thenReturn(newWishlist);
 
-        wishService.update(patchDto);
-
-        assertEquals("new title", existing.getTitle());
-        assertEquals("new description", existing.getDescription());
-        assertEquals("http://new.url", existing.getUrl());
-        assertSame(newWishlist.getId(), existing.getWishlist().getId());
-
-        verify(wr, times(1)).findById(patchDto.getId());
-        verifyNoInteractions(em);
-    }
-
-    @ParameterizedTest
-    @MethodSource("patchArgs")
-    void testUpdate_whenPatch_nulls(Wish existing, Wishlist oldWishlist, WishPatchDTO patchDto, Wishlist newWishlist) {
-        patchDto.setTitle(null);
-        patchDto.setDescription(null);
-        patchDto.setUrl(null);
-        patchDto.setWishListId(null);
-
-        when(wr.findById(patchDto.getId())).thenReturn(Optional.of(existing));
-
-        wishService.update(patchDto);
-
-        assertEquals("old title", existing.getTitle());
-        assertEquals("old description", existing.getDescription());
-        assertEquals("http://old.url", existing.getUrl());
-        assertSame(oldWishlist, existing.getWishlist());
-
-        verify(wr, times(1)).findById(patchDto.getId());
-        verifyNoInteractions(wls);
-    }
-
-    private static Stream<? extends Arguments> putArgs() {
-        Wishlist oldWishlist = new Wishlist();
-        oldWishlist.setId(UUID.randomUUID());
-
-        Wish existingWish = new Wish(UUID.randomUUID(), "old title", "old description",
-                "http://old.url", null, oldWishlist, UUID.randomUUID());
-
-        Wishlist newWishlist = new Wishlist();
-        newWishlist.setId(UUID.randomUUID());
-
-        WishPutDTO putDto = new WishPutDTO();
-        putDto.setId(existingWish.getId());
-        putDto.setTitle("new title");
-        putDto.setDescription(null);
-        putDto.setUrl("http://new.url");
-        putDto.setWishListId(oldWishlist.getId());
-
-        return Stream.of(
-                Arguments.of(existingWish, oldWishlist, putDto, newWishlist));
-    }
-
-    @ParameterizedTest
-    @MethodSource("patchArgs")
-    void testUpdate_whenPatch_onlTitle(Wish existing, Wishlist oldWishlist, WishPatchDTO patchDto, Wishlist newWishlist) {
-        patchDto.setTitle("new title");
-        patchDto.setDescription(null);
-        patchDto.setUrl(null);
-        patchDto.setWishListId(null);
-
-        when(wr.findById(patchDto.getId())).thenReturn(Optional.of(existing));
-
-        wishService.update(patchDto);
-
-        assertEquals("new title", existing.getTitle());
-        assertEquals("old description", existing.getDescription());
-        assertEquals("http://old.url", existing.getUrl());
-        assertSame(oldWishlist, existing.getWishlist());
-
-        verify(wr).findById(patchDto.getId());
-        verifyNoInteractions(wls, em);
-    }
-
-    @ParameterizedTest
-    @MethodSource("patchArgs")
-    void testUpdate_whenPatch_onlDesc(Wish existing, Wishlist oldWishlist, WishPatchDTO patchDto, Wishlist newWishlist) {
-        patchDto.setTitle(null);
-        patchDto.setDescription("new description");
-        patchDto.setUrl(null);
-        patchDto.setWishListId(null);
-
-        when(wr.findById(patchDto.getId())).thenReturn(Optional.of(existing));
-
-        wishService.update(patchDto);
-
-        assertEquals("old title", existing.getTitle());
-        assertEquals("new description", existing.getDescription());
-        assertEquals("http://old.url", existing.getUrl());
-        assertSame(oldWishlist, existing.getWishlist());
-
-        verify(wr).findById(patchDto.getId());
-        verifyNoInteractions(wls, em);
-    }
-
-    @ParameterizedTest
-    @MethodSource("patchArgs")
-    void testUpdate_whenPatch_onlyWishListId(Wish existing, Wishlist oldWishlist, WishPatchDTO patchDto, Wishlist newWishlist) {
-        patchDto.setTitle(null);
-        patchDto.setDescription(null);
-        patchDto.setUrl(null);
-        patchDto.setWishListId(newWishlist.getId());
-
-        when(wr.findById(patchDto.getId())).thenReturn(Optional.of(existing));
-        when(wls.findByIdOrThrow(newWishlist.getId())).thenReturn(newWishlist);
-
-        wishService.update(patchDto);
-
-        assertEquals("old title", existing.getTitle());
-        assertEquals("old description", existing.getDescription());
-        assertEquals("http://old.url", existing.getUrl());
-        assertEquals(newWishlist, existing.getWishlist());
-
-        verify(wr).findById(patchDto.getId());
-        verifyNoInteractions(em);
-    }
-
-    @ParameterizedTest
-    @MethodSource("patchArgs")
-    void testUpdate_whenPatch_onlyUrl(Wish existing, Wishlist oldWishlist, WishPatchDTO patchDto, Wishlist newWishlist) {
-        patchDto.setTitle(null);
-        patchDto.setDescription(null);
-        patchDto.setUrl("http://new.url");
-        patchDto.setWishListId(null);
-
-        when(wr.findById(patchDto.getId())).thenReturn(Optional.of(existing));
-
-        wishService.update(patchDto);
-
-        assertEquals("old title", existing.getTitle());
-        assertEquals("old description", existing.getDescription());
-        assertEquals("http://new.url", existing.getUrl());
-        assertSame(oldWishlist, existing.getWishlist());
-
-        verify(wr).findById(patchDto.getId());
-        verifyNoInteractions(wls, em);
-    }
-
-    @ParameterizedTest
-    @MethodSource("putArgs")
-    void testUpdate_whenPut(Wish existing, Wishlist oldWishlist, WishPutDTO putDto, Wishlist newWishlist) {
-        when(wr.findById(putDto.getId())).thenReturn(Optional.of(existing));
-        when(wls.findByIdOrThrow(newWishlist.getId())).thenReturn(newWishlist);
-        when(wls.findByIdOrThrow(oldWishlist.getId())).thenReturn(oldWishlist);
-
-        wishService.update(putDto);
-
-        assertEquals("new title", existing.getTitle());
-        assertNull(existing.getDescription());
-        assertEquals("http://new.url", existing.getUrl());
-        assertSame(oldWishlist, existing.getWishlist());
-
-        verify(wr, times(1)).findById(putDto.getId());
-        verify(wls, times(1)).findByIdOrThrow(putDto.getWishListId());
-        verifyNoInteractions(em);
-
-        putDto.setDescription("new description");
-        putDto.setWishListId(newWishlist.getId());
-
-        wishService.update(putDto);
+        wishService.patch(ownerId, dto);
 
         assertEquals("new title", existing.getTitle());
         assertEquals("new description", existing.getDescription());
         assertEquals("http://new.url", existing.getUrl());
         assertSame(newWishlist, existing.getWishlist());
-    }
-
-    @Test
-    void testUpdate_whenInvalidArgs() {
-        WishWriteDTO unknownDTOClassInstance = new WishWriteDTO() {
-            @Override
-            public String toString() {
-                return super.toString();
-            }
-        };
-
-        assertThrows(IllegalArgumentException.class,
-                () -> wishService.update(null));
-        assertThrows(IllegalArgumentException.class,
-                () -> wishService.update(unknownDTOClassInstance));
-
-        verifyNoInteractions(wr, em, wls);
-    }
-
-    @Test
-    void testUpdate_whenWishNotExists() {
-        when(wr.findById(any())).thenReturn(Optional.empty());
-
-        assertThrows(EntityNotFoundException.class,
-                () -> wishService.update(new WishPatchDTO()));
-        assertThrows(EntityNotFoundException.class,
-                () -> wishService.update(new WishPutDTO()));
-
-        verify(wr, times(2)).findById(any());
-        verifyNoInteractions(em, wls);
-    }
-
-    @Test
-    void testUpdate_whenWishlistNotExists_forPut() {
-        WishPutDTO putDto = new WishPutDTO();
-        putDto.setId(UUID.randomUUID());
-        putDto.setWishListId(UUID.randomUUID());
-
-        Wish wish = new Wish();
-        wish.setId(putDto.getId());
-
-        when(wr.findById(putDto.getId())).thenReturn(Optional.of(wish));
-        when(wls.findByIdOrThrow(putDto.getWishListId())).thenThrow(EntityNotFoundException.class);
-
-        assertThrows(EntityNotFoundException.class,
-                () -> wishService.update(putDto));
-
-
-        verify(wr, times(1)).findById(putDto.getId());
-        verify(wls, times(1)).findByIdOrThrow(putDto.getWishListId());
+        verify(wr).findById(existing.getId());
+        verify(wls).findByIdOrThrow(newWishlist.getId());
         verifyNoInteractions(em);
     }
 
     @Test
-    void testUpdate_whenWishlistNotExists_forPatch() {
-        WishPatchDTO patchDto = new WishPatchDTO();
-        patchDto.setId(UUID.randomUUID());
-        patchDto.setWishListId(UUID.randomUUID());
+    void patch_whenDtoFieldsAreNull_preservesExistingValues() {
+        UUID ownerId = UUID.randomUUID();
+        Wishlist oldWishlist = wishlist(UUID.randomUUID());
+        Wish existing = new Wish(UUID.randomUUID(), "old title", "old description",
+                "http://old.url", null, oldWishlist, ownerId);
 
-        Wish wish = new Wish();
-        wish.setId(patchDto.getId());
+        WishDTO dto = new WishDTO();
+        dto.setId(existing.getId());
 
-        when(wr.findById(patchDto.getId())).thenReturn(Optional.of(wish));
-        when(wls.findByIdOrThrow(patchDto.getWishListId())).thenThrow(EntityNotFoundException.class);
+        when(wr.findById(existing.getId())).thenReturn(Optional.of(existing));
 
-        assertThrows(EntityNotFoundException.class,
-                () -> wishService.update(patchDto));
+        wishService.patch(ownerId, dto);
 
-        verify(wr, times(1)).findById(patchDto.getId());
-        verify(wls, times(1)).findByIdOrThrow(patchDto.getWishListId());
+        assertEquals("old title", existing.getTitle());
+        assertEquals("old description", existing.getDescription());
+        assertEquals("http://old.url", existing.getUrl());
+        assertSame(oldWishlist, existing.getWishlist());
+        verify(wr).findById(existing.getId());
+        verifyNoInteractions(wls, em);
+    }
+
+    @Test
+    void patch_whenRequesterDoesNotOwnWish_throwsUnauthorizedException() {
+        UUID ownerId = UUID.randomUUID();
+        UUID requesterId = UUID.randomUUID();
+        Wish existing = new Wish(UUID.randomUUID(), "title", null, "http://url", null, null, ownerId);
+
+        WishDTO dto = new WishDTO();
+        dto.setId(existing.getId());
+        dto.setTitle("new title");
+
+        when(wr.findById(existing.getId())).thenReturn(Optional.of(existing));
+
+        assertThrows(ResponseStatusException.class, () -> wishService.patch(requesterId, dto));
+        verify(wr).findById(existing.getId());
+        verifyNoInteractions(wls, em);
+    }
+
+    @Test
+    void put_whenRequesterOwnsWish_replacesWritableFields() {
+        UUID ownerId = UUID.randomUUID();
+        Wishlist oldWishlist = wishlist(UUID.randomUUID());
+        Wishlist newWishlist = wishlist(UUID.randomUUID());
+        Wish existing = new Wish(UUID.randomUUID(), "old title", "old description",
+                "http://old.url", null, oldWishlist, ownerId);
+
+        WishDTO dto = new WishDTO();
+        dto.setId(existing.getId());
+        dto.setTitle("new title");
+        dto.setDescription(null);
+        dto.setUrl("http://new.url");
+        dto.setWishListId(newWishlist.getId());
+
+        when(wr.findById(existing.getId())).thenReturn(Optional.of(existing));
+        when(wls.findByIdOrThrow(newWishlist.getId())).thenReturn(newWishlist);
+
+        wishService.put(ownerId, dto);
+
+        assertEquals("new title", existing.getTitle());
+        assertNull(existing.getDescription());
+        assertEquals("http://new.url", existing.getUrl());
+        assertSame(newWishlist, existing.getWishlist());
+        verify(wr).findById(existing.getId());
+        verify(wls).findByIdOrThrow(newWishlist.getId());
         verifyNoInteractions(em);
     }
 
     @Test
-    void testFindById_passthrough() {
+    void put_whenRequesterDoesNotOwnWish_throwsUnauthorizedException() {
+        UUID ownerId = UUID.randomUUID();
+        UUID requesterId = UUID.randomUUID();
+        Wish existing = new Wish(UUID.randomUUID(), "title", null, "http://url", null, null, ownerId);
+
+        WishDTO dto = new WishDTO();
+        dto.setId(existing.getId());
+        dto.setTitle("new title");
+
+        when(wr.findById(existing.getId())).thenReturn(Optional.of(existing));
+
+        assertThrows(ResponseStatusException.class, () -> wishService.put(requesterId, dto));
+        verify(wr).findById(existing.getId());
+        verifyNoInteractions(wls, em);
+    }
+
+    @Test
+    void patch_whenWishNotExists_throwsEntityNotFoundException() {
+        WishDTO dto = new WishDTO();
+        dto.setId(UUID.randomUUID());
+        when(wr.findById(dto.getId())).thenReturn(Optional.empty());
+
+        assertThrows(EntityNotFoundException.class, () -> wishService.patch(UUID.randomUUID(), dto));
+        verify(wr).findById(dto.getId());
+        verifyNoInteractions(wls, em);
+    }
+
+    @Test
+    void put_whenWishlistNotExists_throwsEntityNotFoundException() {
+        UUID ownerId = UUID.randomUUID();
+        Wish existing = new Wish(UUID.randomUUID(), "title", null, "http://url", null, null, ownerId);
+        WishDTO dto = new WishDTO();
+        dto.setId(existing.getId());
+        dto.setWishListId(UUID.randomUUID());
+
+        when(wr.findById(existing.getId())).thenReturn(Optional.of(existing));
+        when(wls.findByIdOrThrow(dto.getWishListId())).thenThrow(EntityNotFoundException.class);
+
+        assertThrows(EntityNotFoundException.class, () -> wishService.put(ownerId, dto));
+        verify(wr).findById(existing.getId());
+        verify(wls).findByIdOrThrow(dto.getWishListId());
+        verifyNoInteractions(em);
+    }
+
+    @Test
+    void findById_passthrough() {
         UUID id = UUID.randomUUID();
         Wish wish = new Wish();
         wish.setId(id);
-
         when(wr.findById(id)).thenReturn(Optional.of(wish));
 
         Optional<Wish> res = wishService.findById(id);
@@ -381,11 +254,10 @@ class WishServiceTest {
     }
 
     @Test
-    void testFindByIdOrThrow_whenExists() {
+    void findByIdOrThrow_whenExists_returnsWish() {
         UUID id = UUID.randomUUID();
         Wish wish = new Wish();
         wish.setId(id);
-
         when(wr.findById(id)).thenReturn(Optional.of(wish));
 
         Wish res = wishService.findByIdOrThrow(id);
@@ -396,24 +268,41 @@ class WishServiceTest {
     }
 
     @Test
-    void testFindByIdOrThrow_whenMissing() {
+    void findByIdOrThrow_whenMissing_throwsEntityNotFoundException() {
         UUID id = UUID.randomUUID();
-
         when(wr.findById(id)).thenReturn(Optional.empty());
 
-        assertThrows(EntityNotFoundException.class,
-                () -> wishService.findByIdOrThrow(id));
+        assertThrows(EntityNotFoundException.class, () -> wishService.findByIdOrThrow(id));
         verify(wr).findById(id);
         verifyNoInteractions(em, wls);
     }
 
     @Test
-    void testDeleteById_passthrough() {
+    void deleteById_passthrough() {
         UUID id = UUID.randomUUID();
 
         wishService.deleteById(id);
 
         verify(wr).deleteById(id);
         verifyNoInteractions(em, wls);
+    }
+
+    @Test
+    void findAllByOwnerId_passthrough() {
+        UUID ownerId = UUID.randomUUID();
+        List<Wish> expected = List.of(new Wish(), new Wish());
+        when(wr.findAllByOwnerId(ownerId)).thenReturn(expected);
+
+        List<Wish> actual = wishService.findAllByOwnerId(ownerId);
+
+        assertSame(expected, actual);
+        verify(wr).findAllByOwnerId(ownerId);
+        verifyNoInteractions(em, wls);
+    }
+
+    private Wishlist wishlist(UUID id) {
+        Wishlist wishlist = new Wishlist();
+        wishlist.setId(id);
+        return wishlist;
     }
 }

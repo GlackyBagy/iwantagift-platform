@@ -1,10 +1,11 @@
 package online.iwantagift.api.wishlist.models.mapping;
 
-import online.iwantagift.api.wishlist.models.dto.WishCreateDTO;
 import online.iwantagift.api.wishlist.models.dto.WishDTO;
 import online.iwantagift.api.wishlist.models.entities.Wish;
 import online.iwantagift.api.wishlist.services.WishlistService;
 import org.mapstruct.*;
+
+import java.util.UUID;
 
 @Mapper(componentModel = "spring")
 public interface WishMapper {
@@ -12,14 +13,16 @@ public interface WishMapper {
     @Mapping(target = "wishlist", ignore = true)
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "createdAt", ignore = true)
-    Wish toEntity(WishCreateDTO dto, @Context WishlistService wlService);
+    @Mapping(target = "ownerId", ignore = true)
+    Wish toEntity(WishDTO dto, @Context UUID ownerId, @Context WishlistService wlService);
 
     @AfterMapping
-    default void fillWishlist(WishCreateDTO dto,
+    default void fillWishlist(WishDTO dto,
                               @MappingTarget Wish.WishBuilder wish,
+                              @Context UUID ownerId,
                               @Context WishlistService wlService) {
         if (dto.getWishListId() == null)
-            wish.wishlist(wlService.createDefaultList(dto.getOwnerId()));
+            wish.wishlist(wlService.createDefaultList(ownerId));
         else
             wish.wishlist(wlService.findById(dto.getWishListId()).orElse(null));
     }

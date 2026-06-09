@@ -1,11 +1,13 @@
-package online.iwantagift.api.wishlist.models.dto.wl;
+package online.iwantagift.api.wishlist.models.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.Null;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import online.iwantagift.api.wishlist.models.dto.WishDTO;
+import online.iwantagift.api.wishlist.models.dto.abstracts.ValidationGroups;
+import org.hibernate.validator.constraints.Length;
 
 import java.time.Instant;
 import java.util.Collections;
@@ -13,10 +15,11 @@ import java.util.List;
 import java.util.UUID;
 
 /**
- * Data Transfer Object representing a wishlist returned by the API.
+ * Data Transfer Object representing a wishlist in API requests and responses.
  *
- * <p>This DTO is used for read operations and contains system-managed fields
- * such as {@code id}, {@code ownerId}, and {@code createdAt}.</p>
+ * <p>System-managed fields such as {@code id}, {@code ownerId}, {@code createdAt},
+ * and {@code wishes} are returned by read operations but ignored or rejected for
+ * write operations. The owner is resolved from the authenticated user.</p>
  *
  * <p>The {@code wishes} field contains the list of wish items that belong
  * to this wishlist. The list may be empty but is never {@code null}.</p>
@@ -32,14 +35,17 @@ import java.util.UUID;
 public class WishlistDTO {
     /**
      * Unique identifier of the wishlist.
+     * Managed by persistence and must not be provided by clients.
      */
     @JsonProperty("id")
+    @Null(groups = ValidationGroups.Create.class)
     private UUID id;
 
     /**
      * Display title of the wishlist.
      */
     @JsonProperty("title")
+    @Length(min = 1, max = 255)
     private String title;
 
     /**
@@ -50,18 +56,23 @@ public class WishlistDTO {
 
     /**
      * Timestamp when the wishlist was created (UTC).
+     * Managed by persistence and must not be provided by clients.
      */
     @JsonProperty("createdAt")
+    @Null
     private Instant createdAt;
 
     /**
      * Unique identifier of the wishlist owner.
+     * Resolved from authentication on writes.
      */
     @JsonProperty("owner_id")
+    @Null
     private UUID ownerId;
 
     /**
      * List of wishes associated with this wishlist.
+     * Returned by read operations and ignored on writes.
      */
     @JsonProperty("wishes")
     @Builder.Default
