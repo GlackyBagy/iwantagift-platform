@@ -1,0 +1,12 @@
+spring:
+  config:
+    import: classpath:application.yaml
+  application:
+    name: ${SPRING_APPLICATION_NAME:auth}
+
+iwag:
+  services:
+    wishlist:
+      kafka-topics: ${IWAG_WISHLIST_KAFKA_TOPICS:createdUser,deletedUser}
+    profile:
+      kafka-topics: ${IWAG_PROFILE_KAFKA_TOPICS:createdUser}

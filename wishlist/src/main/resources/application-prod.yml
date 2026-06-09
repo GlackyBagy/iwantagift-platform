@@ -1,0 +1,13 @@
+spring:
+  config:
+    import: classpath:application.yaml
+  application:
+    name: ${SPRING_APPLICATION_NAME:wishlist}
+  kafka:
+    admin:
+      modify-topic-configs: ${SPRING_KAFKA_ADMIN_MODIFY_TOPIC_CONFIGS:true}
+
+iwag:
+  services:
+    price:
+      kafka-topics: ${IWAG_PRICE_KAFKA_TOPICS:newWishes}

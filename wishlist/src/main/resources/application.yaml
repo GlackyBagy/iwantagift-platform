@@ -1,0 +1,25 @@
+spring:
+  application:
+    name: ${SPRING_APPLICATION_NAME}
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS}
+    admin:
+      modify-topic-configs: ${SPRING_KAFKA_ADMIN_MODIFY_TOPIC_CONFIGS}
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME}
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST}
+      port: ${SPRING_DATA_REDIS_PORT}
+      password: ${SPRING_DATA_REDIS_PASSWORD}
+
+server:
+  port: ${SERVER_PORT}
+
+iwag:
+  services:
+    price:
+      kafka-topics: ${IWAG_PRICE_KAFKA_TOPICS}

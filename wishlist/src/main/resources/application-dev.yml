@@ -25,4 +25,5 @@ server:
 iwag:
   services:
     price:
-      kafka-topic: newWishes
+      kafka-topics:
+        - newWishes

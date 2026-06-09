@@ -1,31 +1,30 @@
 spring:
   application:
-    name: profile
+    name: ${SPRING_APPLICATION_NAME}
   servlet:
     multipart:
-      max-file-size: ${IWAG_AVATAR_MAX_FILE_SIZE:50MB}
-      max-request-size: ${IWAG_AVATAR_MAX_REQUEST_SIZE:55MB}
+      max-file-size: ${IWAG_AVATAR_MAX_FILE_SIZE}
+      max-request-size: ${IWAG_AVATAR_MAX_REQUEST_SIZE}
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME}
 
 server:
-  port: 8002
+  port: ${SERVER_PORT}
 
 iwag:
   services:
     ui:
-      url: ${IWAG_UI_URL:localhost:8080}
-      use-https: ${IWAG_UI_USE_HTTPS:false}
+      url: ${IWAG_UI_URL}
+      use-https: ${IWAG_UI_USE_HTTPS}
     auth:
-      url: ${IWAG_AUTH_URL:localhost:8091}
-      use-https: ${IWAG_AUTH_USE_HTTPS:false}
+      url: ${IWAG_AUTH_URL}
+      use-https: ${IWAG_AUTH_USE_HTTPS}
   s3:
-    endpoint: ${IWAG_S3_ENDPOINT:https://storage.yandexcloud.net}
-    region: ${IWAG_S3_REGION:ru-central1}
-    bucket: ${IWAG_S3_BUCKET:pictures-iwag}
+    endpoint: ${IWAG_S3_ENDPOINT}
+    region: ${IWAG_S3_REGION}
+    bucket: ${IWAG_S3_BUCKET}
     access-key: ${IWAG_S3_ACCESS_KEY}
     secret-key: ${IWAG_S3_SECRET_KEY}
-
-jwt:
-  cookie:
-    name:
-      access: ${JWT_COOKIE_NAME_ACCESS:accessToken}
-      refresh: ${JWT_COOKIE_NAME_REFRESH:refreshToken}

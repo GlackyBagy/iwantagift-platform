@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: ${SPRING_APPLICATION_NAME}
+  security:
+    oauth2:
+      client:
+        registration:
+          iwag-ui:
+            provider: ${IWAG_OAUTH2_CLIENT_PROVIDER}
+            client-id: ${IWAG_OAUTH2_CLIENT_ID}
+            client-secret: ${IWAG_OAUTH2_CLIENT_SECRET}
+            authorization-grant-type: ${IWAG_OAUTH2_AUTHORIZATION_GRANT_TYPE}
+            redirect-uri: ${IWAG_OAUTH2_REDIRECT_URI}
+            scope: ${IWAG_OAUTH2_SCOPE}
+        provider:
+          iwag-auth:
+            issuer-uri: ${IWAG_OAUTH2_PROVIDER_ISSUER_URI}
+            authorization-uri: ${IWAG_OAUTH2_PROVIDER_AUTHORIZATION_URI}
+            token-uri: ${IWAG_OAUTH2_PROVIDER_TOKEN_URI}
+            jwk-set-uri: ${IWAG_OAUTH2_PROVIDER_JWK_SET_URI}
+            user-info-uri: ${IWAG_OAUTH2_PROVIDER_USER_INFO_URI}
+            user-name-attribute: ${IWAG_OAUTH2_PROVIDER_USER_NAME_ATTRIBUTE}
+  servlet:
+    multipart:
+      max-file-size: ${IWAG_MULTIPART_MAX_FILE_SIZE}
+      max-request-size: ${IWAG_MULTIPART_MAX_REQUEST_SIZE}
+
+server:
+  port: ${SERVER_PORT}
+
+iwag:
+  services:
+    auth:
+      url: ${IWAG_AUTH_URL}
+      use-https: ${IWAG_AUTH_USE_HTTPS}
+    wishlists:
+      url: ${IWAG_WISHLISTS_URL}
+      use-https: ${IWAG_WISHLISTS_USE_HTTPS}
+    profile:
+      url: ${IWAG_PROFILE_URL}
+      use-https: ${IWAG_PROFILE_USE_HTTPS}

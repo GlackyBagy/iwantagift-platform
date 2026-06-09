@@ -1,0 +1,22 @@
+spring:
+  config:
+    import: classpath:application.yaml
+  application:
+    name: ${SPRING_APPLICATION_NAME:ui}
+  security:
+    oauth2:
+      client:
+        registration:
+          iwag-ui:
+            provider: ${IWAG_OAUTH2_CLIENT_PROVIDER:iwag-auth}
+            authorization-grant-type: ${IWAG_OAUTH2_AUTHORIZATION_GRANT_TYPE:authorization_code}
+            redirect-uri: ${IWAG_OAUTH2_REDIRECT_URI:{baseUrl}/login/oauth2/code/{registrationId}}
+
+iwag:
+  services:
+    auth:
+      use-https: ${IWAG_AUTH_USE_HTTPS:true}
+    wishlists:
+      use-https: ${IWAG_WISHLISTS_USE_HTTPS:true}
+    profile:
+      use-https: ${IWAG_PROFILE_USE_HTTPS:true}

@@ -17,6 +17,11 @@ spring:
         provider:
           iwag-auth:
             issuer-uri: http://localhost:8091
+            authorization-uri: http://localhost:8091/oauth2/authorize
+            token-uri: http://localhost:8091/oauth2/token
+            jwk-set-uri: http://localhost:8091/oauth2/jwks
+            user-info-uri: http://localhost:8091/userinfo
+            user-name-attribute: sub
   servlet:
     multipart:
       max-file-size: 50MB
