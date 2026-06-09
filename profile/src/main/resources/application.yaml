@@ -1,6 +1,11 @@
 spring:
   application:
     name: ${SPRING_APPLICATION_NAME}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI}
   servlet:
     multipart:
       max-file-size: ${IWAG_AVATAR_MAX_FILE_SIZE}

@@ -6,6 +6,11 @@ spring:
       lifecycle-management: start-only
   application:
     name: profile
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8091
   servlet:
     multipart:
       max-file-size: 50MB
