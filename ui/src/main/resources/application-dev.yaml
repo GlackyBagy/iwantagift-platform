@@ -1,6 +1,5 @@
 logging:
   level:
-    # dev only: shows the exact reason behind OAuth2 login failures (/landing?error=login)
     org.springframework.security: DEBUG
 
 spring:
@@ -21,7 +20,9 @@ spring:
               - profile
         provider:
           iwag-auth:
-            issuer-uri: http://localhost:8091
+            # No issuer-uri on purpose: it triggers eager OIDC discovery at startup, which would
+            # make the ui fail to boot whenever auth is down. The endpoints below define the
+            # provider fully, so discovery is not needed.
             authorization-uri: http://localhost:8091/oauth2/authorize
             token-uri: http://localhost:8091/oauth2/token
             jwk-set-uri: http://localhost:8091/oauth2/jwks

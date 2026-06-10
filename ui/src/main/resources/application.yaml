@@ -14,7 +14,9 @@ spring:
             scope: ${IWAG_OAUTH2_SCOPE}
         provider:
           iwag-auth:
-            issuer-uri: ${IWAG_OAUTH2_PROVIDER_ISSUER_URI}
+            # issuer-uri intentionally omitted: it forces eager OIDC discovery at startup and
+            # couples the ui's boot to auth being reachable. The explicit endpoints below fully
+            # define the provider, so no discovery call is made.
             authorization-uri: ${IWAG_OAUTH2_PROVIDER_AUTHORIZATION_URI}
             token-uri: ${IWAG_OAUTH2_PROVIDER_TOKEN_URI}
             jwk-set-uri: ${IWAG_OAUTH2_PROVIDER_JWK_SET_URI}

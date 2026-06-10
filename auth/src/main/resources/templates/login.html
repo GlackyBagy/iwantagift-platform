@@ -14,29 +14,30 @@
                 <div class="card-body text-center py-5 px-4">
                     <h1 class="hero-title mb-4">Sign in</h1>
 
-                    <div th:if="${param.error}" id="loginError"
-                         class="alert alert-danger text-start" role="alert">
-                        Invalid email or password.
-                    </div>
                     <div th:if="${param.logout}" class="alert alert-success text-start" role="alert">
                         You have been signed out.
                     </div>
 
-                    <form id="loginForm" th:action="@{/login}" method="post" novalidate
+                    <form id="loginForm" th:action="@{/login}" th:object="${loginForm}" method="post" novalidate
                           class="w-100" style="max-width: 420px; margin: 0 auto;">
                         <input th:if="${_csrf != null}"
                                type="hidden"
                                th:name="${_csrf.parameterName}"
                                th:value="${_csrf.token}">
 
+                        <!-- Shared authentication error (bad credentials are not field-specific) -->
+                        <div id="loginError" class="invalid-feedback d-block text-start mb-3"
+                             th:if="${#fields.hasGlobalErrors()}">
+                            <span th:each="err : ${#fields.globalErrors()}" th:text="${err}"></span>
+                        </div>
+
                         <div class="form-floating mb-3">
                             <input type="email"
                                    class="form-control form-control-dark"
-                                   id="username"
-                                   name="username"
                                    autocomplete="email"
                                    placeholder="Email"
-                                   th:classappend="${param.error} ? 'is-invalid'"
+                                   th:field="*{username}"
+                                   th:classappend="${#fields.hasGlobalErrors()} ? 'is-invalid'"
                                    required>
                             <label for="username">Email</label>
                         </div>
@@ -44,11 +45,10 @@
                         <div class="form-floating mb-4">
                             <input type="password"
                                    class="form-control form-control-dark"
-                                   id="password"
-                                   name="password"
                                    autocomplete="current-password"
                                    placeholder="Password"
-                                   th:classappend="${param.error} ? 'is-invalid'"
+                                   th:field="*{password}"
+                                   th:classappend="${#fields.hasGlobalErrors()} ? 'is-invalid'"
                                    required>
                             <label for="password">Password</label>
                         </div>
@@ -75,6 +75,12 @@
 
     <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
     <script th:src="@{/js/credentialsValidation.js}"></script>
+    <!-- OAuth2 protocol failure bounced back from the ui -->
+    <script th:if="${oauthError}">
+        window.addEventListener('DOMContentLoaded', function () {
+            alert('Sign-in could not be completed. Please try again.');
+        });
+    </script>
     <footer th:replace="~{fragments/footer :: footer}"></footer>
 </body>
 </html>
