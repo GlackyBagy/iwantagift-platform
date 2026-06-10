@@ -19,52 +19,6 @@
         </div>
 
         <div class="settings-layout">
-            <section class="settings-card" aria-labelledby="credentials-title">
-                <div class="settings-card-header">
-                    <div>
-                        <p class="settings-section-label">Security</p>
-                        <h2 id="credentials-title" class="settings-card-title">Credentials</h2>
-                    </div>
-                    <span class="settings-status">Private</span>
-                </div>
-
-                <form class="settings-form" aria-label="Credentials settings">
-                    <div class="settings-field">
-                        <label for="settings-email" class="form-label">Email</label>
-                        <div class="settings-inline-control">
-                            <input id="settings-email"
-                                   name="email"
-                                   type="email"
-                                   class="form-control form-control-dark"
-                                   th:value="${email}"
-                                   placeholder="email@example.com"
-                                   autocomplete="email"
-                                   disabled>
-                            <button type="button" class="btn btn-auth" disabled>Change</button>
-                            <button type="button" class="btn btn-outline-light" disabled>Confirm email</button>
-                        </div>
-                    </div>
-
-                    <div class="settings-field">
-                        <label for="settings-password" class="form-label">Password</label>
-                        <div class="settings-inline-control">
-                            <input id="settings-password"
-                                   name="password"
-                                   type="password"
-                                   class="form-control form-control-dark"
-                                   value="********"
-                                   autocomplete="current-password"
-                                   disabled>
-                            <button type="button" class="btn btn-auth" disabled>Change</button>
-                        </div>
-                    </div>
-
-                    <p class="settings-note">
-                        Credential changes are shown here, but update endpoints are not available yet.
-                    </p>
-                </form>
-            </section>
-
             <section class="settings-card" aria-labelledby="profile-settings-title">
                 <div class="settings-card-header">
                     <div>
@@ -123,6 +77,52 @@
                         <button type="submit" class="btn btn-auth">Save profile</button>
                         <a th:href="@{/profile}" class="btn btn-outline-light">Back to profile</a>
                     </div>
+                </form>
+            </section>
+
+            <section class="settings-card" aria-labelledby="credentials-title">
+                <div class="settings-card-header">
+                    <div>
+                        <p class="settings-section-label">Security</p>
+                        <h2 id="credentials-title" class="settings-card-title">Credentials</h2>
+                    </div>
+                    <span class="settings-status">Private</span>
+                </div>
+
+                <form class="settings-form" aria-label="Credentials settings">
+                    <div class="settings-field">
+                        <label for="settings-email" class="form-label">Email</label>
+                        <div class="settings-inline-control">
+                            <input id="settings-email"
+                                   name="email"
+                                   type="email"
+                                   class="form-control form-control-dark"
+                                   th:value="${email}"
+                                   placeholder="email@example.com"
+                                   autocomplete="email"
+                                   disabled>
+                            <button type="button" class="btn btn-auth" disabled>Change</button>
+                            <button type="button" class="btn btn-outline-light" disabled>Confirm email</button>
+                        </div>
+                    </div>
+
+                    <div class="settings-field">
+                        <label for="settings-password" class="form-label">Password</label>
+                        <div class="settings-inline-control">
+                            <input id="settings-password"
+                                   name="password"
+                                   type="password"
+                                   class="form-control form-control-dark"
+                                   value="********"
+                                   autocomplete="current-password"
+                                   disabled>
+                            <button type="button" class="btn btn-auth" disabled>Change</button>
+                        </div>
+                    </div>
+
+                    <p class="settings-note">
+                        Credential changes are shown here, but update endpoints are not available yet.
+                    </p>
                 </form>
             </section>
 

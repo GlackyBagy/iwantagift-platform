@@ -4,8 +4,6 @@ import lombok.RequiredArgsConstructor;
 import online.iwantagift.ui.models.dto.auth.CredentialsDTO;
 import online.iwantagift.ui.models.validation.AuthValidationGroups;
 import online.iwantagift.ui.services.AuthService;
-import online.iwantagift.ui.util.exceptions.ConflictException;
-import online.iwantagift.ui.util.exceptions.ServiceUnauthorizedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -13,6 +11,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Objects;
 
@@ -73,7 +72,9 @@ public class AuthController {
 
         try {
             authService.signUp(credentials);
-        } catch (ConflictException e) {
+        } catch (ResponseStatusException e) {
+            if (!e.getStatusCode().isSameCodeAs(HttpStatus.CONFLICT))
+                throw e;
             bindingResult.rejectValue("email",
                     "validation.emailTaken", "Email already exists");
             log.info("Sign-up failed on conflict");
@@ -87,13 +88,6 @@ public class AuthController {
     @ModelAttribute
     public CredentialsDTO putCredentials() {
         return new CredentialsDTO();
-    }
-
-    @ExceptionHandler(ServiceUnauthorizedException.class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
-    protected String handleUnauthorizedException(ServiceUnauthorizedException e) {
-        log.error("Service unauthorized", e);
-        return "error/500";
     }
 
 }

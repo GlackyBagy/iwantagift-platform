@@ -8,15 +8,15 @@ import online.iwantagift.ui.models.payloads.WishlistPayload;
 import online.iwantagift.ui.models.validation.WishlistValidationGroups;
 import online.iwantagift.ui.services.CurrentUserService;
 import online.iwantagift.ui.services.WishlistService;
-import online.iwantagift.ui.util.exceptions.NotFoundException;
 import online.iwantagift.ui.util.exceptions.RemoteServiceException;
-import online.iwantagift.ui.util.exceptions.ServiceUnauthorizedException;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
@@ -105,11 +105,6 @@ public class ListsController {
             wishlistPayload.setOwnerId(userId);
             wishlistService.updateWishlist(wishlistPayload);
             return "redirect:/wishlist/" + listId;
-        } catch (ServiceUnauthorizedException e) {
-            log.warn(e.getMessage());
-            return "error/500";
-        } catch (NotFoundException e) {
-            return "error/404";
         } catch (RemoteServiceException e) {
             log.warn(e.getMessage());
             model.addAttribute("listId", listId);
@@ -122,8 +117,12 @@ public class ListsController {
 
         try {
             wishlist = wishlistService.getWishlist(listId);
-        } catch (NotFoundException e) {
-            return WishlistLookup.error("error/404");
+        } catch (ResponseStatusException e) {
+            if (e.getStatusCode().isSameCodeAs(HttpStatus.NOT_FOUND))
+                return WishlistLookup.error("error/404");
+
+            log.warn(e.getMessage());
+            return WishlistLookup.error("error/500");
         } catch (RemoteServiceException e) {
             log.warn(e.getMessage());
             return WishlistLookup.error("error/500");

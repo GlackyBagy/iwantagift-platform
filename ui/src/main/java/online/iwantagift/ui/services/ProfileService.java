@@ -6,14 +6,17 @@ import online.iwantagift.ui.IwagProperties;
 import online.iwantagift.ui.models.dto.profile.ProfileDTO;
 import online.iwantagift.ui.models.payloads.ProfilePayload;
 import online.iwantagift.ui.util.exceptions.HttpErrorHandler;
-import online.iwantagift.ui.util.exceptions.NotFoundException;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.lang.Contract;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.Clock;
 import java.time.Instant;
@@ -50,10 +53,14 @@ public class ProfileService {
                     .retrieve()
                     .onStatus(new HttpErrorHandler())
                     .body(ProfileDTO.class);
-        } catch (NotFoundException e) {
+        } catch (ResponseStatusException e) {
+            if (!e.getStatusCode().isSameCodeAs(HttpStatus.NOT_FOUND))
+                throw e;
             // The profile record is created asynchronously (Kafka event from auth),
             // so it may not exist yet — fall back to defaults instead of failing the page.
             res = null;
+        } catch (ResourceAccessException e) {
+            throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE, "Service currently unavailable", e);
         }
 
         return res != null ? res : defaultProfile(profileId);

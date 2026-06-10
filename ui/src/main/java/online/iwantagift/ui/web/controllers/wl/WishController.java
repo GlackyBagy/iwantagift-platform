@@ -8,15 +8,15 @@ import online.iwantagift.ui.models.validation.WishValidationGroups;
 import online.iwantagift.ui.services.CurrentUserService;
 import online.iwantagift.ui.services.WishService;
 import online.iwantagift.ui.services.WishlistService;
-import online.iwantagift.ui.util.exceptions.NotFoundException;
 import online.iwantagift.ui.util.exceptions.RemoteServiceException;
-import online.iwantagift.ui.util.exceptions.ServiceUnauthorizedException;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.UUID;
 
@@ -102,12 +102,6 @@ public class WishController {
             wishPayload.setId(wishId);
             wishService.updateWish(wishPayload);
             return "redirect:/wishlist/" + wishPayload.getWishlistId();
-        } catch (ServiceUnauthorizedException e) {
-            log.warn(e.getMessage());
-            return "error/500";
-        } catch (NotFoundException e) {
-            log.debug(e.getMessage());
-            return "error/404";
         } catch (RemoteServiceException e) {
             log.debug(e.getMessage());
             model.addAttribute("wishId", wishId);
@@ -122,8 +116,12 @@ public class WishController {
 
         try {
             wish = wishService.findWishById(wishId);
-        } catch (NotFoundException e) {
-            return WishLookup.error("error/404");
+        } catch (ResponseStatusException e) {
+            if (e.getStatusCode().isSameCodeAs(HttpStatus.NOT_FOUND))
+                return WishLookup.error("error/404");
+
+            log.warn(e.getMessage());
+            return WishLookup.error("error/500");
         } catch (RemoteServiceException e) {
             log.warn(e.getMessage());
             return WishLookup.error("error/500");
