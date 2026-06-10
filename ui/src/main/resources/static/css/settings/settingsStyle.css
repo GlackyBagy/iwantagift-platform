@@ -98,6 +98,25 @@
     background-color: rgba(250, 102, 123, 0.1);
 }
 
+/* Client-side hydration states for the profile block (see profileSettings.js). */
+.settings-card.is-loading {
+    opacity: 0.7;
+}
+
+.settings-card.is-unavailable {
+    opacity: 0.85;
+}
+
+.settings-card.is-unavailable .settings-status {
+    border-color: rgba(250, 102, 123, 0.5);
+    color: #ffb4bf;
+    background-color: rgba(250, 102, 123, 0.1);
+}
+
+.settings-error {
+    color: #ffb4bf;
+}
+
 .settings-form {
     display: grid;
     gap: 1rem;

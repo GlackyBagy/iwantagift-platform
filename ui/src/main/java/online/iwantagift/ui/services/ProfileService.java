@@ -9,10 +9,10 @@ import online.iwantagift.ui.util.exceptions.HttpErrorHandler;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.http.client.MultipartBodyBuilder;
 import org.springframework.lang.Contract;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.multipart.MultipartFile;
@@ -28,6 +28,7 @@ import java.util.UUID;
 public class ProfileService {
 
     private final IwagProperties iwagProperties;
+    private final ClientHttpRequestFactory requestFactory;
     private RestClient restClient;
     private String profileBaseUrl;
 
@@ -35,12 +36,13 @@ public class ProfileService {
     public void init() {
         profileBaseUrl = iwagProperties.getRequiredService("profile").getBaseUrl();
         restClient = RestClient.builder()
+                .requestFactory(requestFactory)
                 .baseUrl(profileBaseUrl)
                 .build();
     }
 
     @Contract("_ -> !null")
-    public ProfileDTO getProfile(UUID profileId) {
+    public ProfileDTO getProfile(UUID profileId) throws ResponseStatusException{
         ProfileDTO res;
 
         try {

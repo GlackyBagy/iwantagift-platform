@@ -19,16 +19,23 @@
         </div>
 
         <div class="settings-layout">
-            <section class="settings-card" aria-labelledby="profile-settings-title">
+            <!-- Profile data is hydrated by /js/settings/profileSettings.js via the /api/profile BFF
+                 endpoint. It starts in a loading state; if the profile service is unavailable the
+                 whole block is left disabled instead of failing the page. -->
+            <section id="profileSettingsCard"
+                     class="settings-card is-loading"
+                     aria-labelledby="profile-settings-title"
+                     aria-busy="true">
                 <div class="settings-card-header">
                     <div>
                         <p class="settings-section-label">Public identity</p>
                         <h2 id="profile-settings-title" class="settings-card-title">Profile settings</h2>
                     </div>
-                    <span class="settings-status">Visible</span>
+                    <span id="profileSettingsStatus" class="settings-status">Loading…</span>
                 </div>
 
-                <form class="settings-form"
+                <form id="profileSettingsForm"
+                      class="settings-form"
                       method="post"
                       enctype="multipart/form-data"
                       th:action="@{/settings/profile}"
@@ -37,10 +44,15 @@
                            type="hidden"
                            th:name="${_csrf.parameterName}"
                            th:value="${_csrf.token}">
+
+                    <p id="profileUnavailableNote" class="settings-note settings-error" role="alert" hidden>
+                        Profile is temporarily unavailable. Editing is disabled — please try again later.
+                    </p>
+
                     <div class="settings-profile-row">
                         <img id="settingsAvatar"
                              class="settings-avatar"
-                             th:src="${profileAvatarUrl}"
+                             th:src="@{/img/logo_load_error.png}"
                              alt="Current profile photo">
                         <div class="settings-photo-actions">
                             <label for="settings-photo" class="form-label">Profile photo</label>
@@ -48,7 +60,8 @@
                                    name="profilePhoto"
                                    type="file"
                                    class="form-control form-control-dark"
-                                   accept="image/png,image/jpeg,image/webp">
+                                   accept="image/png,image/jpeg,image/webp"
+                                   disabled>
                             <p class="settings-note">Upload a PNG, JPEG, or WebP image. Storage handling will be added later.</p>
                         </div>
                     </div>
@@ -59,8 +72,8 @@
                                name="nickname"
                                type="text"
                                class="form-control form-control-dark"
-                               th:value="${nickname}"
-                               maxlength="64">
+                               maxlength="64"
+                               disabled>
                     </div>
 
                     <div class="settings-field">
@@ -70,11 +83,11 @@
                                   class="form-control form-control-dark"
                                   rows="5"
                                   maxlength="500"
-                                  th:text="${profileDescription}"></textarea>
+                                  disabled></textarea>
                     </div>
 
                     <div class="settings-actions">
-                        <button type="submit" class="btn btn-auth">Save profile</button>
+                        <button type="submit" class="btn btn-auth" disabled>Save profile</button>
                         <a th:href="@{/profile}" class="btn btn-outline-light">Back to profile</a>
                     </div>
                 </form>
@@ -163,5 +176,6 @@
 
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/js/settings/profileSettings.js}"></script>
 </body>
 </html>

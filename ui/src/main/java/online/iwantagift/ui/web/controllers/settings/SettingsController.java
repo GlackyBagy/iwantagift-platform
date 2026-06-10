@@ -1,7 +1,6 @@
 package online.iwantagift.ui.web.controllers.settings;
 
 import lombok.RequiredArgsConstructor;
-import online.iwantagift.ui.models.dto.profile.ProfileDTO;
 import online.iwantagift.ui.models.payloads.ProfilePayload;
 import online.iwantagift.ui.services.CurrentUserService;
 import online.iwantagift.ui.services.ProfileService;
@@ -21,7 +20,6 @@ import java.util.UUID;
 @Controller
 @RequiredArgsConstructor
 public class SettingsController {
-    private static final String DEFAULT_PROFILE_DESCRIPTION = "Profile description is not set yet.";
 
     private final CurrentUserService currentUserService;
     private final ProfileService profileService;
@@ -29,21 +27,9 @@ public class SettingsController {
     @GetMapping("/settings")
     public String settings(Model model, Authentication authentication) {
         UUID userId = currentUserService.requireUserId(authentication);
-        ProfileDTO profile = profileService.getProfile(userId);
 
         model.addAttribute("email", currentUserService.email(authentication));
-        model.addAttribute("nickname", profile.nickname() );
-
-        model.addAttribute("profileDescription",
-                profile.description() != null ?
-                        profile.description() :
-                        DEFAULT_PROFILE_DESCRIPTION);
         model.addAttribute("profileOwnerId", userId);
-        model.addAttribute("profileAvatarUrl",
-                profile.hasAvatar() ?
-                        profileService.avatarUrl(userId) :
-                        "/img/logo_load_error.png");
-
         model.addAttribute("settingsCss", List.of("/css/settings/settingsStyle.css"));
 
         return "settings/index";

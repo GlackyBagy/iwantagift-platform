@@ -8,6 +8,7 @@ import online.iwantagift.ui.models.payloads.WishPayload;
 import online.iwantagift.ui.util.exceptions.HttpErrorHandler;
 import online.iwantagift.ui.util.exceptions.RemoteServiceException;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 
@@ -20,10 +21,12 @@ import java.util.UUID;
 public class WishService {
     private RestClient restClients;
     private final IwagProperties iwagProperties;
+    private final ClientHttpRequestFactory requestFactory;
 
     @PostConstruct
     public void init() {
         restClients = RestClient.builder()
+                .requestFactory(requestFactory)
                 .baseUrl(iwagProperties.getRequiredService("wishlists").getBaseUrl())
                 .build();
     }

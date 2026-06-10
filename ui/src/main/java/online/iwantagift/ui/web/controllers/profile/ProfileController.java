@@ -2,10 +2,8 @@ package online.iwantagift.ui.web.controllers.profile;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import online.iwantagift.ui.models.dto.profile.ProfileDTO;
 import online.iwantagift.ui.models.dto.wl.WishlistDTO;
 import online.iwantagift.ui.services.CurrentUserService;
-import online.iwantagift.ui.services.ProfileService;
 import online.iwantagift.ui.services.WishlistService;
 import online.iwantagift.ui.util.exceptions.RemoteServiceException;
 import org.springframework.security.core.Authentication;
@@ -14,6 +12,8 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Comparator;
 import java.util.List;
@@ -25,10 +25,8 @@ import java.util.UUID;
 @Slf4j
 public class ProfileController {
     private static final String DEFAULT_WISHLIST_TITLE = "DEFAULT_WISHLIST";
-    private static final String DEFAULT_PROFILE_DESCRIPTION = "Profile description is not set yet.";
 
     private final WishlistService wishlistService;
-    private final ProfileService profileService;
     private final CurrentUserService currentUserService;
 
     @GetMapping("/profile")
@@ -57,13 +55,22 @@ public class ProfileController {
                                  Model model,
                                  String template,
                                  boolean allowEmptyWishlists) {
-        List<WishlistDTO> wishlists;
+        // The profile hero (avatar/nickname/description) is hydrated client-side via
+        // /api/profile/{id}, so the profile service being down only affects the hero, not this page.
+        model.addAttribute("profileOwnerId", profileOwnerId);
+        model.addAttribute("profileCss", List.of("/css/profile/profileStyle.css"));
 
+        List<WishlistDTO> wishlists;
         try {
             wishlists = wishlistService.getAllWishlists(profileOwnerId);
-        } catch (RemoteServiceException e) {
-            log.warn(e.getMessage());
-            return "error/500";
+        } catch (RemoteServiceException | ResourceAccessException | ResponseStatusException e) {
+            // Wishlist service unavailable (5xx, timeout, connection refused, 503): render a
+            // degraded page with an "unavailable" wishlists area instead of failing the whole page.
+            log.warn("Wishlists unavailable for {}: {}", profileOwnerId, e.getMessage());
+            model.addAttribute("wishlistsUnavailable", true);
+            model.addAttribute("wishlists", List.of());
+            model.addAttribute("selectedWishlist", null);
+            return template;
         }
 
         Optional<WishlistDTO> selectedWishlist = selectWishlist(wishlists, listId);
@@ -71,20 +78,9 @@ public class ProfileController {
         if (selectedWishlist.isEmpty() && !(allowEmptyWishlists && wishlists.isEmpty()))
             return "error/403";
 
-        ProfileDTO profile = profileService.getProfile(profileOwnerId);
-
-        model.addAttribute("profileOwnerId", profileOwnerId);
-        model.addAttribute("profileNickname", profile.nickname());
-        model.addAttribute("profileDescription",
-                profile.description() != null ?
-                        profile.description() :
-                        DEFAULT_PROFILE_DESCRIPTION);
-        model.addAttribute("profileAvatarUrl", profile.hasAvatar() ?
-                profileService.avatarUrl(profileOwnerId) :
-                "/img/logo_load_error.png");
+        model.addAttribute("wishlistsUnavailable", false);
         model.addAttribute("wishlists", sortDefaultFirst(wishlists));
         model.addAttribute("selectedWishlist", selectedWishlist.orElse(null));
-        model.addAttribute("profileCss", List.of("/css/profile/profileStyle.css"));
 
         return template;
     }

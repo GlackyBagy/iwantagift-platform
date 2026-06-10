@@ -9,6 +9,7 @@ import online.iwantagift.ui.util.exceptions.HttpErrorHandler;
 import online.iwantagift.ui.util.exceptions.RemoteServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.util.UriComponentsBuilder;
@@ -27,7 +28,8 @@ public class AuthService {
     private static final Logger log = LoggerFactory.getLogger(AuthService.class);
 
     private final IwagProperties iwagProperties;
-    private final RestClient restClient = RestClient.create();
+    private final ClientHttpRequestFactory requestFactory;
+    private RestClient restClient;
 
     private String authServiceUrl;
 
@@ -35,6 +37,9 @@ public class AuthService {
     private void init() {
         var authService = iwagProperties.getRequiredService("auth");
         authServiceUrl = authService.getBaseUrl();
+        restClient = RestClient.builder()
+                .requestFactory(requestFactory)
+                .build();
         log.info("Auth service client initialized for {}", authServiceUrl);
     }
 

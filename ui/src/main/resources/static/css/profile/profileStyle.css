@@ -189,3 +189,18 @@
         display: none;
     }
 }
+
+/* Client-side hero hydration states (see profileHero.js). */
+.profile-hero.is-loading {
+    opacity: 0.7;
+}
+
+.profile-hero.is-unavailable {
+    opacity: 0.85;
+}
+
+.profile-wishlist-unavailable {
+    margin: 0.5rem 0;
+    color: #ffb4bf;
+    font-size: 0.85rem;
+}

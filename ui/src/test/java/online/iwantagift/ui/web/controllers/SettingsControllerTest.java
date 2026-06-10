@@ -19,6 +19,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
@@ -45,17 +46,20 @@ public class SettingsControllerTest {
         when(currentUserService.requireUserId(any())).thenReturn(userId);
         when(currentUserService.email(any())).thenReturn("user@example.com");
 
+        // Profile data is no longer fetched server-side (it is hydrated via /api/profile), so the
+        // settings page renders without touching the profile service.
         mockMvc.perform(get("/settings")
                         .principal(authentication)
                         .accept(MediaType.TEXT_HTML))
                 .andExpect(status().isOk())
                 .andExpect(view().name("settings/index"))
                 .andExpect(model().attribute("email", "user@example.com"))
-                .andExpect(model().attribute("nickname", "User"))
-                .andExpect(model().attributeExists("profileDescription"))
                 .andExpect(model().attribute("profileOwnerId", userId))
-                .andExpect(model().attribute("profileAvatarUrl", "/img/logo_load_error.png"))
-                .andExpect(model().attributeExists("settingsCss"));
+                .andExpect(model().attributeExists("settingsCss"))
+                .andExpect(model().attributeDoesNotExist("nickname"))
+                .andExpect(model().attributeDoesNotExist("profileAvatarUrl"));
+
+        verifyNoInteractions(profileService);
     }
 
     @Test
