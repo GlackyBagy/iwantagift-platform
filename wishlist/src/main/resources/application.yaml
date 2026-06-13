@@ -10,6 +10,8 @@ spring:
     bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS}
     admin:
       modify-topic-configs: ${SPRING_KAFKA_ADMIN_MODIFY_TOPIC_CONFIGS}
+    consumer:
+      group-id: wishlist-service
   datasource:
     url: ${SPRING_DATASOURCE_URL}
     username: ${SPRING_DATASOURCE_USERNAME}

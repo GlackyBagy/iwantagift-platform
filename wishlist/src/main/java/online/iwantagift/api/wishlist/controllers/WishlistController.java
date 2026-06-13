@@ -13,10 +13,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
+import static online.iwantagift.api.wishlist.services.WishlistService.DEFAULT_WISHLIST_TITLE;
 
 @RestController
 @RequestMapping("/api/v1/list")
@@ -47,6 +45,8 @@ public class WishlistController {
     public Map<String, UUID> createWishlist(@RequestBody @Validated(ValidationGroups.Create.class)
                                             WishlistDTO dto, BindingResult bindingResult,
                                             Authentication authentication) {
+        if(Objects.equals(dto.getTitle(), DEFAULT_WISHLIST_TITLE))
+            bindingResult.rejectValue("title", "title.reserved");
         if (bindingResult.hasErrors())
             throw new ValidationFailedException(bindingResult.getFieldErrors());
 
@@ -61,6 +61,8 @@ public class WishlistController {
     public void patchWishlist(@RequestBody @Validated(ValidationGroups.Patch.class)
                               WishlistDTO dto, BindingResult bindingResult,
                               Authentication authentication) {
+        if(Objects.equals(dto.getTitle(), DEFAULT_WISHLIST_TITLE))
+            bindingResult.rejectValue("title", "title.reserved");
         if (bindingResult.hasErrors())
             throw new ValidationFailedException(bindingResult.getFieldErrors());
 
@@ -74,6 +76,8 @@ public class WishlistController {
     public void putWishlist(@RequestBody @Validated(ValidationGroups.Put.class)
                             WishlistDTO dto, BindingResult bindingResult,
                             Authentication authentication) {
+        if(Objects.equals(dto.getTitle(), DEFAULT_WISHLIST_TITLE))
+            bindingResult.rejectValue("title", "title.reserved");
         if (bindingResult.hasErrors())
             throw new ValidationFailedException(bindingResult.getFieldErrors());
 

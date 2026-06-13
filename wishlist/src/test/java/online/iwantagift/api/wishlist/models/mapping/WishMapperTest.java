@@ -10,7 +10,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.time.Instant;
-import java.util.Optional;
 import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -26,20 +25,22 @@ class WishMapperTest {
 
     @Test
     void toEntity_resolvesWishlistViaService_andMapsFields() {
+        UUID ownerId = UUID.randomUUID();
         UUID wishListId = UUID.randomUUID();
+
         Wishlist wishlist = new Wishlist();
         wishlist.setId(wishListId);
+        wishlist.setOwnerId(ownerId);
 
-        when(wlService.findById(wishListId)).thenReturn(Optional.of(wishlist));
+        when(wlService.findByIdOrDefaultIfNull(wishListId, ownerId)).thenReturn(wishlist);
 
         WishDTO dto = new WishDTO();
         dto.setWishListId(wishListId);
-        dto.setOwnerId(UUID.randomUUID());
         dto.setTitle("PS5");
         dto.setDescription("Slim");
         dto.setUrl("https://example.com/ps5");
 
-        Wish entity = mapper.toEntity(dto, UUID.randomUUID(), wlService);
+        Wish entity = mapper.toEntity(dto, ownerId, wlService);
 
         assertNotNull(entity);
         assertEquals("PS5", entity.getTitle());
@@ -48,27 +49,28 @@ class WishMapperTest {
         assertNull(entity.getOwnerId());
         assertSame(wishlist, entity.getWishlist());
 
-        verify(wlService).findById(wishListId);
+        verify(wlService).findByIdOrDefaultIfNull(wishListId, ownerId);
         verifyNoMoreInteractions(wlService);
     }
 
     @Test
-    void toEntity_whenWishlistIdIsNull_usesOwnerDefaultWishlist() {
+    void toEntity_whenWishlistIdIsNull_setsDefault() {
         UUID ownerId = UUID.randomUUID();
-        Wishlist defaultWishlist = new Wishlist();
-        defaultWishlist.setOwnerId(ownerId);
 
-        when(wlService.createDefaultList(ownerId)).thenReturn(defaultWishlist);
+        Wishlist defaultList = new Wishlist();
+        defaultList.setOwnerId(ownerId);
 
         WishDTO dto = new WishDTO();
         dto.setTitle("PS5");
         dto.setUrl("https://example.com/ps5");
+        dto.setWishListId(null);
+
+        when(wlService.findByIdOrDefaultIfNull(null, ownerId)).thenReturn(defaultList);
 
         Wish entity = mapper.toEntity(dto, ownerId, wlService);
 
-        assertNull(dto.getOwnerId());
-        assertSame(defaultWishlist, entity.getWishlist());
-        verify(wlService).createDefaultList(ownerId);
+        assertEquals(defaultList, entity.getWishlist());
+        verify(wlService).findByIdOrDefaultIfNull(dto.getWishListId(), ownerId);
         verifyNoMoreInteractions(wlService);
     }
 
@@ -100,7 +102,6 @@ class WishMapperTest {
         assertEquals("https://example.com/airpods", dto.getUrl());
         assertEquals(createdAt, dto.getCreatedAt());
         assertEquals(wishListId, dto.getWishListId());
-        assertEquals(ownerId, dto.getOwnerId());
 
         verifyNoInteractions(wlService);
     }

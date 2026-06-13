@@ -33,6 +33,6 @@ public class Wishlist {
     @Column(name = "owner_id")
     private UUID ownerId;
 
-    @OneToMany(mappedBy = "wishlist")
+    @OneToMany(mappedBy = "wishlist", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Wish> wishes = Collections.emptyList();
 }

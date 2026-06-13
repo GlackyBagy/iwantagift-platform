@@ -78,7 +78,6 @@ public class WishDTO {
     private UUID wishListId;
 
     /**
-     * Deprecated client-facing owner field.
      * Ownership is resolved from the authenticated user and this value is ignored on writes.
      */
     @JsonProperty("owner_id")

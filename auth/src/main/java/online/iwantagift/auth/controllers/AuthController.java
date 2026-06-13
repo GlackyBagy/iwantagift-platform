@@ -2,7 +2,7 @@ package online.iwantagift.auth.controllers;
 
 import lombok.RequiredArgsConstructor;
 import online.iwantagift.auth.messaging.kafka.AccountProducer;
-import online.iwantagift.auth.models.dto.AccountEventDTO;
+import online.iwantagift.auth.models.dto.AccountEvent;
 import online.iwantagift.auth.models.dto.CredentialsDTO;
 import online.iwantagift.auth.models.dto.abstracts.ValidationGroups;
 import online.iwantagift.auth.models.entities.Account;
@@ -41,7 +41,7 @@ public class AuthController {
      */
     @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
-    public AccountEventDTO signUp(@RequestBody @Validated(ValidationGroups.SignUp.class)
+    public AccountEvent signUp(@RequestBody @Validated(ValidationGroups.SignUp.class)
                                   CredentialsDTO credentials, BindingResult bindingResult) {
         if (Objects.nonNull(credentials.getConfirmPassword()) &&
                 !Objects.equals(credentials.getConfirmPassword(), credentials.getPassword())) {
@@ -60,6 +60,6 @@ public class AuthController {
         }
         accountProducer.sendOnCreate(account.getId(), credentials.getNickname(), account.getEmail()); // todo guaranty DB + kafka operations atomicity
 
-        return new AccountEventDTO(account.getId(), credentials.getNickname(), account.getEmail());
+        return new AccountEvent(account.getId(), credentials.getNickname(), account.getEmail(), AccountEvent.Type.CREATED);
     }
 }

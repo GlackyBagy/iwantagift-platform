@@ -1,7 +1,6 @@
 package online.iwantagift.api.wishlist.controllers;
 
 import lombok.RequiredArgsConstructor;
-import online.iwantagift.api.wishlist.util.exceptions.ValidationFailedException;
 import online.iwantagift.api.wishlist.messaging.kafka.NewWishProducer;
 import online.iwantagift.api.wishlist.models.dto.WishDTO;
 import online.iwantagift.api.wishlist.models.dto.abstracts.ValidationGroups;
@@ -10,6 +9,7 @@ import online.iwantagift.api.wishlist.models.events.WishCreatedEvent;
 import online.iwantagift.api.wishlist.models.mapping.WishMapper;
 import online.iwantagift.api.wishlist.services.WishService;
 import online.iwantagift.api.wishlist.services.WishlistService;
+import online.iwantagift.api.wishlist.util.exceptions.ValidationFailedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -62,8 +62,7 @@ public class WishController {
                 wish.getWishlist() == null ? dto.getWishListId() : wish.getWishlist().getId()
         ));
 
-        Map<String, UUID> response = Collections.singletonMap("id", wishId);
-        return response;
+        return Collections.singletonMap("id", wishId);
     }
 
     @PatchMapping

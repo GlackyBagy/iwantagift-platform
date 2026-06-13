@@ -55,7 +55,9 @@ class WishlistControllerTest {
     void getUserLists_isPublicAndUsesRequestedUserId() {
         UUID userId = UUID.randomUUID();
         Wishlist first = new Wishlist();
+        first.setId(UUID.randomUUID());
         Wishlist second = new Wishlist();
+        second.setId(UUID.randomUUID());
         WishlistDTO firstDto = new WishlistDTO();
         WishlistDTO secondDto = new WishlistDTO();
 

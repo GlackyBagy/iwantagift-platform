@@ -36,8 +36,7 @@ iwag:
   services:
     wishlist:
       kafka-topics:
-        - createdUser
-        - deletedUser
+        - accountEvent
     profile:
       kafka-topics:
         - createdUser

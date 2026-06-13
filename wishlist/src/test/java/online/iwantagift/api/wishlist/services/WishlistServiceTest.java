@@ -210,12 +210,12 @@ class WishlistServiceTest {
     }
 
     @Test
-    void createDefaultList_whenExists_returnsExistingWishlist() {
+    void getOrCreateDefaultList_whenExists_returnsExistingWishlist() {
         UUID ownerId = UUID.randomUUID();
         Wishlist existing = new Wishlist(UUID.randomUUID(), "DEFAULT_WISHLIST", "Default wishlist", null, ownerId, null);
         when(lr.findByOwnerIdAndTitle(ownerId, "DEFAULT_WISHLIST")).thenReturn(Optional.of(existing));
 
-        Wishlist result = service.createDefaultList(ownerId);
+        Wishlist result = service.getOrCreateDefaultList(ownerId);
 
         assertSame(existing, result);
         verify(lr).findByOwnerIdAndTitle(ownerId, "DEFAULT_WISHLIST");
@@ -224,18 +224,18 @@ class WishlistServiceTest {
     }
 
     @Test
-    void createDefaultList_whenMissing_savesDefaultWishlist() {
+    void getOrCreateDefaultList_whenMissing_savesDefaultWishlist() {
         UUID ownerId = UUID.randomUUID();
         when(lr.findByOwnerIdAndTitle(ownerId, "DEFAULT_WISHLIST")).thenReturn(Optional.empty());
-        when(lr.save(any(Wishlist.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(lr.idempotentInsert(any(Wishlist.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
-        Wishlist result = service.createDefaultList(ownerId);
+        Wishlist result = service.getOrCreateDefaultList(ownerId);
 
         assertEquals(ownerId, result.getOwnerId());
         assertEquals("DEFAULT_WISHLIST", result.getTitle());
         assertEquals("Default wishlist", result.getDescription());
         verify(lr).findByOwnerIdAndTitle(ownerId, "DEFAULT_WISHLIST");
-        verify(lr).save(result);
+        verify(lr).idempotentInsert(result);
         verifyNoInteractions(em);
     }
 

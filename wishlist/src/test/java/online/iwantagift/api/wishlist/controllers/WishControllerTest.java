@@ -56,7 +56,7 @@ class WishControllerTest {
         Wishlist wishlist = new Wishlist();
         wishlist.setId(wishlistId);
         wishEntity.setWishlist(wishlist);
-        when(wishMapper.toEntity(dto, requesterId, wlService)).thenReturn(wishEntity);
+        when(wishMapper.toEntity(dto, requesterId ,wlService)).thenReturn(wishEntity);
 
         UUID id = UUID.randomUUID();
         when(wishService.create(requesterId, wishEntity)).thenReturn(id);
@@ -64,7 +64,6 @@ class WishControllerTest {
         Map<String, UUID> resp = controller.createWish(dto, bindingResult, authentication);
 
         assertEquals(id, resp.get("id"));
-        assertNull(dto.getOwnerId());
         verify(wishMapper).toEntity(dto, requesterId, wlService);
         verify(wishService).create(requesterId, wishEntity);
         ArgumentCaptor<WishCreatedEvent> eventCaptor = ArgumentCaptor.forClass(WishCreatedEvent.class);

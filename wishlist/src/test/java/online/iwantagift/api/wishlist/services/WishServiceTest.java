@@ -37,9 +37,16 @@ class WishServiceTest {
     @Test
     void create_setsOwnerIdAndPersistsWish() {
         UUID ownerId = UUID.randomUUID();
+        Wishlist wishlist = new Wishlist();
+        wishlist.setId(UUID.randomUUID());
+        wishlist.setOwnerId(ownerId);
+
         Wish wish = new Wish();
         wish.setTitle("title");
         wish.setDescription("new description");
+        wish.setWishlist(wishlist);
+
+        when(wls.findByIdOrThrow(wishlist.getId())).thenReturn(wishlist);
 
         doAnswer(invocation -> {
             wish.setId(UUID.randomUUID());
@@ -52,18 +59,21 @@ class WishServiceTest {
         assertEquals(ownerId, wish.getOwnerId());
         verify(em).persist(wish);
         verify(em).flush();
-        verifyNoInteractions(wr, wls);
+        verifyNoInteractions(wr);
     }
 
     @Test
     void create_attachesManagedWishlistBeforePersist() {
         UUID ownerId = UUID.randomUUID();
         UUID wishlistId = UUID.randomUUID();
+
         Wishlist detachedWishlist = new Wishlist();
         detachedWishlist.setId(wishlistId);
+        detachedWishlist.setOwnerId(ownerId);
 
         Wishlist managedWishlist = new Wishlist();
         managedWishlist.setId(wishlistId);
+        managedWishlist.setOwnerId(ownerId);
 
         Wish wish = new Wish();
         wish.setTitle("title");
@@ -88,8 +98,16 @@ class WishServiceTest {
     @Test
     void create_whenAlreadyExists_throwsAlreadyExistsException() {
         UUID ownerId = UUID.randomUUID();
+
+        Wishlist wishlist = new Wishlist();
+        wishlist.setId(UUID.randomUUID());
+        wishlist.setOwnerId(ownerId);
+
         Wish wish = new Wish();
+        wish.setWishlist(wishlist);
         wish.setId(UUID.randomUUID());
+
+        when(wls.findByIdOrThrow(wishlist.getId())).thenReturn(wishlist);
 
         doThrow(new PersistenceException("duplicated key")).when(em).persist(wish);
 
@@ -101,6 +119,7 @@ class WishServiceTest {
         UUID ownerId = UUID.randomUUID();
         Wishlist oldWishlist = wishlist(UUID.randomUUID());
         Wishlist newWishlist = wishlist(UUID.randomUUID());
+        newWishlist.setOwnerId(ownerId);
         Wish existing = new Wish(UUID.randomUUID(), "old title", "old description",
                 "http://old.url", null, oldWishlist, ownerId);
 
@@ -167,8 +186,13 @@ class WishServiceTest {
     @Test
     void put_whenRequesterOwnsWish_replacesWritableFields() {
         UUID ownerId = UUID.randomUUID();
+
         Wishlist oldWishlist = wishlist(UUID.randomUUID());
+        oldWishlist.setOwnerId(ownerId);
+
         Wishlist newWishlist = wishlist(UUID.randomUUID());
+        newWishlist.setOwnerId(ownerId);
+
         Wish existing = new Wish(UUID.randomUUID(), "old title", "old description",
                 "http://old.url", null, oldWishlist, ownerId);
 
@@ -181,6 +205,7 @@ class WishServiceTest {
 
         when(wr.findById(existing.getId())).thenReturn(Optional.of(existing));
         when(wls.findByIdOrThrow(newWishlist.getId())).thenReturn(newWishlist);
+        when(wls.findByIdOrDefaultIfNull(newWishlist.getId(), ownerId)).thenReturn(newWishlist);
 
         wishService.put(ownerId, dto);
 
@@ -190,6 +215,7 @@ class WishServiceTest {
         assertSame(newWishlist, existing.getWishlist());
         verify(wr).findById(existing.getId());
         verify(wls).findByIdOrThrow(newWishlist.getId());
+        verify(wls).findByIdOrDefaultIfNull(newWishlist.getId(), ownerId);
         verifyNoInteractions(em);
     }
 

@@ -2,8 +2,7 @@ package online.iwantagift.auth.messaging.kafka;
 
 import lombok.RequiredArgsConstructor;
 import online.iwantagift.auth.config.IwagProperties;
-import online.iwantagift.auth.models.dto.AccountEventDTO;
-import online.iwantagift.auth.models.entities.Account;
+import online.iwantagift.auth.models.dto.AccountEvent;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.ObjectMapper;
@@ -17,22 +16,21 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class AccountProducer {
 
-    private static final String CREATED_USER_TOPIC = "createdUser";
-    private static final String DELETED_USER_TOPIC = "deletedUser";
+    private static final String ACCOUNT_EVENT_TOPIC = "accountEvent";
 
     private final KafkaTemplate<String, String> kafkaTemplate;
     private final ObjectMapper objectMapper;
     private final IwagProperties iwagProperties;
 
     public void sendOnCreate(UUID userId, String nickname, String email) {
-        sendToTopic(CREATED_USER_TOPIC, new AccountEventDTO(userId, nickname, email));
-    } // todo send nickname
-
-    public void sendOnDelete(UUID userId) {
-        sendToTopic(DELETED_USER_TOPIC, new AccountEventDTO(userId, null, null));
+        sendToTopic(ACCOUNT_EVENT_TOPIC, new AccountEvent(userId, nickname, email, AccountEvent.Type.CREATED));
     }
 
-    private void sendToTopic(String topic, AccountEventDTO event) {
+    public void sendOnDelete(UUID userId) {
+        sendToTopic(ACCOUNT_EVENT_TOPIC, new AccountEvent(userId, null, null, AccountEvent.Type.DELETED));
+    }
+
+    private void sendToTopic(String topic, AccountEvent event) {
         String payload = objectMapper.writeValueAsString(event);
         kafkaTopics()
                 .stream()
