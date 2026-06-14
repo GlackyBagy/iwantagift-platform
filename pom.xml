@@ -38,6 +38,7 @@
         <module>profile</module>
         <module>ui</module>
         <module>auth</module>
+        <module>mail-service</module>
     </modules>
 
     <dependencies>

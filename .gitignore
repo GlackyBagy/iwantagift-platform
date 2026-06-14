@@ -1,6 +1,10 @@
 # Generic
 HELP.md
 
+# Locally generated auth signing keys (never commit private keys)
+**/data/auth-jwt-private.pem
+**/data/
+
 # Maven / Build
 **/target/
 !.mvn/wrapper/maven-wrapper.jar
