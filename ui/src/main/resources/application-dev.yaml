@@ -5,6 +5,14 @@ logging:
 spring:
   application:
     name: "ui"
+  docker:
+    compose:
+      file: ui/compose.yml
+  datasource:
+    url: jdbc:postgresql://localhost:9914/ui
+    username: "postgres"
+    password: "postgres"
+    driver-class-name: org.postgresql.Driver
   security:
     oauth2:
       client:

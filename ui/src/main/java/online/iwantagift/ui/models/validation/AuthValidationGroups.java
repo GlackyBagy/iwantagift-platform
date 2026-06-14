@@ -8,4 +8,13 @@ public final class AuthValidationGroups {
 
     public interface SignIn extends Default {
     }
+
+    public interface ChangeEmail {
+    }
+
+    public interface ChangePassword {
+    }
+
+    public interface ConfirmEmail {
+    }
 }

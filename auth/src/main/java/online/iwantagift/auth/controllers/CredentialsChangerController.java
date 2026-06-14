@@ -1,6 +1,7 @@
 package online.iwantagift.auth.controllers;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import online.iwantagift.auth.messaging.kafka.CredentialsProducer;
 import online.iwantagift.auth.models.dto.CredentialsDTO;
 import online.iwantagift.auth.models.dto.abstracts.ValidationGroups;
@@ -25,6 +26,7 @@ import static online.iwantagift.auth.models.dto.abstracts.ValidationGroups.Chang
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@Slf4j
 public class CredentialsChangerController {
 
     private final VerificationTokenService verificationTokenService;
@@ -38,14 +40,19 @@ public class CredentialsChangerController {
                             CredentialsDTO dto,
                             Authentication authentication) {
         String oldEmail = authentication.getName();
+        log.info("Email change requested: {} -> {}", oldEmail, dto.getEmail());
+
         String token = verificationTokenService.generateAndSaveForEmail(oldEmail, dto.getEmail());
         String verificationUrl = emailVerificationUrlBuilder.buildForEmail(token);
+        log.info("Generated verification token and url for email change to {}: {}",
+                dto.getEmail(), verificationUrl);
 
         credentialsProducer.sendEmailChange(new CredentialsUpdateEvent(
                 oldEmail,
                 dto.getEmail(),
                 verificationUrl
         ));
+        log.info("Published emailChange event for {} -> {}", oldEmail, dto.getEmail());
     }
 
     @PostMapping("/confirm/email")

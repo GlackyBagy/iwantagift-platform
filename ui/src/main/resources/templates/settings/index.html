@@ -102,10 +102,16 @@
                     <span class="settings-status">Private</span>
                 </div>
 
-                <form class="settings-form" aria-label="Credentials settings">
+                <div class="settings-form" aria-label="Credentials settings">
                     <div class="settings-field">
                         <label for="settings-email" class="form-label">Email</label>
-                        <div class="settings-inline-control">
+                        <form class="settings-inline-control"
+                              method="post"
+                              th:action="@{/settings/changeEmail}">
+                            <input th:if="${_csrf != null}"
+                                   type="hidden"
+                                   th:name="${_csrf.parameterName}"
+                                   th:value="${_csrf.token}">
                             <input id="settings-email"
                                    name="email"
                                    type="email"
@@ -113,30 +119,79 @@
                                    th:value="${email}"
                                    placeholder="email@example.com"
                                    autocomplete="email"
-                                   disabled>
-                            <button type="button" class="btn btn-auth" disabled>Change</button>
-                            <button type="button" class="btn btn-outline-light" disabled>Confirm email</button>
+                                   required>
+                            <button type="submit" class="btn btn-auth">Change</button>
+                            <button type="submit"
+                                    class="btn btn-outline-light"
+                                    th:formaction="@{/settings/confirmEmail}"
+                                    formnovalidate>
+                                Confirm email
+                            </button>
+                        </form>
+                        <div class="settings-validation-errors"
+                             role="alert"
+                             th:if="${emailValidationErrors}">
+                            <p th:each="error : ${emailValidationErrors}"
+                               th:text="${error}"></p>
                         </div>
                     </div>
 
-                    <div class="settings-field">
+                    <form id="changePasswordForm"
+                          class="settings-field"
+                          method="post"
+                          th:action="@{/settings/changePassword}">
+                        <input th:if="${_csrf != null}"
+                               type="hidden"
+                               th:name="${_csrf.parameterName}"
+                               th:value="${_csrf.token}">
                         <label for="settings-password" class="form-label">Password</label>
                         <div class="settings-inline-control">
                             <input id="settings-password"
                                    name="password"
                                    type="password"
                                    class="form-control form-control-dark"
-                                   value="********"
-                                   autocomplete="current-password"
-                                   disabled>
-                            <button type="button" class="btn btn-auth" disabled>Change</button>
+                                   placeholder="Enter new password"
+                                   autocomplete="new-password"
+                                   minlength="8"
+                                   maxlength="128"
+                                   required>
+                            <button id="changePasswordButton"
+                                    type="submit"
+                                    class="btn btn-auth"
+                                    disabled>
+                                Change
+                            </button>
                         </div>
-                    </div>
+                        <div class="settings-validation-errors"
+                             role="alert"
+                             th:if="${passwordValidationErrors}">
+                            <p th:each="error : ${passwordValidationErrors}"
+                               th:text="${error}"></p>
+                        </div>
 
-                    <p class="settings-note">
-                        Credential changes are shown here, but update endpoints are not available yet.
-                    </p>
-                </form>
+                        <div id="confirmPasswordField" class="settings-field" hidden>
+                            <label for="settings-confirm-password" class="form-label">Confirm password</label>
+                            <input id="settings-confirm-password"
+                                   name="confirmPassword"
+                                   type="password"
+                                   class="form-control form-control-dark"
+                                   placeholder="Repeat new password"
+                                   autocomplete="new-password">
+                            <p id="passwordMismatchMessage"
+                               class="settings-password-message"
+                               role="alert"
+                               hidden>
+                                Passwords do not match
+                            </p>
+                        </div>
+                        <div class="settings-validation-errors"
+                             role="alert"
+                             th:if="${confirmPasswordValidationErrors}">
+                            <p th:each="error : ${confirmPasswordValidationErrors}"
+                               th:text="${error}"></p>
+                        </div>
+                    </form>
+                </div>
             </section>
 
             <section class="settings-card settings-danger-card" aria-labelledby="danger-zone-title">
@@ -177,5 +232,67 @@
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
 <script th:src="@{/js/settings/profileSettings.js}"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const passwordInput = document.getElementById("settings-password");
+        const confirmPasswordField = document.getElementById("confirmPasswordField");
+        const confirmPasswordInput = document.getElementById("settings-confirm-password");
+        const changePasswordForm = document.getElementById("changePasswordForm");
+        const changePasswordButton = document.getElementById("changePasswordButton");
+        const passwordMismatchMessage = document.getElementById("passwordMismatchMessage");
+
+        if (!passwordInput || !confirmPasswordField || !confirmPasswordInput ||
+            !changePasswordForm || !changePasswordButton || !passwordMismatchMessage) {
+            return;
+        }
+
+        const updatePasswordConfirmation = () => {
+            const hasPassword = passwordInput.value.length > 0;
+            const hasValidLength = passwordInput.value.length >= 8;
+            confirmPasswordField.hidden = !hasPassword;
+            confirmPasswordInput.required = hasPassword;
+
+            if (!hasPassword) {
+                confirmPasswordInput.value = "";
+            }
+
+            const passwordsMatch = passwordInput.value === confirmPasswordInput.value;
+            const isValid = hasValidLength && passwordsMatch;
+            const showMismatch = confirmPasswordInput.value.length > 0 && !passwordsMatch;
+            confirmPasswordInput.setCustomValidity(
+                hasPassword && !passwordsMatch ? "Passwords do not match" : ""
+            );
+            passwordMismatchMessage.hidden = !showMismatch;
+            changePasswordButton.disabled = !isValid;
+        };
+
+        passwordInput.addEventListener("input", updatePasswordConfirmation);
+        confirmPasswordInput.addEventListener("input", updatePasswordConfirmation);
+        changePasswordForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            updatePasswordConfirmation();
+
+            if (changePasswordButton.disabled) {
+                return;
+            }
+
+            changePasswordButton.disabled = true;
+
+            fetch(changePasswordForm.action, {
+                method: "POST",
+                body: new FormData(changePasswordForm),
+                headers: { Accept: "text/html" },
+                credentials: "same-origin",
+            })
+                .then(() => {
+                    window.location.assign("/settings");
+                })
+                .catch((error) => {
+                    console.warn("Password change request failed:", error);
+                    changePasswordButton.disabled = false;
+                });
+        });
+    });
+</script>
 </body>
 </html>
