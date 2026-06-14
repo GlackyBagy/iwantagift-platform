@@ -32,6 +32,10 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/auth/signup")
                         .permitAll()
+                        // Password reset is a forgot-password flow: it must be reachable without a
+                        // session. CSRF still applies (the reset pages render the token).
+                        .requestMatchers("/auth/reset/password", "/auth/reset/password/**")
+                        .permitAll()
                         .requestMatchers("/login", "/css/**", "/js/**", "/img/**")
                         .permitAll()
                         .anyRequest()

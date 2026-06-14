@@ -8,4 +8,10 @@ public final class ValidationGroups {
 
     public interface SignIn extends Default {
     }
+
+    public interface ChangeEmail {
+    }
+
+    public interface ChangePassword {
+    }
 }

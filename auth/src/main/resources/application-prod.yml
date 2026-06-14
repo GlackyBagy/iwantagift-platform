@@ -11,3 +11,5 @@ iwag:
       kafka-topics: ${IWAG_WISHLIST_KAFKA_TOPICS:accountEvent}
     profile:
       kafka-topics: ${IWAG_PROFILE_KAFKA_TOPICS:createdUser}
+    mail:
+      kafka-topics: ${IWAG_MAIL_KAFKA_TOPICS:emailChange,emailVerify,passwordReset,passwordResetRequest}

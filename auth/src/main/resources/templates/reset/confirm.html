@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head th:replace="~{fragments/head :: head(
+    title='iwag - Confirm password reset',
+    extraCss=${{'/css/auth/authStyle.css'}})}">
+    <title></title>
+</head>
+<body>
+    <header th:replace="~{fragments/header :: header}"></header>
+
+    <main class="d-flex flex-column" style="min-height: 80vh;">
+        <div class="container">
+            <div class="card hero-card mx-auto">
+                <div class="card-body text-center py-5 px-4">
+                    <h1 class="hero-title mb-4">Confirm password reset</h1>
+
+                    <!-- Initial state: ask the user to confirm or cancel the reset. -->
+                    <div th:if="${status == null}" style="max-width: 420px; margin: 0 auto;">
+                        <p class="text-secondary mb-4">
+                            Do you want to reset your password? A new password will be generated and
+                            emailed to you.
+                        </p>
+
+                        <div class="d-flex gap-3 justify-content-center">
+                            <form th:action="@{/auth/reset/password/confirm}" method="post">
+                                <input th:if="${_csrf != null}"
+                                       type="hidden"
+                                       th:name="${_csrf.parameterName}"
+                                       th:value="${_csrf.token}">
+                                <input type="hidden" name="token" th:value="${token}">
+                                <button type="submit" class="btn btn-auth">Confirm reset</button>
+                            </form>
+
+                            <form th:action="@{/auth/reset/password/cancel}" method="post">
+                                <input th:if="${_csrf != null}"
+                                       type="hidden"
+                                       th:name="${_csrf.parameterName}"
+                                       th:value="${_csrf.token}">
+                                <input type="hidden" name="token" th:value="${token}">
+                                <button type="submit" class="btn btn-outline-light">Cancel reset</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div th:if="${status == 'sent'}" class="alert alert-success text-start" role="alert">
+                        Your new password has been emailed to you. Please sign in and change it as
+                        soon as possible.
+                    </div>
+
+                    <div th:if="${status == 'cancelled'}" class="alert alert-secondary text-start" role="alert">
+                        The password reset has been cancelled. Your password was not changed.
+                    </div>
+
+                    <div th:if="${status == 'invalid'}" class="alert alert-danger text-start" role="alert">
+                        This reset link is invalid or has expired. Please request a new one.
+                    </div>
+
+                    <div th:if="${status != null}" class="mt-4">
+                        <a th:href="@{/login}" class="auth-link">Back to sign in</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+    <footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

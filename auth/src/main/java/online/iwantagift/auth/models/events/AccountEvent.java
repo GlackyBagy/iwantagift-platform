@@ -1,4 +1,4 @@
-package online.iwantagift.auth.models.dto;
+package online.iwantagift.auth.models.events;
 
 import java.util.UUID;
 

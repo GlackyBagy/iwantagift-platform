@@ -2,7 +2,7 @@ package online.iwantagift.auth.messaging.kafka;
 
 import lombok.RequiredArgsConstructor;
 import online.iwantagift.auth.config.IwagProperties;
-import online.iwantagift.auth.models.dto.AccountEvent;
+import online.iwantagift.auth.models.events.AccountEvent;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.ObjectMapper;

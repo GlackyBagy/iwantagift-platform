@@ -31,3 +31,5 @@ iwag:
       kafka-topics: ${IWAG_WISHLIST_KAFKA_TOPICS}
     profile:
       kafka-topics: ${IWAG_PROFILE_KAFKA_TOPICS}
+    mail:
+      kafka-topics: ${IWAG_MAIL_KAFKA_TOPICS:emailChange,emailVerify,passwordReset,passwordResetRequest}

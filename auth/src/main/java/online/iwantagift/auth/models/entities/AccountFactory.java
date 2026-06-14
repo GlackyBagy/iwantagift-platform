@@ -26,6 +26,7 @@ public final class AccountFactory {
         return Account.builder()
                 .email(credentialsDTO.getEmail())
                 .passwordHash(passwordEncoder.encode(credentialsDTO.getPassword()))
+                .emailVerified(false)
                 .build();
     }
 }

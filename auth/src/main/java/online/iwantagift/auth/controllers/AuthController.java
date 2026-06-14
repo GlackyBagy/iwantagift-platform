@@ -2,7 +2,7 @@ package online.iwantagift.auth.controllers;
 
 import lombok.RequiredArgsConstructor;
 import online.iwantagift.auth.messaging.kafka.AccountProducer;
-import online.iwantagift.auth.models.dto.AccountEvent;
+import online.iwantagift.auth.models.events.AccountEvent;
 import online.iwantagift.auth.models.dto.CredentialsDTO;
 import online.iwantagift.auth.models.dto.abstracts.ValidationGroups;
 import online.iwantagift.auth.models.entities.Account;

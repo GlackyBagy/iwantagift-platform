@@ -40,3 +40,9 @@ iwag:
     profile:
       kafka-topics:
         - createdUser
+    mail:
+      kafka-topics:
+        - emailChange
+        - emailVerify
+        - passwordReset
+        - passwordResetRequest
