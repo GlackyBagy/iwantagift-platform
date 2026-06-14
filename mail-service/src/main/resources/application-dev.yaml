@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: mail-service
+  kafka:
+    consumer:
+      group-id: mail-service
+    bootstrap-servers: localhost:9092
+  mail:
+    host: ${MAIL_HOST:smtp.beget.com}
+    port: ${MAIL_PORT:465}
+    username: ${MAIL_USERNAME:norepy@iwag.online}
+    password: ${MAIL_PASSWORD}
+    ssl:
+      enabled: true
+
+server:
+  port: 9978

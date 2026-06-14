@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: mail-service
+  kafka:
+    consumer:
+      group-id: mail-service
+    bootstrap-servers:  ${SPRING_KAFKA_BOOTSTRAP_SERVERS}
+  mail:
+    host: ${SPRING_MAIL_HOST}
+    port: ${SPRING_MAIL_PORT}
+    username: ${MAIL_USERNAME}
+    password: ${MAIL_PASSWORD}
