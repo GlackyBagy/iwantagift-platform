@@ -13,6 +13,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -24,9 +25,29 @@ public class WebSecurityConfig {
     private final AccountUserDetailsService userDetailsService;
     private final IwagProperties iwagProperties;
 
+    /**
+     * Bearer-protected REST endpoints that the ui calls server-to-server with an OAuth2 access token
+     * (no session, no CSRF). These need a resource-server (JWT) chain — the form-login chain below
+     * cannot authenticate a Bearer token, so without this the requests are bounced to /login and the
+     * controller never runs.
+     */
+    @Bean
+    @Order(2)
+    SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) {
+        http
+                .securityMatcher("/auth/change/**", "/auth/confirm/**")
+                .authorizeHttpRequests(requests -> requests.anyRequest().authenticated())
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
+
+        return http.build();
+    }
+
     @Bean
     @DependsOn("authenticationProvider")
-    @Order(2)
+    @Order(3)
     SecurityFilterChain securityFilterChain(HttpSecurity http) {
         http
                 .authorizeHttpRequests((requests) -> requests

@@ -23,7 +23,10 @@ services:
 
   auth-cache:
     image: redis:8.6
-    command: redis-server --requirepass RDSpassword
+    # No requirepass in dev: it's a local token cache with nothing sensitive, and Spring Boot's
+    # docker-compose support can't read a --requirepass password from the command (it would connect
+    # with an empty password and fail with NOAUTH). A passwordless dev Redis avoids the whole issue.
+    # Production sets a password via SPRING_DATA_REDIS_PASSWORD and does not use docker-compose.
     ports:
       - "9922:6379"
 

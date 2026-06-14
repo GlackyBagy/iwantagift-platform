@@ -1,3 +1,7 @@
+logging:
+  level:
+    org.springframework.security: DEBUG
+
 spring:
   docker:
     compose:
@@ -22,7 +26,7 @@ spring:
     redis:
       host: localhost
       port: 9922
-      password: RDSpassword
+      # No password in dev — auth-cache runs without requirepass (see auth/compose.yml).
 server:
   port: 8091
   servlet:
