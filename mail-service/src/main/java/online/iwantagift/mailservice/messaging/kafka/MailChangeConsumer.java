@@ -1,6 +1,7 @@
 package online.iwantagift.mailservice.messaging.kafka;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import online.iwantagift.mailservice.MailService;
 import online.iwantagift.mailservice.MessageBuilder;
 import online.iwantagift.mailservice.models.events.CredentialsUpdateEvent;
@@ -12,6 +13,7 @@ import tools.jackson.databind.ObjectMapper;
 
 @Component
 @RequiredArgsConstructor
+@Slf4j
 public class MailChangeConsumer {
 
     public static final String PASSWORD_RESET_TOPIC = "passwordReset";
@@ -24,10 +26,13 @@ public class MailChangeConsumer {
 
     @KafkaListener(topics = EMAIL_CHANGE_TOPIC)
     void handleEmailChange(String eventStr) {
+        log.info("Received emailChange event from Kafka");
         CredentialsUpdateEvent event = objectMapper.readValue(eventStr, CredentialsUpdateEvent.class);
+        log.info("Processing email change: sending verification mail to {}", event.newEmail());
         mailService.send(
                 MessageBuilder.buildForUpdateEmail(event.newEmail(), event.verificationUrl())
         );
+        log.info("Sent mail change message to {}", event.newEmail());
     }
 
     @KafkaListener(topics = EMAIL_VERIFY_TOPIC)

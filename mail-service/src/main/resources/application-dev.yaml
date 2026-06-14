@@ -7,11 +7,20 @@ spring:
     bootstrap-servers: localhost:9092
   mail:
     host: ${MAIL_HOST:smtp.beget.com}
-    port: ${MAIL_PORT:465}
-    username: ${MAIL_USERNAME:norepy@iwag.online}
+    port: ${MAIL_PORT:2525}
+    username: ${MAIL_USERNAME:noreply@iwag.online}
     password: ${MAIL_PASSWORD}
-    ssl:
-      enabled: true
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+            required: true
+          connectiontimeout: 10000
+          timeout: 10000
+          writetimeout: 10000
+
 
 server:
   port: 9978
