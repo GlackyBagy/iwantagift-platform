@@ -3,7 +3,6 @@ package online.iwantagift.ui.models.payloads;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
 import lombok.Data;
 import online.iwantagift.ui.models.validation.WishValidationGroups;
@@ -30,7 +29,6 @@ public class WishPayload {
     private String url;
 
     @JsonProperty("wish_list_id")
-    @NotNull(groups = {WishValidationGroups.CreateWish.class, WishValidationGroups.UpdateWish.class})
     private UUID wishlistId;
 
     @JsonProperty("default_price")

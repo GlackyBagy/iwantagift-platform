@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import online.iwantagift.ui.models.dto.wl.WishlistDTO;
 import online.iwantagift.ui.services.CurrentUserService;
 import online.iwantagift.ui.services.WishlistService;
+import online.iwantagift.ui.util.WishlistsProcessor;
 import online.iwantagift.ui.util.exceptions.RemoteServiceException;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -16,16 +17,17 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+
+import static online.iwantagift.ui.services.WishlistService.DEFAULT_WISHLIST_TITLE;
 
 @Controller
 @RequiredArgsConstructor
 @Slf4j
 public class ProfileController {
-    private static final String DEFAULT_WISHLIST_TITLE = "DEFAULT_WISHLIST";
+
 
     private final WishlistService wishlistService;
     private final CurrentUserService currentUserService;
@@ -85,8 +87,11 @@ public class ProfileController {
         if (selectedWishlist.isEmpty() && !(allowEmptyWishlists && wishlists.isEmpty()))
             return "error/403";
 
+        List<WishlistDTO> displayWishlists = WishlistsProcessor.sortDefaultFirst(wishlists);
+        WishlistsProcessor.applyDisplayTitles(displayWishlists);
+
         model.addAttribute("wishlistsUnavailable", false);
-        model.addAttribute("wishlists", sortDefaultFirst(wishlists));
+        model.addAttribute("wishlists", displayWishlists);
         model.addAttribute("selectedWishlist", selectedWishlist.orElse(null));
 
         return template;
@@ -103,13 +108,5 @@ public class ProfileController {
                 .filter(wishlist -> DEFAULT_WISHLIST_TITLE.equals(wishlist.getTitle()))
                 .findFirst()
                 .or(() -> wishlists.stream().findFirst());
-    }
-
-    private List<WishlistDTO> sortDefaultFirst(List<WishlistDTO> wishlists) {
-        return wishlists.stream()
-                .sorted(Comparator.comparing((WishlistDTO wishlist) ->
-                                !DEFAULT_WISHLIST_TITLE.equals(wishlist.getTitle()))
-                        .thenComparing(WishlistDTO::getTitle, Comparator.nullsLast(String::compareToIgnoreCase)))
-                .toList();
     }
 }

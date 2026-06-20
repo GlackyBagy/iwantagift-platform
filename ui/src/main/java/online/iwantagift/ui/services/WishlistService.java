@@ -22,6 +22,8 @@ import static online.iwantagift.ui.services.WishService.getCreatedEntityIdOrThro
 @Service
 @RequiredArgsConstructor
 public class WishlistService {
+    public static final String DEFAULT_WISHLIST_TITLE = "DEFAULT_WISHLIST";
+
     private RestClient restClients;
     private final IwagProperties iwagProperties;
     private final ClientHttpRequestFactory requestFactory;

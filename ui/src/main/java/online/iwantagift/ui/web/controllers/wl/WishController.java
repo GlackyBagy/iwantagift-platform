@@ -2,12 +2,14 @@ package online.iwantagift.ui.web.controllers.wl;
 
 import lombok.extern.slf4j.Slf4j;
 import online.iwantagift.ui.models.dto.wl.WishDTO;
+import online.iwantagift.ui.models.dto.wl.WishlistDTO;
 import online.iwantagift.ui.models.mappers.WishMapper;
 import online.iwantagift.ui.models.payloads.WishPayload;
 import online.iwantagift.ui.models.validation.WishValidationGroups;
 import online.iwantagift.ui.services.CurrentUserService;
 import online.iwantagift.ui.services.WishService;
 import online.iwantagift.ui.services.WishlistService;
+import online.iwantagift.ui.util.WishlistsProcessor;
 import online.iwantagift.ui.util.exceptions.RemoteServiceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -18,7 +20,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.UUID;
+
+import static online.iwantagift.ui.services.WishlistService.DEFAULT_WISHLIST_TITLE;
 
 @Controller
 @RequestMapping("/wish")
@@ -56,9 +61,8 @@ public class WishController {
         UUID userId = currentUserService.requireUserId(authentication);
         wishPayload.setOwnerId(userId);
 
-        UUID createdWishId;
         try {
-            createdWishId = wishService.createWish(
+            wishService.createWish(
                     wishPayload, currentUserService.requireAccessToken(authentication));
         } catch (RemoteServiceException e) {
             log.warn(e.getMessage());
@@ -67,7 +71,7 @@ public class WishController {
         UUID wishlistId = wishPayload.getWishlistId();
 
         if (wishlistId == null)
-            return "redirect:/wish/" + createdWishId;
+            return "redirect:/profile";
 
         return "redirect:/wishlist/" + wishlistId;
     }
@@ -135,8 +139,23 @@ public class WishController {
     }
 
     private void addWishlists(Model model, Authentication authentication) {
-        model.addAttribute("wlList", wishlistService.getAllWishlists(
-                currentUserService.requireUserId(authentication)));
+        List<WishlistDTO> wishlists = wishlistService.getAllWishlists(
+                currentUserService.requireUserId(authentication));
+
+        boolean defaultListExists = wishlists.stream().anyMatch(x -> DEFAULT_WISHLIST_TITLE.equals(x.getTitle()));
+
+        if (!defaultListExists)
+            wishlists.add(defaultListPlaceholder());
+
+        WishlistsProcessor.sortDefaultFirst(wishlists);
+        WishlistsProcessor.applyDisplayTitles(wishlists);
+        model.addAttribute("wlList", wishlists);
+    }
+
+    private WishlistDTO defaultListPlaceholder() {
+        var res = new WishlistDTO();
+        res.setTitle(DEFAULT_WISHLIST_TITLE);
+        return res;
     }
 
     private record WishLookup(WishDTO wish, String errorView) {

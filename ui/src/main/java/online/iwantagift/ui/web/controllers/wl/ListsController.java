@@ -8,6 +8,7 @@ import online.iwantagift.ui.models.payloads.WishlistPayload;
 import online.iwantagift.ui.models.validation.WishlistValidationGroups;
 import online.iwantagift.ui.services.CurrentUserService;
 import online.iwantagift.ui.services.WishlistService;
+import online.iwantagift.ui.util.WishlistsProcessor;
 import online.iwantagift.ui.util.exceptions.RemoteServiceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
@@ -18,6 +19,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.UUID;
 
 @Controller
@@ -68,6 +70,8 @@ public class ListsController {
             log.warn(e.getMessage());
             return "error/500";
         }
+
+        WishlistsProcessor.applyDisplayTitles(List.of(wishlist));
 
         model.addAttribute("wishlist", wishlist);
         return "wishlists/index";
