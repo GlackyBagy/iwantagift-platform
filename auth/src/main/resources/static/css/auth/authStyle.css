@@ -1,26 +1,30 @@
+/* Auth-specific: divider between form and sign-up link */
 .auth-divider hr {
     border-color: #2c2c2c;
     opacity: 1;
 }
 
-.hero-card {
-    width: 100%;
-    max-width: 450px;
-    border: 0;
-    border-radius: 28px;
-    background: #121212;
-    box-shadow: 0 18px 60px rgba(33, 37, 41, 0.08);
-}
-
-.btn-auth {
+.auth-link {
+    color: var(--grad-orange-light);
     font-weight: 600;
 }
 
-.form-control-dark.is-invalid {
-    border-color: #fa667b;
-    box-shadow: 0 0 0 0.2rem rgba(250, 102, 123, 0.25);
+.auth-link:hover {
+    color: var(--grad-orange-dark);
 }
 
-.invalid-feedback {
-    color: #fa667b;
+/* Floating labels in dark theme */
+.form-floating .form-label {
+    color: #888;
+}
+
+.form-floating > .form-control-dark:focus ~ label,
+.form-floating > .form-control-dark:not(:placeholder-shown) ~ label {
+    color: #aaa;
+    background-color: transparent;
+}
+
+.form-floating > .form-control-dark {
+    padding-top: 1.625rem;
+    padding-bottom: 0.625rem;
 }

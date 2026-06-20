@@ -2,7 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
 <head th:replace="~{fragments/head :: head(
     title='iwag - Internal Server Error',
-    extraCss=${{'/css/error/errorStyle.css'}})}">
+    extraCss=${#lists.toList({'/css/error/errorStyle.css'})})}">
     <title></title>
 </head>
 <body>

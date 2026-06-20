@@ -11,6 +11,7 @@
 <main class="wishlist-page">
     <div class="container">
         <section class="wishlist-heading mx-auto">
+            <p class="wishlist-eyebrow">Wishlist</p>
             <h1 class="wishlist-title" th:text="${wishlist.title}">Wishlist title</h1>
 
             <div th:if="${wishlist.description != null and !#strings.isEmpty(wishlist.description)}"
@@ -43,14 +44,12 @@
                 <img class="wish-image"
                      th:src="@{/img/logo_load_error.png}"
                      alt="">
-
                 <div>
                     <h2 class="wish-title" th:text="${wish.title}">Wish title</h2>
                     <p class="wish-description"
                        th:if="${wish.description != null and !#strings.isEmpty(wish.description)}"
                        th:text="${wish.description}">Wish description</p>
                 </div>
-
                 <a class="wish-link"
                    th:if="${wish.url != null and !#strings.isEmpty(wish.url)}"
                    th:href="${wish.url}"
@@ -59,7 +58,8 @@
             </article>
         </section>
 
-        <section class="wishlist-empty mx-auto" th:if="${wishlist.wishes == null or #lists.isEmpty(wishlist.wishes)}">
+        <section class="wishlist-empty mx-auto"
+                 th:if="${wishlist.wishes == null or #lists.isEmpty(wishlist.wishes)}">
             <p>This wishlist has no wishes yet.</p>
         </section>
     </div>

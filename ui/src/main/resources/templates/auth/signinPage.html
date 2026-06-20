@@ -2,7 +2,7 @@
 <html lang="en">
 <head th:replace="~{fragments/head :: head(
     title='iwag — Sign in',
-    extraCss=${{'/css/auth/authStyle.css'}})}">
+    extraCss=${#lists.toList({'/css/auth/authStyle.css'})})}">
     <title></title>
 </head>
 <body>

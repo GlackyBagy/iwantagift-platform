@@ -1,58 +1,85 @@
 .home-page {
+    padding-top: 3rem;
     min-height: 100vh;
+}
+
+.home-eyebrow {
+    color: var(--grad-orange-light);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
 }
 
 .home-title {
     color: whitesmoke;
-    font-size: clamp(2rem, 5vw, 3.2rem);
-    font-weight: 700;
-    letter-spacing: -0.03em;
-    margin-bottom: 0.5rem;
+    font-size: clamp(2.3rem, 5vw, 3.8rem);
+    font-weight: 800;
+    letter-spacing: -0.04em;
+    line-height: 0.95;
+    margin-bottom: 0.65rem;
 }
 
 .home-subtitle {
-    color: #a0a0a0;
-    font-size: 1.1rem;
+    color: #aaa;
+    font-size: 1.05rem;
     margin-bottom: 0;
+}
+
+.home-actions {
+    margin-top: 1.75rem;
 }
 
 .home-action-btn {
     min-width: 180px;
     border-radius: 12px;
-    font-weight: 600;
+    font-weight: 700;
+}
+
+/* ── Quick-access cards ── */
+
+.home-cards {
+    margin-top: 3.5rem;
 }
 
 .home-card {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
-    padding: 1.75rem 1.5rem;
-    border: 1px solid #2f2f2f;
-    border-radius: 16px;
-    background-color: #151515;
-    transition: border-color 0.15s, background-color 0.15s;
+    padding: 1.5rem;
+    border: 1px solid #2a2a2a;
+    border-radius: 20px;
+    background:
+        radial-gradient(circle at top right, rgba(250, 102, 123, 0.08), transparent 45%),
+        linear-gradient(145deg, #181818, #111);
+    transition: border-color 0.15s, transform 0.15s;
     height: 100%;
+    text-decoration: none;
 }
 
 .home-card:hover {
-    border-color: #555;
-    background-color: #1c1c1c;
+    border-color: #3a3a3a;
+    transform: translateY(-2px);
+    text-decoration: none;
 }
 
 .home-card-icon {
-    font-size: 1.8rem;
+    font-size: 1.6rem;
     margin-bottom: 0.25rem;
+    line-height: 1;
 }
 
 .home-card-title {
     color: whitesmoke;
-    font-size: 1.15rem;
-    font-weight: 600;
-    margin-bottom: 0.25rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.2rem;
 }
 
 .home-card-text {
-    color: #a0a0a0;
-    font-size: 0.95rem;
+    color: #999;
+    font-size: 0.92rem;
     margin-bottom: 0;
+    line-height: 1.5;
 }
