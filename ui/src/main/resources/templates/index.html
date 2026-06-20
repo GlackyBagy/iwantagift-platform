@@ -1,13 +1,55 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org" lang="en">
-<head th:replace="~{fragments/head :: head(title='IWAG', extraCss=null)}">
+<head th:replace="~{fragments/head :: head(title='iwag — home', extraCss=${#lists.toList({'/css/home/homeStyle.css'})})}">
     <title></title>
 </head>
-<body>   
-    <script src="../static/js/bootstrap.bundle.min.js"></script>
+<body>
     <header th:replace="~{fragments/header :: header}"></header>
-<!--todo-->
+
+    <main class="d-flex flex-column home-page">
+        <div class="container py-5">
+
+            <div class="home-hero text-center mb-5">
+                <h1 class="home-title">What's next?</h1>
+                <p class="home-subtitle">Add a new wish or start a fresh wishlist</p>
+                <div class="home-actions d-flex gap-3 justify-content-center flex-wrap mt-4">
+                    <a th:href="@{/wish/new}" class="btn btn-auth btn-lg home-action-btn">
+                        + Create wish
+                    </a>
+                    <a th:href="@{/wishlist/new}" class="btn btn-outline-light btn-lg home-action-btn">
+                        + Create wishlist
+                    </a>
+                </div>
+            </div>
+
+            <div class="row g-4 justify-content-center">
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <a th:href="@{/profile}" class="home-card text-decoration-none">
+                        <div class="home-card-icon">&#128100;</div>
+                        <h2 class="home-card-title">My profile</h2>
+                        <p class="home-card-text">View your wishlists and wishes</p>
+                    </a>
+                </div>
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <a th:href="@{/wishlist/new}" class="home-card text-decoration-none">
+                        <div class="home-card-icon">&#128222;</div>
+                        <h2 class="home-card-title">New wishlist</h2>
+                        <p class="home-card-text">Organise your wishes into a list and share it</p>
+                    </a>
+                </div>
+                <div class="col-12 col-sm-6 col-lg-4">
+                    <a th:href="@{/settings}" class="home-card text-decoration-none">
+                        <div class="home-card-icon">&#9881;&#65039;</div>
+                        <h2 class="home-card-title">Settings</h2>
+                        <p class="home-card-text">Manage your account and preferences</p>
+                    </a>
+                </div>
+            </div>
+
+        </div>
+    </main>
 
     <footer th:replace="~{fragments/footer :: footer}"></footer>
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
 </body>
 </html>

@@ -1,0 +1,58 @@
+.home-page {
+    min-height: 100vh;
+}
+
+.home-title {
+    color: whitesmoke;
+    font-size: clamp(2rem, 5vw, 3.2rem);
+    font-weight: 700;
+    letter-spacing: -0.03em;
+    margin-bottom: 0.5rem;
+}
+
+.home-subtitle {
+    color: #a0a0a0;
+    font-size: 1.1rem;
+    margin-bottom: 0;
+}
+
+.home-action-btn {
+    min-width: 180px;
+    border-radius: 12px;
+    font-weight: 600;
+}
+
+.home-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 1.75rem 1.5rem;
+    border: 1px solid #2f2f2f;
+    border-radius: 16px;
+    background-color: #151515;
+    transition: border-color 0.15s, background-color 0.15s;
+    height: 100%;
+}
+
+.home-card:hover {
+    border-color: #555;
+    background-color: #1c1c1c;
+}
+
+.home-card-icon {
+    font-size: 1.8rem;
+    margin-bottom: 0.25rem;
+}
+
+.home-card-title {
+    color: whitesmoke;
+    font-size: 1.15rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.home-card-text {
+    color: #a0a0a0;
+    font-size: 0.95rem;
+    margin-bottom: 0;
+}

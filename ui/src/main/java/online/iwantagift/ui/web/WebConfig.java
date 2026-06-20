@@ -13,7 +13,6 @@ public class WebConfig implements WebMvcConfigurer {
     private final AuthPageRedirectInterceptor authPageRedirectInterceptor;
     @Override
     public void addViewControllers(ViewControllerRegistry registry) {
-        registry.addViewController("/").setViewName("index");
         registry.addViewController("/landing").setViewName("landing");
     }
 
