@@ -6,6 +6,7 @@ import online.iwantagift.ui.models.dto.wl.WishlistDTO;
 import online.iwantagift.ui.services.CurrentUserService;
 import online.iwantagift.ui.services.WishlistService;
 import online.iwantagift.ui.util.exceptions.RemoteServiceException;
+import org.springframework.security.authentication.AnonymousAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -43,9 +44,15 @@ public class ProfileController {
                                  @RequestParam(required = false) UUID listId,
                                  Model model,
                                  Authentication authentication) {
-        UUID currentUserId = currentUserService.requireUserId(authentication);
-        if (currentUserId.equals(profileOwnerId))
-            return listId == null ? "redirect:/profile" : "redirect:/profile?listId=" + listId;
+        boolean isAuthenticated = authentication != null
+                && authentication.isAuthenticated()
+                && !(authentication instanceof AnonymousAuthenticationToken);
+
+        if (isAuthenticated) {
+            UUID currentUserId = currentUserService.requireUserId(authentication);
+            if (currentUserId.equals(profileOwnerId))
+                return listId == null ? "redirect:/profile" : "redirect:/profile?listId=" + listId;
+        }
 
         return renderProfile(profileOwnerId, listId, model, "profile/foreign", false);
     }
