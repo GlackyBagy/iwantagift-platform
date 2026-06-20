@@ -4,6 +4,7 @@ import online.iwantagift.auth.config.IwagProperties;
 import online.iwantagift.auth.models.dto.EmailChangeVerification;
 import online.iwantagift.auth.services.AccountService;
 import online.iwantagift.auth.services.VerificationTokenService;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -11,6 +12,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -27,9 +30,14 @@ class TokenVerifierControllerTest {
 
     private final IwagProperties iwagProperties = new IwagProperties();
 
+    @BeforeEach
+    void setUp() throws MalformedURLException {
+        configureUiBaseUrl("https://ui.example.com");
+    }
+
     @Test
-    void verifyEmail_changedEmail_updatesEmailRevokesTokenAndRedirects() {
-        iwagProperties.setUiBaseUrl("https://ui.example.com");
+    void verifyEmail_changedEmail_updatesEmailRevokesTokenAndRedirects() throws MalformedURLException {
+        configureUiBaseUrl("https://ui.example.com");
         when(verificationTokenService.findEmailChange("token")).thenReturn(Optional.of(
                 new EmailChangeVerification("old@example.com", "new@example.com")
         ));
@@ -45,8 +53,8 @@ class TokenVerifierControllerTest {
     }
 
     @Test
-    void verifyEmail_unchangedEmail_verifiesEmailAndRedirects() {
-        iwagProperties.setUiBaseUrl("https://ui.example.com/");
+    void verifyEmail_unchangedEmail_verifiesEmailAndRedirects() throws MalformedURLException {
+        configureUiBaseUrl("https://ui.example.com/");
         when(verificationTokenService.findEmailChange("token")).thenReturn(Optional.of(
                 new EmailChangeVerification("user@example.com", "user@example.com")
         ));
@@ -93,10 +101,18 @@ class TokenVerifierControllerTest {
     }
 
     private TokenVerifierController controller() {
-        return new TokenVerifierController(
+        TokenVerifierController controller = new TokenVerifierController(
                 verificationTokenService,
                 accountService,
                 iwagProperties
         );
+        controller.init();
+        return controller;
+    }
+
+    private void configureUiBaseUrl(String baseUrl) throws MalformedURLException {
+        IwagProperties.ServiceProperties uiProps = new IwagProperties.ServiceProperties();
+        uiProps.setBaseUrl(URI.create(baseUrl).toURL());
+        iwagProperties.getServices().put("ui", uiProps);
     }
 }

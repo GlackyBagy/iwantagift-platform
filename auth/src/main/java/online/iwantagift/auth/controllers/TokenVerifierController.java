@@ -28,8 +28,10 @@ public class TokenVerifierController {
 
     @PostConstruct
     protected void init(){
+        var uiProps = iwagProperties.requireService("ui");
+
         this.settingsUrl = UriComponentsBuilder
-                .fromUriString(iwagProperties.getUiBaseUrl())
+                .fromUriString(uiProps.requireBaseUrl().toString())
                 .path("/settings")
                 .build()
                 .toUriString();

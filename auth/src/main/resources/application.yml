@@ -27,9 +27,8 @@ server:
 
 iwag:
   services:
-    wishlist:
-      kafka-topics: ${IWAG_WISHLIST_KAFKA_TOPICS}
-    profile:
-      kafka-topics: ${IWAG_PROFILE_KAFKA_TOPICS}
-    mail:
-      kafka-topics: ${IWAG_MAIL_KAFKA_TOPICS:emailChange,emailVerify,passwordReset,passwordResetRequest}
+    auth:
+      base-url: ${IWAG_AUTH_BASE_URL}
+    ui:
+      base-url: ${IWAG_UI_BASE_URL}
+      client-secret: ${IWAG_UI_OAUTH2_CLIENT_SECRET}

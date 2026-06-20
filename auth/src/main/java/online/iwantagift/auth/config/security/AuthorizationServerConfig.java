@@ -6,19 +6,20 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import lombok.extern.slf4j.Slf4j;
+import online.iwantagift.auth.config.IwagProperties;
 import online.iwantagift.auth.services.AccountService;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.MediaType;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.config.annotation.web.configurers.oauth2.server.authorization.OAuth2AuthorizationServerConfigurer;
-
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.endpoint.OidcParameterNames;
@@ -29,14 +30,14 @@ import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
-import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.server.authorization.token.JwtEncodingContext;
 import org.springframework.security.oauth2.server.authorization.token.OAuth2TokenCustomizer;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
+import org.springframework.web.util.UriComponentsBuilder;
 
+import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.security.KeyFactory;
@@ -62,12 +63,6 @@ public class AuthorizationServerConfig {
     @Value("${iwag.auth.jwt.key-path:data/auth-jwt-private.pem}")
     private String jwtKeyPath;
 
-    @Bean
-    AuthorizationServerSettings authorizationServerSettings() {
-        return AuthorizationServerSettings.builder()
-                .issuer("http://localhost:8091") // todo load from application.yml
-                .build();
-    }
 
     @Bean
     @Order(1)
@@ -156,7 +151,7 @@ public class AuthorizationServerConfig {
             }
             Files.writeString(keyFile, derToPem(generated.getPrivate().getEncoded()));
             log.warn("No RSA signing key at {} — generated and persisted a new one. "
-                    + "Provide a stable key (iwag.auth.jwt.key-path) for production.",
+                            + "Provide a stable key (iwag.auth.jwt.key-path) for production.",
                     keyFile.toAbsolutePath());
             return generated;
         } catch (Exception ex) {
@@ -198,22 +193,19 @@ public class AuthorizationServerConfig {
     }
 
     @Bean
-    RegisteredClientRepository registeredClientRepository(PasswordEncoder passwordEncoder) {
-        // The internal id must be STABLE across restarts: persisted authorizations in
-        // oauth2_authorization reference it via registered_client_id, and on load the
-        // JdbcOAuth2AuthorizationService resolves the client by this id. A random UUID here would
-        // orphan every persisted authorization after a restart (and break refresh again).
+    RegisteredClientRepository registeredClientRepository(PasswordEncoder passwordEncoder, IwagProperties iwagProperties) throws URISyntaxException {
+        IwagProperties.ServiceProperties uiProps = iwagProperties.requireService("ui");
+        String redirectUri = UriComponentsBuilder.fromUri(uiProps.requireBaseUrl().toURI())
+                .path("/login/oauth2/code/iwag-ui")
+                .toUriString();
+
         RegisteredClient uiClient = RegisteredClient.withId("iwag-ui")
                 .clientId("iwag-ui")
-                // The global PasswordEncoder bean (BCrypt) is also used by the authorization server
-                // to verify client secrets, so the secret must be stored encoded with it —
-                // "{noop}..." would fail with 401 invalid_client at the token endpoint.
-                .clientSecret(passwordEncoder.encode("dev-secret")) // todo move secret to config
-
+                .clientSecret(passwordEncoder.encode(uiProps.requireClientSecret()))
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-                .redirectUri("http://localhost:8080/login/oauth2/code/iwag-ui")
+                .redirectUri(redirectUri)
                 .scope("openid")
                 .scope("profile")
                 .build();

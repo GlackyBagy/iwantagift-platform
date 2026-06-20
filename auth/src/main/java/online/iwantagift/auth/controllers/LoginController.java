@@ -1,5 +1,6 @@
 package online.iwantagift.auth.controllers;
 
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import online.iwantagift.auth.config.IwagProperties;
 import online.iwantagift.auth.models.dto.LoginForm;
@@ -17,11 +18,18 @@ public class LoginController {
 
     private final IwagProperties iwagProperties;
 
+    private String uiBaseUrl;
+
+    @PostConstruct
+    private void init(){
+        uiBaseUrl = iwagProperties.requireService("ui").requireBaseUrl().toString();
+    }
+
     @GetMapping("/login")
     public String login(@RequestParam(required = false) String error,
                         @RequestParam(required = false) String oauthError,
                         Model model) {
-        model.addAttribute("uiBaseUrl", iwagProperties.getUiBaseUrl());
+        model.addAttribute("uiBaseUrl", uiBaseUrl);
 
         LoginForm form = new LoginForm();
         model.addAttribute(FORM_ATTRIBUTE, form);

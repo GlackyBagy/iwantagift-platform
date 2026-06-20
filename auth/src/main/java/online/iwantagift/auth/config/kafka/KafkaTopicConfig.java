@@ -8,19 +8,14 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.KafkaAdmin;
 
-import java.util.Collection;
-
 @Configuration
 @Profile("dev")
 public class KafkaTopicConfig {
 
     @Bean
     public KafkaAdmin.NewTopics kafkaTopics(IwagProperties iwagProperties) {
-        NewTopic[] topics = iwagProperties.getServices()
-                .values()
+        NewTopic[] topics = iwagProperties.getUsingKafkaTopics()
                 .stream()
-                .map(IwagProperties.ServiceProperties::getKafkaTopics)
-                .flatMap(Collection::stream)
                 .distinct()
                 .map(topic -> TopicBuilder.name(topic).build())
                 .toArray(NewTopic[]::new);

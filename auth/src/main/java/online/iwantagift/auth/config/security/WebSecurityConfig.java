@@ -13,10 +13,14 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import java.net.URISyntaxException;
 
 @Configuration
 @EnableWebSecurity
@@ -37,7 +41,7 @@ public class WebSecurityConfig {
         http
                 .securityMatcher("/auth/change/**", "/auth/confirm/**")
                 .authorizeHttpRequests(requests -> requests.anyRequest().authenticated())
-                .csrf(csrf -> csrf.disable())
+                .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2ResourceServer(oauth2 -> oauth2.jwt(Customizer.withDefaults()));
@@ -48,7 +52,12 @@ public class WebSecurityConfig {
     @Bean
     @DependsOn("authenticationProvider")
     @Order(3)
-    SecurityFilterChain securityFilterChain(HttpSecurity http) {
+    SecurityFilterChain securityFilterChain(HttpSecurity http) throws URISyntaxException {
+        IwagProperties.ServiceProperties uiProps = iwagProperties.requireService("ui");
+        String successRedirectUri = UriComponentsBuilder.fromUri(uiProps.requireBaseUrl().toURI())
+                .path("/auth/signin")
+                .toUriString();
+
         http
                 .authorizeHttpRequests((requests) -> requests
                         .requestMatchers("/auth/signup")
@@ -67,7 +76,7 @@ public class WebSecurityConfig {
                         .loginPage("/login")
                         // Used only when there is no saved OAuth2 request (direct visit to /login):
                         // sends the user into the OAuth2 flow on the ui so the session is not "lost".
-                        .defaultSuccessUrl(iwagProperties.getUiBaseUrl() + "/auth/signin")
+                        .defaultSuccessUrl(successRedirectUri)
                         .permitAll()
                 )
                 .logout(Customizer.withDefaults());
