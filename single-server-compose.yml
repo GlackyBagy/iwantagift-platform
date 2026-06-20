@@ -1,0 +1,141 @@
+services:
+
+  # --- Infrastructure ---
+
+  auth-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: auth
+      POSTGRES_USER: ${AUTH_DB_USER}
+      POSTGRES_PASSWORD: ${AUTH_DB_PASSWORD}
+
+  wl-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: wishlist
+      POSTGRES_USER: ${WL_DB_USER}
+      POSTGRES_PASSWORD: ${WL_DB_PASSWORD}
+
+  ui-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: ui
+      POSTGRES_USER: ${UI_DB_USER}
+      POSTGRES_PASSWORD: ${UI_DB_PASSWORD}
+
+  profile-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: profile
+      POSTGRES_USER: ${PROFILE_DB_USER}
+      POSTGRES_PASSWORD: ${PROFILE_DB_PASSWORD}
+
+  auth-redis:
+    image: redis:8.6
+
+  wl-redis:
+    image: redis:8.6
+    command: ["redis-server", "--requirepass", "${WL_REDIS_PASSWORD}"]
+
+  broker:
+    image: apache/kafka:4.2.0
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@broker:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+
+  # --- Application services ---
+
+  auth-service:
+    image: ghcr.io/glackybagy/iwantagift-platform/auth:${IMAGE_TAG}
+    env_file: .env
+    environment:
+      SPRING_APPLICATION_NAME: auth
+      SERVER_PORT: 8091
+      SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/auth
+      SPRING_DATASOURCE_USERNAME: ${AUTH_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${AUTH_DB_PASSWORD}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_DATA_REDIS_HOST: auth-redis
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: broker:9092
+    restart: unless-stopped
+    ports:
+      - "8091:8091"
+    depends_on:
+      - auth-db
+      - auth-redis
+      - broker
+
+  wishlist-service:
+    image: ghcr.io/glackybagy/iwantagift-platform/wishlist:${IMAGE_TAG}
+    env_file: .env
+    environment:
+      SPRING_APPLICATION_NAME: wishlist
+      SERVER_PORT: 8001
+      SPRING_DATASOURCE_URL: jdbc:postgresql://wl-db:5432/wishlist
+      SPRING_DATASOURCE_USERNAME: ${WL_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${WL_DB_PASSWORD}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_DATA_REDIS_HOST: wl-redis
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_PASSWORD: ${WL_REDIS_PASSWORD}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: broker:9092
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    depends_on:
+      - wl-db
+      - wl-redis
+      - broker
+
+  ui-service:
+    image: ghcr.io/glackybagy/iwantagift-platform/ui:${IMAGE_TAG}
+    env_file: .env
+    environment:
+      SPRING_APPLICATION_NAME: ui
+      SERVER_PORT: 8080
+      SPRING_DATASOURCE_URL: jdbc:postgresql://ui-db:5432/ui
+      SPRING_DATASOURCE_USERNAME: ${UI_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${UI_DB_PASSWORD}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    depends_on:
+      - ui-db
+      - auth-service
+
+  profile-service:
+    image: ghcr.io/glackybagy/iwantagift-platform/profile:${IMAGE_TAG}
+    env_file: .env
+    environment:
+      SPRING_APPLICATION_NAME: profile
+      SERVER_PORT: 8002
+      SPRING_DATASOURCE_URL: jdbc:postgresql://profile-db:5432/profile
+      SPRING_DATASOURCE_USERNAME: ${PROFILE_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${PROFILE_DB_PASSWORD}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: broker:9092
+    restart: unless-stopped
+    ports:
+      - "8002:8002"
+    depends_on:
+      - profile-db
+      - broker
+
+  mail-service:
+    image: ghcr.io/glackybagy/iwantagift-platform/mail-service:${IMAGE_TAG}
+    env_file: .env
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: broker:9092
+    restart: unless-stopped
+    depends_on:
+      - broker

@@ -16,5 +16,9 @@
     <name>productprice-microservice</name>
     <description>productprice</description>
 
+    <properties>
+        <spring-boot.build-image.skip>true</spring-boot.build-image.skip>
+    </properties>
+
     <dependencies/>
 </project>
