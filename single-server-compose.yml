@@ -79,7 +79,7 @@ services:
     env_file: .env
     environment:
       SPRING_APPLICATION_NAME: auth
-      SERVER_PORT: 8091
+      SERVER_PORT: ${AUTH_PORT}
       SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/auth
       SPRING_DATASOURCE_USERNAME: ${AUTH_DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${AUTH_DB_PASSWORD}
@@ -91,8 +91,6 @@ services:
     volumes:
       - ./data/auth:/secrets
     restart: unless-stopped
-    ports:
-      - "8091:8091"
     depends_on:
       - auth-db
       - auth-redis
@@ -103,7 +101,7 @@ services:
     env_file: .env
     environment:
       SPRING_APPLICATION_NAME: wishlist
-      SERVER_PORT: 8001
+      SERVER_PORT: ${WL_PORT}
       SPRING_DATASOURCE_URL: jdbc:postgresql://wl-db:5432/wishlist
       SPRING_DATASOURCE_USERNAME: ${WL_DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${WL_DB_PASSWORD}
@@ -113,8 +111,6 @@ services:
       SPRING_DATA_REDIS_PASSWORD: ${WL_REDIS_PASSWORD}
       SPRING_KAFKA_BOOTSTRAP_SERVERS: broker:9092
     restart: unless-stopped
-    ports:
-      - "8001:8001"
     depends_on:
       - wl-db
       - wl-redis
@@ -125,14 +121,12 @@ services:
     env_file: .env
     environment:
       SPRING_APPLICATION_NAME: ui
-      SERVER_PORT: 8080
+      SERVER_PORT: ${UI_PORT}
       SPRING_DATASOURCE_URL: jdbc:postgresql://ui-db:5432/ui
       SPRING_DATASOURCE_USERNAME: ${UI_DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${UI_DB_PASSWORD}
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
     restart: unless-stopped
-    ports:
-      - "8080:8080"
     depends_on:
       - ui-db
       - auth-service
@@ -142,15 +136,13 @@ services:
     env_file: .env
     environment:
       SPRING_APPLICATION_NAME: profile
-      SERVER_PORT: 8002
+      SERVER_PORT: ${PROFILE_PORT}
       SPRING_DATASOURCE_URL: jdbc:postgresql://profile-db:5432/profile
       SPRING_DATASOURCE_USERNAME: ${PROFILE_DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${PROFILE_DB_PASSWORD}
       SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
       SPRING_KAFKA_BOOTSTRAP_SERVERS: broker:9092
     restart: unless-stopped
-    ports:
-      - "8002:8002"
     depends_on:
       - profile-db
       - broker
@@ -164,6 +156,23 @@ services:
     depends_on:
       - broker
 
+  # --- Reverse proxy ---
+
+  caddy:
+    image: caddy:2-alpine
+    env_file: .env
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+    restart: unless-stopped
+    depends_on:
+      - ui-service
+      - auth-service
+
 volumes:
   auth-db-data:
   wl-db-data:
@@ -172,3 +181,4 @@ volumes:
   auth-redis-data:
   wl-redis-data:
   broker-data:
+  caddy-data:
