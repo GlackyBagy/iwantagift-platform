@@ -1,22 +1,58 @@
+logging:
+  level:
+    org.springframework.security: ${LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_SECURITY:INFO}
+
 spring:
-  config:
-    import: classpath:application.yaml
   application:
     name: ${SPRING_APPLICATION_NAME:ui}
+  docker:
+    compose:
+      file: ${SPRING_DOCKER_COMPOSE_FILE:ui/compose.yml}
+      enabled: ${SPRING_DOCKER_COMPOSE_ENABLED:false}
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME:org.postgresql.Driver}
   security:
     oauth2:
       client:
         registration:
           iwag-ui:
             provider: ${IWAG_OAUTH2_CLIENT_PROVIDER:iwag-auth}
+            client-id: ${IWAG_OAUTH2_CLIENT_ID}
+            client-secret: ${IWAG_OAUTH2_CLIENT_SECRET}
             authorization-grant-type: ${IWAG_OAUTH2_AUTHORIZATION_GRANT_TYPE:authorization_code}
-            redirect-uri: ${IWAG_OAUTH2_REDIRECT_URI:{baseUrl}/login/oauth2/code/{registrationId}}
+            redirect-uri: "${IWAG_OAUTH2_REDIRECT_URI:{baseUrl}/login/oauth2/code/{registrationId}}"
+            scope:
+              - ${IWAG_OAUTH2_SCOPE_OPENID:openid}
+              - ${IWAG_OAUTH2_SCOPE_PROFILE:profile}
+        provider:
+          iwag-auth:
+            # No issuer-uri on purpose: it triggers eager OIDC discovery at startup, which would
+            # make the ui fail to boot whenever auth is down. The endpoints below define the
+            # provider fully, so discovery is not needed.
+            authorization-uri: ${IWAG_OAUTH2_PROVIDER_AUTHORIZATION_URI}
+            token-uri: ${IWAG_OAUTH2_PROVIDER_TOKEN_URI}
+            jwk-set-uri: ${IWAG_OAUTH2_PROVIDER_JWK_SET_URI}
+            user-info-uri: ${IWAG_OAUTH2_PROVIDER_USER_INFO_URI}
+            user-name-attribute: ${IWAG_OAUTH2_PROVIDER_USER_NAME_ATTRIBUTE:sub}
+  servlet:
+    multipart:
+      max-file-size: ${IWAG_MULTIPART_MAX_FILE_SIZE:50MB}
+      max-request-size: ${IWAG_MULTIPART_MAX_REQUEST_SIZE:55MB}
+
+server:
+  port: ${SERVER_PORT:8080}
 
 iwag:
   services:
     auth:
+      url: ${IWAG_AUTH_URL}
       use-https: ${IWAG_AUTH_USE_HTTPS:true}
     wishlists:
+      url: ${IWAG_WISHLISTS_URL}
       use-https: ${IWAG_WISHLISTS_USE_HTTPS:true}
     profile:
+      url: ${IWAG_PROFILE_URL}
       use-https: ${IWAG_PROFILE_USE_HTTPS:true}
