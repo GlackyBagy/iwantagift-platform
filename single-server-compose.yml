@@ -8,6 +8,9 @@ services:
       POSTGRES_DB: auth
       POSTGRES_USER: ${AUTH_DB_USER}
       POSTGRES_PASSWORD: ${AUTH_DB_PASSWORD}
+    volumes:
+      - auth-db-data:/var/lib/postgresql/data
+    restart: unless-stopped
 
   wl-db:
     image: postgres:15-alpine
@@ -15,6 +18,9 @@ services:
       POSTGRES_DB: wishlist
       POSTGRES_USER: ${WL_DB_USER}
       POSTGRES_PASSWORD: ${WL_DB_PASSWORD}
+    volumes:
+      - wl-db-data:/var/lib/postgresql/data
+    restart: unless-stopped
 
   ui-db:
     image: postgres:15-alpine
@@ -22,6 +28,9 @@ services:
       POSTGRES_DB: ui
       POSTGRES_USER: ${UI_DB_USER}
       POSTGRES_PASSWORD: ${UI_DB_PASSWORD}
+    volumes:
+      - ui-db-data:/var/lib/postgresql/data
+    restart: unless-stopped
 
   profile-db:
     image: postgres:15-alpine
@@ -29,13 +38,22 @@ services:
       POSTGRES_DB: profile
       POSTGRES_USER: ${PROFILE_DB_USER}
       POSTGRES_PASSWORD: ${PROFILE_DB_PASSWORD}
+    volumes:
+      - profile-db-data:/var/lib/postgresql/data
+    restart: unless-stopped
 
   auth-redis:
     image: redis:8.6
+    volumes:
+      - auth-redis-data:/data
+    restart: unless-stopped
 
   wl-redis:
     image: redis:8.6
     command: ["redis-server", "--requirepass", "${WL_REDIS_PASSWORD}"]
+    volumes:
+      - wl-redis-data:/data
+    restart: unless-stopped
 
   broker:
     image: apache/kafka:4.2.0
@@ -50,6 +68,9 @@ services:
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+    volumes:
+      - broker-data:/var/lib/kafka/data
+    restart: unless-stopped
 
   # --- Application services ---
 
@@ -66,6 +87,9 @@ services:
       SPRING_DATA_REDIS_HOST: auth-redis
       SPRING_DATA_REDIS_PORT: 6379
       SPRING_KAFKA_BOOTSTRAP_SERVERS: broker:9092
+      IWAG_AUTH_JWT_KEY_PATH: /secrets/auth-jwt-private.pem
+    volumes:
+      - ./data/auth:/secrets
     restart: unless-stopped
     ports:
       - "8091:8091"
@@ -139,3 +163,12 @@ services:
     restart: unless-stopped
     depends_on:
       - broker
+
+volumes:
+  auth-db-data:
+  wl-db-data:
+  ui-db-data:
+  profile-db-data:
+  auth-redis-data:
+  wl-redis-data:
+  broker-data:
