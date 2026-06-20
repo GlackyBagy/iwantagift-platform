@@ -157,8 +157,7 @@ public class WishlistService {
      * Returns the user's default wishlist, creating it when absent.
      *
      * <p>Creation is idempotent under concurrent calls because the repository
-     * insert resolves conflicts on the unique title and owner pair and returns
-     * the database row selected by that key.</p>
+     * insert resolves conflicts (does nothing) on the unique title and owner pair.</p>
      *
      * @param userId owner of the default wishlist
      * @return existing or newly created default wishlist
@@ -172,7 +171,9 @@ public class WishlistService {
                     wishlist.setOwnerId(userId);
                     wishlist.setTitle(DEFAULT_WISHLIST_TITLE);
                     wishlist.setDescription(DEFAULT_WISHLIST_DESCRIPTION);
-                    return listRepository.idempotentInsert(wishlist);
+                    listRepository.idempotentInsert(wishlist);
+
+                    return wishlist;
                 });
     }
 

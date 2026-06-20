@@ -26,10 +26,9 @@ public interface WishlistRepository extends JpaRepository<Wishlist, UUID> {
                                    :#{#wishlist.ownerId}
                                )
                                ON CONFLICT (title, owner_id)
-                               DO UPDATE SET title = EXCLUDED.title
-                               RETURNING *
+                               DO NOTHING
                     """, nativeQuery = true
     )
     @Modifying
-    Wishlist idempotentInsert(Wishlist wishlist);
+    void idempotentInsert(Wishlist wishlist);
 }

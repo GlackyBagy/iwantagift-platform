@@ -227,7 +227,6 @@ class WishlistServiceTest {
     void getOrCreateDefaultList_whenMissing_savesDefaultWishlist() {
         UUID ownerId = UUID.randomUUID();
         when(lr.findByOwnerIdAndTitle(ownerId, "DEFAULT_WISHLIST")).thenReturn(Optional.empty());
-        when(lr.idempotentInsert(any(Wishlist.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         Wishlist result = service.getOrCreateDefaultList(ownerId);
 
