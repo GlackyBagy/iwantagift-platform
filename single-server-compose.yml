@@ -88,6 +88,7 @@ services:
       SPRING_DATA_REDIS_PORT: 6379
       SPRING_KAFKA_BOOTSTRAP_SERVERS: broker:9092
       IWAG_AUTH_JWT_KEY_PATH: /secrets/auth-jwt-private.pem
+    user: ${DEPLOY_USER_UID}
     volumes:
       - ./data/auth:/secrets
     restart: unless-stopped
