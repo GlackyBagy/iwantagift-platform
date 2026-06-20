@@ -8,6 +8,7 @@ import online.iwantagift.ui.models.payloads.WishPayload;
 import online.iwantagift.ui.util.exceptions.HttpErrorHandler;
 import online.iwantagift.ui.util.exceptions.RemoteServiceException;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.client.ClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestClient;
@@ -31,14 +32,14 @@ public class WishService {
                 .build();
     }
 
-    public UUID createWish(WishPayload payload) {
+    public UUID createWish(WishPayload payload, String accessToken) {
         var response = restClients
                 .post()
                 .uri("/api/v1/wish")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
                 .body(payload)
                 .retrieve()
                 .onStatus(new HttpErrorHandler());
-
 
         return getCreatedEntityIdOrThrow(response);
     }
@@ -65,10 +66,11 @@ public class WishService {
                 .getBody();
     }
 
-    public void updateWish(WishPayload payload) {
-         restClients.
-                patch()
+    public void updateWish(WishPayload payload, String accessToken) {
+        restClients
+                .patch()
                 .uri("/api/v1/wish")
+                .header(HttpHeaders.AUTHORIZATION, "Bearer " + accessToken)
                 .body(payload)
                 .retrieve()
                 .onStatus(new HttpErrorHandler())

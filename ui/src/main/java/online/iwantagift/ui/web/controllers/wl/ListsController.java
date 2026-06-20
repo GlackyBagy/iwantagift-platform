@@ -48,7 +48,8 @@ public class ListsController {
         UUID createWishlistId;
 
         try {
-            createWishlistId = wishlistService.createWishlist(wishlistPayload);
+            createWishlistId = wishlistService.createWishlist(
+                    wishlistPayload, currentUserService.requireAccessToken(authentication));
         } catch (RemoteServiceException e) {
             log.warn(e.getMessage());
             return "error/500";
@@ -103,7 +104,8 @@ public class ListsController {
         try {
             wishlistPayload.setId(listId);
             wishlistPayload.setOwnerId(userId);
-            wishlistService.updateWishlist(wishlistPayload);
+            wishlistService.updateWishlist(
+                    wishlistPayload, currentUserService.requireAccessToken(authentication));
             return "redirect:/wishlist/" + listId;
         } catch (RemoteServiceException e) {
             log.warn(e.getMessage());

@@ -58,7 +58,8 @@ public class WishController {
 
         UUID createdWishId;
         try {
-            createdWishId = wishService.createWish(wishPayload);
+            createdWishId = wishService.createWish(
+                    wishPayload, currentUserService.requireAccessToken(authentication));
         } catch (RemoteServiceException e) {
             log.warn(e.getMessage());
             return "error/500";
@@ -100,7 +101,7 @@ public class WishController {
 
         try {
             wishPayload.setId(wishId);
-            wishService.updateWish(wishPayload);
+            wishService.updateWish(wishPayload, currentUserService.requireAccessToken(authentication));
             return "redirect:/wishlist/" + wishPayload.getWishlistId();
         } catch (RemoteServiceException e) {
             log.debug(e.getMessage());
