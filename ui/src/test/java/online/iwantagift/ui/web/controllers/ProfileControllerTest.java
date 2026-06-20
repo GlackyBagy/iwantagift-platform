@@ -96,6 +96,7 @@ public class ProfileControllerTest {
         Authentication authentication = mock(Authentication.class);
 
         when(currentUserService.requireUserId(any())).thenReturn(userId);
+        when(authentication.isAuthenticated()).thenReturn(true);
 
         mockMvc.perform(get("/profile/{ownerId}", userId)
                         .principal(authentication)

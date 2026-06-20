@@ -1,5 +1,6 @@
 package online.iwantagift.ui.web.controllers;
 
+import online.iwantagift.ui.services.AuthService;
 import online.iwantagift.ui.services.CurrentUserService;
 import online.iwantagift.ui.services.ProfileService;
 import online.iwantagift.ui.web.controllers.settings.SettingsController;
@@ -38,6 +39,9 @@ public class SettingsControllerTest {
     private CurrentUserService currentUserService;
     @MockitoBean
     private ProfileService profileService;
+    @MockitoBean
+    private AuthService authService;
+
     @Test
     void settings_returnsSettingsView() throws Exception {
         UUID userId = UUID.randomUUID();
