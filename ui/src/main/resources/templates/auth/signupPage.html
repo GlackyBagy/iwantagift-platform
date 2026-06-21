@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/head :: head(title='iwag — Sign up', extraCss=${#lists.toList({'/css/form/formStyle.css', '/css/auth/authStyle.css'})})}">
+    <title>iwag — Sign up</title>
+</head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="form-page">
+    <div class="container">
+        <div class="form-card">
+            <p class="form-eyebrow">Account</p>
+            <h1 class="form-title">Sign up</h1>
+            <form id="signupForm" th:action="@{/auth/signup}" th:object="${credentialsDTO}" method="post">
+
+                <div class="form-field">
+                    <label class="form-label" th:for="${#ids.next('nickname')}">Nickname</label>
+                    <input type="text" class="form-control form-control-dark"
+                           placeholder="Enter nickname" th:field="*{nickname}"
+                           th:classappend="${#fields.hasErrors('nickname')} ? 'is-invalid' : ''">
+                    <div class="invalid-feedback"
+                         th:if="${#fields.hasErrors('nickname')}"
+                         th:errors="*{nickname}"></div>
+                </div>
+
+                <div class="form-field">
+                    <label class="form-label" th:for="${#ids.next('email')}">Email</label>
+                    <input type="email" class="form-control form-control-dark"
+                           placeholder="Enter email" th:field="*{email}"
+                           th:classappend="${#fields.hasErrors('email')} ? 'is-invalid' : ''">
+                    <div class="invalid-feedback d-block"
+                         th:if="${#fields.hasErrors('email')}"
+                         th:errors="*{email}"></div>
+                </div>
+
+                <div class="form-field">
+                    <label class="form-label" th:for="${#ids.next('password')}">Password</label>
+                    <input type="password" class="form-control form-control-dark"
+                           placeholder="Enter password" th:field="*{password}"
+                           th:classappend="${#fields.hasErrors('password')} ? 'is-invalid' : ''">
+                    <div class="invalid-feedback"
+                         th:if="${#fields.hasErrors('password')}"
+                         th:errors="*{password}"></div>
+                </div>
+
+                <div class="form-field">
+                    <label class="form-label" th:for="${#ids.next('confirmPassword')}">Confirm password</label>
+                    <input type="password" class="form-control form-control-dark"
+                           placeholder="Repeat password" th:field="*{confirmPassword}"
+                           th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid' : ''">
+                    <div class="invalid-feedback"
+                         th:if="${#fields.hasErrors('confirmPassword')}"
+                         th:errors="*{confirmPassword}"></div>
+                </div>
+
+                <div id="validationError" class="invalid-feedback d-none" style="display:none!important"
+                     aria-live="polite"></div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-auth w-100">Create account</button>
+                </div>
+
+                <div class="form-divider-text">or</div>
+
+                <div class="d-grid gap-2">
+                    <button type="button" class="btn btn-outline-light" style="border-radius:12px;">
+                        Continue with Google
+                    </button>
+                    <button type="button" class="btn btn-outline-light" style="border-radius:12px;">
+                        Continue with GitHub
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/js/credentialsValidation.js}"></script>
+</body>
+</html>

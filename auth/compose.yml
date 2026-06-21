@@ -1,0 +1,34 @@
+services:
+#  auth:
+#    build:
+#      context: .
+#      dockerfile: Dockerfile
+#    environment:
+#      SPRING_PROFILES_ACTIVE: docker
+#    ports:
+#      - "8080:8080"
+#    depends_on:
+#      - db
+#      - cache
+#      - broker
+
+  auth-db:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: "postgres"
+      POSTGRES_PASSWORD: "postgres"
+      POSTGRES_DB: "auth"
+    ports:
+      - "9912:5432"
+
+  auth-cache:
+    image: redis:8.6
+    # No requirepass in dev: it's a local token cache with nothing sensitive, and Spring Boot's
+    # docker-compose support can't read a --requirepass password from the command (it would connect
+    # with an empty password and fail with NOAUTH). A passwordless dev Redis avoids the whole issue.
+    # Production sets a password via SPRING_DATA_REDIS_PASSWORD and does not use docker-compose.
+    ports:
+      - "9922:6379"
+
+# Kafka is shared across services in dev: auth publishes to the broker
+# from wishlist/compose.yml (localhost:9092), so no own broker here.

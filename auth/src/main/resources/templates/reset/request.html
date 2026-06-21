@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head(
+    title='iwag - Reset password',
+    extraCss=${#lists.toList({'/css/auth/authStyle.css'})})}">
+    <title></title>
+</head>
+<body>
+    <header th:replace="~{fragments/header :: header}"></header>
+
+    <main class="d-flex flex-column" style="min-height: 80vh;">
+        <div class="container">
+            <div class="card hero-card mx-auto">
+                <div class="card-body text-center py-5 px-4">
+                    <h1 class="hero-title mb-4">Reset password</h1>
+
+                    <div th:if="${submitted}" class="alert alert-success text-start" role="alert">
+                        If an account exists for that email, we've sent a link to confirm the
+                        password reset. Please check your inbox.
+                    </div>
+
+                    <form th:unless="${submitted}"
+                          th:action="@{/auth/reset/password}"
+                          method="post"
+                          novalidate
+                          class="w-100" style="max-width: 420px; margin: 0 auto;">
+                        <input th:if="${_csrf != null}"
+                               type="hidden"
+                               th:name="${_csrf.parameterName}"
+                               th:value="${_csrf.token}">
+
+                        <div th:if="${error}" class="alert alert-danger text-start" role="alert"
+                             th:text="${error}"></div>
+
+                        <p class="text-secondary text-start mb-3">
+                            Enter your account email and we'll send you a link to confirm resetting
+                            your password.
+                        </p>
+
+                        <div class="form-floating mb-4">
+                            <input type="email"
+                                   id="email"
+                                   name="email"
+                                   class="form-control form-control-dark"
+                                   autocomplete="email"
+                                   placeholder="Email"
+                                   required>
+                            <label for="email">Email</label>
+                        </div>
+
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-auth">Send reset link</button>
+                        </div>
+
+                        <div class="text-center">
+                            <a th:href="@{/login}" class="auth-link">Back to sign in</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+    <footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

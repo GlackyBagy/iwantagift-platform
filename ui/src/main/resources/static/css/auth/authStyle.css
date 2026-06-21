@@ -1,0 +1,5 @@
+/* Auth-specific: divider between form and OAuth buttons */
+.auth-divider hr {
+    border-color: #2c2c2c;
+    opacity: 1;
+}

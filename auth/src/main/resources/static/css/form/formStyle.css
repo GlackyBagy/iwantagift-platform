@@ -1,0 +1,81 @@
+.form-page {
+    padding-top: 2.5rem;
+    padding-bottom: 2rem;
+}
+
+.form-card {
+    position: relative;
+    overflow: hidden;
+    max-width: 560px;
+    margin: 0 auto;
+    padding: clamp(1.5rem, 4vw, 2.5rem);
+    border: 1px solid #303030;
+    border-radius: 22px;
+    background:
+        radial-gradient(circle at top right, rgba(250, 102, 123, 0.12), transparent 38%),
+        linear-gradient(145deg, #171717, #101010);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.25);
+}
+
+.form-eyebrow {
+    color: var(--grad-orange-light);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    margin-bottom: 0.5rem;
+}
+
+.form-title {
+    color: whitesmoke;
+    font-size: clamp(1.9rem, 4vw, 2.6rem);
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    line-height: 1;
+    margin-bottom: 1.75rem;
+}
+
+.form-field {
+    display: grid;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.form-field:last-of-type {
+    margin-bottom: 0;
+}
+
+.form-card .form-label {
+    color: #eeeeee;
+    font-weight: 650;
+    margin: 0;
+}
+
+.form-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.65rem;
+    margin-top: 1.5rem;
+}
+
+.form-actions .btn {
+    border-radius: 12px;
+}
+
+.form-divider-text {
+    color: #888;
+    font-size: 0.9rem;
+    text-align: center;
+    margin: 1rem 0;
+}
+
+.form-divider-text::before,
+.form-divider-text::after {
+    content: '';
+    display: inline-block;
+    width: 30%;
+    height: 1px;
+    background-color: #2c2c2c;
+    vertical-align: middle;
+    margin: 0 0.75rem;
+}

@@ -1,0 +1,30 @@
+/* Auth-specific: divider between form and sign-up link */
+.auth-divider hr {
+    border-color: #2c2c2c;
+    opacity: 1;
+}
+
+.auth-link {
+    color: var(--grad-orange-light);
+    font-weight: 600;
+}
+
+.auth-link:hover {
+    color: var(--grad-orange-dark);
+}
+
+/* Floating labels in dark theme */
+.form-floating .form-label {
+    color: #888;
+}
+
+.form-floating > .form-control-dark:focus ~ label,
+.form-floating > .form-control-dark:not(:placeholder-shown) ~ label {
+    color: #aaa;
+    background-color: transparent;
+}
+
+.form-floating > .form-control-dark {
+    padding-top: 1.625rem;
+    padding-bottom: 0.625rem;
+}

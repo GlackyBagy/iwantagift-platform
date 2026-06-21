@@ -1,0 +1,46 @@
+spring:
+  docker:
+    compose:
+      enabled: true
+      file: profile/compose.yaml
+      lifecycle-management: start-only
+  application:
+    name: profile
+  kafka:
+    # shared dev broker from wishlist/compose.yml
+    bootstrap-servers: localhost:9092
+    consumer:
+      # pick up createdUser events published before this service started
+      auto-offset-reset: earliest
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8091
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 55MB
+  datasource:
+    url: jdbc:postgresql://localhost:9913/profile
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+
+server:
+  port: 8002
+
+iwag:
+  services:
+    ui:
+      url: localhost:8080
+      use-https: false
+    auth:
+      url: localhost:8091
+      use-https: false
+  s3:
+    endpoint: https://storage.yandexcloud.net
+    region: ru-central1
+    bucket: pictures-iwag
+    access-key: ${IWAG_S3_ACCESS_KEY}
+    secret-key: ${IWAG_S3_SECRET_KEY}

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/head :: head(
+    title='iwag — Sign in',
+    extraCss=${#lists.toList({'/css/form/formStyle.css', '/css/auth/authStyle.css'})})}">
+    <title></title>
+</head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="form-page">
+    <div class="container">
+        <div class="form-card">
+            <p class="form-eyebrow">Account</p>
+            <h1 class="form-title">Sign in</h1>
+
+            <div th:if="${param.logout}" class="alert alert-success mb-4" role="alert">
+                You have been signed out.
+            </div>
+
+            <form id="loginForm" th:action="@{/login}" th:object="${loginForm}" method="post" novalidate>
+                <input th:if="${_csrf != null}"
+                       type="hidden"
+                       th:name="${_csrf.parameterName}"
+                       th:value="${_csrf.token}">
+
+                <div th:if="${#fields.hasGlobalErrors()}"
+                     class="invalid-feedback d-block mb-3" role="alert">
+                    <span th:each="err : ${#fields.globalErrors()}" th:text="${err}"></span>
+                </div>
+
+                <div class="form-field">
+                    <label class="form-label" th:for="${#ids.next('username')}">Email</label>
+                    <input type="email"
+                           class="form-control form-control-dark"
+                           autocomplete="email"
+                           placeholder="email@example.com"
+                           th:field="*{username}"
+                           th:classappend="${#fields.hasGlobalErrors()} ? 'is-invalid'"
+                           required>
+                </div>
+
+                <div class="form-field">
+                    <label class="form-label" th:for="${#ids.next('password')}">Password</label>
+                    <input type="password"
+                           class="form-control form-control-dark"
+                           autocomplete="current-password"
+                           placeholder="Enter password"
+                           th:field="*{password}"
+                           th:classappend="${#fields.hasGlobalErrors()} ? 'is-invalid'"
+                           required>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-auth w-100">Continue</button>
+                </div>
+
+                <div class="text-center mt-3">
+                    <a th:href="@{/auth/reset/password}" class="auth-link" style="font-size:0.9rem;">
+                        Forgot password?
+                    </a>
+                </div>
+
+                <p class="text-center mt-3" style="color:#888; font-size:0.9rem;">
+                    Don't have an account?
+                    <a th:href="${uiBaseUrl} + '/auth/signup'" class="auth-link">Sign up</a>
+                </p>
+            </form>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/js/credentialsValidation.js}"></script>
+<script th:if="${oauthError}">
+    window.addEventListener('DOMContentLoaded', function () {
+        alert('Sign-in could not be completed. Please try again.');
+    });
+</script>
+</body>
+</html>

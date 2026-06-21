@@ -1,0 +1,47 @@
+.error-main {
+    min-height: 80vh;
+}
+
+.error-card {
+    width: 100%;
+    max-width: 760px;
+    border: 0;
+    border-radius: 28px;
+    background: #121212;
+    box-shadow: 0 18px 60px rgba(33, 37, 41, 0.08);
+}
+
+.error-code {
+    color: var(--grad-orange-dark);
+    font-size: clamp(4rem, 15vw, 8rem);
+    line-height: 0.95;
+    font-weight: 800;
+}
+
+.error-title {
+    color: whitesmoke;
+    font-size: clamp(1.9rem, 5vw, 3rem);
+    line-height: 1.1;
+    font-weight: 700;
+}
+
+.error-text {
+    max-width: 560px;
+    color: #c7c7c7;
+    font-size: 1.05rem;
+}
+
+.error-actions {
+    gap: 0.75rem;
+}
+
+.btn-error-secondary {
+    color: var(--bs-light);
+    border-color: #6e7377;
+}
+
+.btn-error-secondary:hover {
+    color: #202020;
+    background-color: var(--bs-light);
+    border-color: var(--bs-light);
+}

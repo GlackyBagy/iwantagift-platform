@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/head :: head(
+    title='iwag - Settings',
+    extraCss=${settingsCss})}">
+    <title></title>
+</head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="settings-page">
+    <div class="container">
+        <div class="settings-heading">
+            <p class="settings-eyebrow">Account control</p>
+            <h1 class="settings-title">Settings</h1>
+            <p class="settings-subtitle">
+                Manage credentials, public profile details, and irreversible account actions.
+            </p>
+        </div>
+
+        <div class="settings-layout">
+            <!-- Profile data is hydrated by /js/settings/profileSettings.js via the /api/profile BFF
+                 endpoint. It starts in a loading state; if the profile service is unavailable the
+                 whole block is left disabled instead of failing the page. -->
+            <section id="profileSettingsCard"
+                     class="settings-card is-loading"
+                     aria-labelledby="profile-settings-title"
+                     aria-busy="true">
+                <div class="settings-card-header">
+                    <div>
+                        <p class="settings-section-label">Public identity</p>
+                        <h2 id="profile-settings-title" class="settings-card-title">Profile settings</h2>
+                    </div>
+                    <span id="profileSettingsStatus" class="settings-status">Loading…</span>
+                </div>
+
+                <form id="profileSettingsForm"
+                      class="settings-form"
+                      method="post"
+                      enctype="multipart/form-data"
+                      th:action="@{/settings/profile}"
+                      aria-label="Profile settings">
+                    <input th:if="${_csrf != null}"
+                           type="hidden"
+                           th:name="${_csrf.parameterName}"
+                           th:value="${_csrf.token}">
+
+                    <p id="profileUnavailableNote" class="settings-note settings-error" role="alert" hidden>
+                        Profile is temporarily unavailable. Editing is disabled — please try again later.
+                    </p>
+
+                    <div class="settings-profile-row">
+                        <img id="settingsAvatar"
+                             class="settings-avatar"
+                             th:src="@{/img/logo_load_error.png}"
+                             alt="Current profile photo">
+                        <div class="settings-photo-actions">
+                            <label for="settings-photo" class="form-label">Profile photo</label>
+                            <input id="settings-photo"
+                                   name="profilePhoto"
+                                   type="file"
+                                   class="form-control form-control-dark"
+                                   accept="image/png,image/jpeg,image/webp"
+                                   disabled>
+                            <p class="settings-note">Upload a PNG, JPEG, or WebP image. Storage handling will be added later.</p>
+                        </div>
+                    </div>
+
+                    <div class="settings-field">
+                        <label for="settings-nickname" class="form-label">Nickname</label>
+                        <input id="settings-nickname"
+                               name="nickname"
+                               type="text"
+                               class="form-control form-control-dark"
+                               maxlength="64"
+                               disabled>
+                    </div>
+
+                    <div class="settings-field">
+                        <label for="settings-description" class="form-label">Description</label>
+                        <textarea id="settings-description"
+                                  name="description"
+                                  class="form-control form-control-dark"
+                                  rows="5"
+                                  maxlength="500"
+                                  disabled></textarea>
+                    </div>
+
+                    <div class="settings-actions">
+                        <button type="submit" class="btn btn-auth" disabled>Save profile</button>
+                        <a th:href="@{/profile}" class="btn btn-outline-light">Back to profile</a>
+                    </div>
+                </form>
+            </section>
+
+            <section class="settings-card" aria-labelledby="credentials-title">
+                <div class="settings-card-header">
+                    <div>
+                        <p class="settings-section-label">Security</p>
+                        <h2 id="credentials-title" class="settings-card-title">Credentials</h2>
+                    </div>
+                    <span class="settings-status">Private</span>
+                </div>
+
+                <div class="settings-form" aria-label="Credentials settings">
+                    <div class="settings-field">
+                        <label for="settings-email" class="form-label">Email</label>
+                        <form class="settings-inline-control"
+                              method="post"
+                              th:action="@{/settings/changeEmail}">
+                            <input th:if="${_csrf != null}"
+                                   type="hidden"
+                                   th:name="${_csrf.parameterName}"
+                                   th:value="${_csrf.token}">
+                            <input id="settings-email"
+                                   name="email"
+                                   type="email"
+                                   class="form-control form-control-dark"
+                                   th:value="${email}"
+                                   placeholder="email@example.com"
+                                   autocomplete="email"
+                                   required>
+                            <button type="submit" class="btn btn-auth">Change</button>
+                            <button type="submit"
+                                    class="btn btn-outline-light"
+                                    th:formaction="@{/settings/confirmEmail}"
+                                    formnovalidate>
+                                Confirm email
+                            </button>
+                        </form>
+                        <div class="settings-validation-errors"
+                             role="alert"
+                             th:if="${emailValidationErrors}">
+                            <p th:each="error : ${emailValidationErrors}"
+                               th:text="${error}"></p>
+                        </div>
+                    </div>
+
+                    <form id="changePasswordForm"
+                          class="settings-field"
+                          method="post"
+                          th:action="@{/settings/changePassword}">
+                        <input th:if="${_csrf != null}"
+                               type="hidden"
+                               th:name="${_csrf.parameterName}"
+                               th:value="${_csrf.token}">
+                        <label for="settings-password" class="form-label">Password</label>
+                        <div class="settings-inline-control">
+                            <input id="settings-password"
+                                   name="password"
+                                   type="password"
+                                   class="form-control form-control-dark"
+                                   placeholder="Enter new password"
+                                   autocomplete="new-password"
+                                   minlength="8"
+                                   maxlength="128"
+                                   required>
+                            <button id="changePasswordButton"
+                                    type="submit"
+                                    class="btn btn-auth"
+                                    disabled>
+                                Change
+                            </button>
+                        </div>
+                        <div class="settings-validation-errors"
+                             role="alert"
+                             th:if="${passwordValidationErrors}">
+                            <p th:each="error : ${passwordValidationErrors}"
+                               th:text="${error}"></p>
+                        </div>
+
+                        <div id="confirmPasswordField" class="settings-field" hidden>
+                            <label for="settings-confirm-password" class="form-label">Confirm password</label>
+                            <input id="settings-confirm-password"
+                                   name="confirmPassword"
+                                   type="password"
+                                   class="form-control form-control-dark"
+                                   placeholder="Repeat new password"
+                                   autocomplete="new-password">
+                            <p id="passwordMismatchMessage"
+                               class="settings-password-message"
+                               role="alert"
+                               hidden>
+                                Passwords do not match
+                            </p>
+                        </div>
+                        <div class="settings-validation-errors"
+                             role="alert"
+                             th:if="${confirmPasswordValidationErrors}">
+                            <p th:each="error : ${confirmPasswordValidationErrors}"
+                               th:text="${error}"></p>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <section class="settings-card settings-danger-card" aria-labelledby="danger-zone-title">
+                <div class="settings-card-header">
+                    <div>
+                        <p class="settings-section-label">Irreversible</p>
+                        <h2 id="danger-zone-title" class="settings-card-title">Danger zone</h2>
+                    </div>
+                    <span class="settings-status settings-status-danger">Danger</span>
+                </div>
+
+                <div class="settings-danger-list">
+                    <article class="settings-danger-action">
+                        <div>
+                            <h3>Delete account</h3>
+                            <p>Remove your account and personal identity from iwag.</p>
+                        </div>
+                        <button type="button" class="btn settings-danger-button" disabled>Delete account</button>
+                    </article>
+
+                    <article class="settings-danger-action">
+                        <div>
+                            <h3>Delete all wishes and wishlists</h3>
+                            <p>Clear every wishlist and wish while keeping the account itself.</p>
+                        </div>
+                        <button type="button" class="btn settings-danger-button" disabled>Delete all</button>
+                    </article>
+                </div>
+
+                <p class="settings-note settings-danger-note">
+                    Destructive actions are disabled until backend endpoints and confirmation flow are implemented.
+                </p>
+            </section>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/js/settings/profileSettings.js}"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const passwordInput = document.getElementById("settings-password");
+        const confirmPasswordField = document.getElementById("confirmPasswordField");
+        const confirmPasswordInput = document.getElementById("settings-confirm-password");
+        const changePasswordForm = document.getElementById("changePasswordForm");
+        const changePasswordButton = document.getElementById("changePasswordButton");
+        const passwordMismatchMessage = document.getElementById("passwordMismatchMessage");
+
+        if (!passwordInput || !confirmPasswordField || !confirmPasswordInput ||
+            !changePasswordForm || !changePasswordButton || !passwordMismatchMessage) {
+            return;
+        }
+
+        const updatePasswordConfirmation = () => {
+            const hasPassword = passwordInput.value.length > 0;
+            const hasValidLength = passwordInput.value.length >= 8;
+            confirmPasswordField.hidden = !hasPassword;
+            confirmPasswordInput.required = hasPassword;
+
+            if (!hasPassword) {
+                confirmPasswordInput.value = "";
+            }
+
+            const passwordsMatch = passwordInput.value === confirmPasswordInput.value;
+            const isValid = hasValidLength && passwordsMatch;
+            const showMismatch = confirmPasswordInput.value.length > 0 && !passwordsMatch;
+            confirmPasswordInput.setCustomValidity(
+                hasPassword && !passwordsMatch ? "Passwords do not match" : ""
+            );
+            passwordMismatchMessage.hidden = !showMismatch;
+            changePasswordButton.disabled = !isValid;
+        };
+
+        passwordInput.addEventListener("input", updatePasswordConfirmation);
+        confirmPasswordInput.addEventListener("input", updatePasswordConfirmation);
+        changePasswordForm.addEventListener("submit", (event) => {
+            event.preventDefault();
+            updatePasswordConfirmation();
+
+            if (changePasswordButton.disabled) {
+                return;
+            }
+
+            changePasswordButton.disabled = true;
+
+            fetch(changePasswordForm.action, {
+                method: "POST",
+                body: new FormData(changePasswordForm),
+                headers: { Accept: "text/html" },
+                credentials: "same-origin",
+            })
+                .then(() => {
+                    window.location.assign("/settings");
+                })
+                .catch((error) => {
+                    console.warn("Password change request failed:", error);
+                    changePasswordButton.disabled = false;
+                });
+        });
+    });
+</script>
+</body>
+</html>

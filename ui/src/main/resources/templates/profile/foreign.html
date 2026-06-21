@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/head :: head(
+    title='Profile',
+    extraCss=${profileCss})}">
+    <title></title>
+</head>
+<body>
+<header th:replace="~{fragments/header :: header}"></header>
+
+<main class="profile-page">
+    <div class="container">
+        <div class="profile-layout">
+            <aside class="profile-sidebar" aria-label="Wishlists">
+                <h2 class="profile-sidebar-title">Wishlists</h2>
+                <nav class="profile-wishlist-list">
+                    <p class="profile-wishlist-unavailable" role="alert" th:if="${wishlistsUnavailable}">
+                        Wishlists are temporarily unavailable.
+                    </p>
+                    <a th:each="wishlist : ${wishlists}"
+                       class="profile-wishlist-link"
+                       th:classappend="${selectedWishlist != null and wishlist.id == selectedWishlist.id} ? ' active'"
+                       th:href="@{/profile/{profileOwnerId}(profileOwnerId=${profileOwnerId}, listId=${wishlist.id})}"
+                       th:text="${wishlist.title}">Wishlist</a>
+                </nav>
+            </aside>
+
+            <section class="profile-main">
+                <!-- Hero is hydrated client-side by /js/profile/profileHero.js via /api/profile/{id}. -->
+                <section id="profileHero"
+                         class="profile-hero is-loading"
+                         th:attr="data-profile-owner-id=${profileOwnerId}">
+                    <img id="profileAvatar"
+                         class="profile-avatar"
+                         th:src="@{/img/logo_load_error.png}"
+                         alt="User avatar">
+                    <h1 id="profileNickname" class="profile-nickname">Loading…</h1>
+                    <form class="profile-subscribe-form" method="post" th:action="@{/subscribe}">
+                        <input type="hidden" name="subscribeToId" th:value="${profileOwnerId}">
+                        <button class="btn btn-auth btn-to-profile profile-action-button"
+                                type="submit">Subscribe</button>
+                    </form>
+                    <div class="profile-description-box">
+                        <p id="profileDescription"></p>
+                    </div>
+                </section>
+
+                <div class="profile-wishes" th:if="${wishlistsUnavailable}">
+                    <section class="wishlist-empty">
+                        <p>Wishlists are temporarily unavailable. Please try again later.</p>
+                    </section>
+                </div>
+
+                <div class="profile-wishes" th:if="${!wishlistsUnavailable and selectedWishlist != null}">
+                    <section class="wish-grid"
+                             th:if="${selectedWishlist.wishes != null and !#lists.isEmpty(selectedWishlist.wishes)}">
+                        <article class="wish-tile" th:each="wish : ${selectedWishlist.wishes}">
+                            <img class="wish-image"
+                                 th:src="@{/img/logo_load_error.png}"
+                                 alt="">
+
+                            <div>
+                                <h2 class="wish-title" th:text="${wish.title}">Wish title</h2>
+                                <p class="wish-description"
+                                   th:if="${wish.description != null and !#strings.isEmpty(wish.description)}"
+                                   th:text="${wish.description}">Wish description</p>
+                            </div>
+
+                            <a class="wish-link"
+                               th:if="${wish.url != null and !#strings.isEmpty(wish.url)}"
+                               th:href="${wish.url}"
+                               target="_blank"
+                               rel="noopener noreferrer">Open link</a>
+                        </article>
+                    </section>
+
+                    <section class="wishlist-empty"
+                             th:if="${selectedWishlist.wishes == null or #lists.isEmpty(selectedWishlist.wishes)}">
+                        <p>This wishlist has no wishes yet.</p>
+                    </section>
+                </div>
+            </section>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/footer :: footer}"></footer>
+<script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+<script th:src="@{/js/profile/profileHero.js}"></script>
+</body>
+</html>

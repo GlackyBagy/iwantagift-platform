@@ -1,0 +1,12 @@
+spring:
+  config:
+    import: classpath:application.yaml
+  application:
+    name: ${SPRING_APPLICATION_NAME:profile}
+
+iwag:
+  services:
+    ui:
+      use-https: ${IWAG_UI_USE_HTTPS:true}
+    auth:
+      use-https: ${IWAG_AUTH_USE_HTTPS:true}

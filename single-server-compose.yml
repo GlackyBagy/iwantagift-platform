@@ -1,0 +1,185 @@
+services:
+
+  # --- Infrastructure ---
+
+  auth-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: auth
+      POSTGRES_USER: ${AUTH_DB_USER}
+      POSTGRES_PASSWORD: ${AUTH_DB_PASSWORD}
+    volumes:
+      - auth-db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  wl-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: wishlist
+      POSTGRES_USER: ${WL_DB_USER}
+      POSTGRES_PASSWORD: ${WL_DB_PASSWORD}
+    volumes:
+      - wl-db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  ui-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: ui
+      POSTGRES_USER: ${UI_DB_USER}
+      POSTGRES_PASSWORD: ${UI_DB_PASSWORD}
+    volumes:
+      - ui-db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  profile-db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_DB: profile
+      POSTGRES_USER: ${PROFILE_DB_USER}
+      POSTGRES_PASSWORD: ${PROFILE_DB_PASSWORD}
+    volumes:
+      - profile-db-data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  auth-redis:
+    image: redis:8.6
+    volumes:
+      - auth-redis-data:/data
+    restart: unless-stopped
+
+  wl-redis:
+    image: redis:8.6
+    command: ["redis-server", "--requirepass", "${WL_REDIS_PASSWORD}"]
+    volumes:
+      - wl-redis-data:/data
+    restart: unless-stopped
+
+  broker:
+    image: apache/kafka:4.2.0
+    environment:
+      KAFKA_NODE_ID: 1
+      KAFKA_PROCESS_ROLES: broker,controller
+      KAFKA_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://broker:9092
+      KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CONTROLLER_QUORUM_VOTERS: 1@broker:9093
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+    volumes:
+      - broker-data:/var/lib/kafka/data
+    restart: unless-stopped
+
+  # --- Application services ---
+
+  auth-service:
+    image: ghcr.io/glackybagy/iwantagift-platform/auth:${IMAGE_TAG}
+    env_file: .env
+    environment:
+      SPRING_APPLICATION_NAME: auth
+      SERVER_PORT: ${AUTH_PORT}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://auth-db:5432/auth
+      SPRING_DATASOURCE_USERNAME: ${AUTH_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${AUTH_DB_PASSWORD}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_DATA_REDIS_HOST: auth-redis
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: broker:9092
+      IWAG_AUTH_JWT_KEY_PATH: /secrets/auth-jwt-private.pem
+    user: ${DEPLOY_USER_UID}
+    volumes:
+      - ./data/auth:/secrets
+    restart: unless-stopped
+    depends_on:
+      - auth-db
+      - auth-redis
+      - broker
+
+  wishlist-service:
+    image: ghcr.io/glackybagy/iwantagift-platform/wishlist:${IMAGE_TAG}
+    env_file: .env
+    environment:
+      SPRING_APPLICATION_NAME: wishlist
+      SERVER_PORT: ${WL_PORT}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://wl-db:5432/wishlist
+      SPRING_DATASOURCE_USERNAME: ${WL_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${WL_DB_PASSWORD}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_DATA_REDIS_HOST: wl-redis
+      SPRING_DATA_REDIS_PORT: 6379
+      SPRING_DATA_REDIS_PASSWORD: ${WL_REDIS_PASSWORD}
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: broker:9092
+    restart: unless-stopped
+    depends_on:
+      - wl-db
+      - wl-redis
+      - broker
+
+  ui-service:
+    image: ghcr.io/glackybagy/iwantagift-platform/ui:${IMAGE_TAG}
+    env_file: .env
+    environment:
+      SPRING_APPLICATION_NAME: ui
+      SERVER_PORT: ${UI_PORT}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://ui-db:5432/ui
+      SPRING_DATASOURCE_USERNAME: ${UI_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${UI_DB_PASSWORD}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+    restart: unless-stopped
+    depends_on:
+      - ui-db
+      - auth-service
+
+  profile-service:
+    image: ghcr.io/glackybagy/iwantagift-platform/profile:${IMAGE_TAG}
+    env_file: .env
+    environment:
+      SPRING_APPLICATION_NAME: profile
+      SERVER_PORT: ${PROFILE_PORT}
+      SPRING_DATASOURCE_URL: jdbc:postgresql://profile-db:5432/profile
+      SPRING_DATASOURCE_USERNAME: ${PROFILE_DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${PROFILE_DB_PASSWORD}
+      SPRING_DATASOURCE_DRIVER_CLASS_NAME: org.postgresql.Driver
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: broker:9092
+    restart: unless-stopped
+    depends_on:
+      - profile-db
+      - broker
+
+  mail-service:
+    image: ghcr.io/glackybagy/iwantagift-platform/mail-service:${IMAGE_TAG}
+    env_file: .env
+    environment:
+      SPRING_KAFKA_BOOTSTRAP_SERVERS: broker:9092
+    restart: unless-stopped
+    depends_on:
+      - broker
+
+  # --- Reverse proxy ---
+
+  caddy:
+    image: caddy:2-alpine
+    env_file: .env
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+    restart: unless-stopped
+    depends_on:
+      - ui-service
+      - auth-service
+
+volumes:
+  auth-db-data:
+  wl-db-data:
+  ui-db-data:
+  profile-db-data:
+  auth-redis-data:
+  wl-redis-data:
+  broker-data:
+  caddy-data:

@@ -1,0 +1,15 @@
+iwantagift.online, www.iwantagift.online {
+    reverse_proxy ui-service:{$UI_PORT}
+}
+
+auth.iwantagift.online {
+    reverse_proxy auth-service:{$AUTH_PORT}
+}
+
+http://iwantagift.online, http://www.iwantagift.online, http://auth.iwantagift.online {
+    redir https://{host}{uri} permanent
+}
+
+:80, :443 {
+    abort
+}

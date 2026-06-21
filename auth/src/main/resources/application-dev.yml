@@ -1,0 +1,50 @@
+logging:
+  level:
+    org.springframework.security: DEBUG
+
+spring:
+  docker:
+    compose:
+      enabled: true
+      file: auth/compose.yml
+      lifecycle-management: start-only
+  application:
+    name: "auth"
+  security:
+    oauth2:
+      authorizationserver:
+        issuer: http://localhost:8091
+  kafka:
+    # shared dev broker from wishlist/compose.yml — events must reach other services
+    bootstrap-servers: localhost:9092
+  datasource:
+    url: jdbc:postgresql://localhost:9912/auth
+    username: "postgres"
+    password: "postgres"
+    driver-class-name: org.postgresql.Driver
+  data:
+    redis:
+      host: localhost
+      port: 9922
+
+server:
+  port: 8091
+  servlet:
+    session:
+      cookie:
+        name: AUTH_SESSIONID
+
+iwag:
+  services:
+    auth:
+      base-url: http://localhost:8091
+    ui:
+      base-url: http://localhost:8080
+      client-secret: dev-secret
+  using-kafka-topics:
+    - emailChange
+    - emailVerify
+    - passwordReset
+    - passwordResetRequest
+    - createdUser
+    - accountEvent

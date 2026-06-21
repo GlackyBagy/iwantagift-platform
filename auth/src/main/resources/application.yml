@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: ${SPRING_APPLICATION_NAME}
+  security:
+    oauth2:
+      authorizationserver:
+        issuer: ${IWAG_AUTH_ISSUER_URI}
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS}
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME}
+  data:
+    redis:
+      host: ${SPRING_DATA_REDIS_HOST}
+      port: ${SPRING_DATA_REDIS_PORT}
+      password: ${SPRING_DATA_REDIS_PASSWORD}
+
+server:
+  port: ${SERVER_PORT}
+  servlet:
+    session:
+      cookie:
+        name: AUTH_SESSIONID
+
+iwag:
+  services:
+    auth:
+      base-url: ${IWAG_AUTH_BASE_URL}
+    ui:
+      base-url: ${IWAG_UI_BASE_URL}
+      client-secret: ${IWAG_UI_OAUTH2_CLIENT_SECRET}

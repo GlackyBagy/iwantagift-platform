@@ -1,0 +1,5 @@
+spring:
+  config:
+    import: classpath:application.yml
+  application:
+    name: ${SPRING_APPLICATION_NAME:auth}

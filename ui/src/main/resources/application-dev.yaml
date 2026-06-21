@@ -1,0 +1,58 @@
+logging:
+  level:
+    org.springframework.security: DEBUG
+
+spring:
+  application:
+    name: "ui"
+  docker:
+    compose:
+      file: ui/compose.yml
+  datasource:
+    url: jdbc:postgresql://localhost:9914/ui
+    username: "postgres"
+    password: "postgres"
+    driver-class-name: org.postgresql.Driver
+  security:
+    oauth2:
+      client:
+        registration:
+          iwag-ui:
+            provider: iwag-auth
+            client-id: iwag-ui
+            client-secret: dev-secret
+            authorization-grant-type: authorization_code
+            redirect-uri: "{baseUrl}/login/oauth2/code/{registrationId}"
+            scope:
+              - openid
+              - profile
+        provider:
+          iwag-auth:
+            # No issuer-uri on purpose: it triggers eager OIDC discovery at startup, which would
+            # make the ui fail to boot whenever auth is down. The endpoints below define the
+            # provider fully, so discovery is not needed.
+            authorization-uri: http://localhost:8091/oauth2/authorize
+            token-uri: http://localhost:8091/oauth2/token
+            jwk-set-uri: http://localhost:8091/oauth2/jwks
+            user-info-uri: http://localhost:8091/userinfo
+            user-name-attribute: sub
+  servlet:
+    multipart:
+      max-file-size: 50MB
+      max-request-size: 55MB
+
+server:
+  port: 8080
+
+iwag:
+  services:
+    auth:
+      url: localhost:8091
+      use-https: false
+    wishlists:
+      url: localhost:8001
+      use-https: false
+    profile:
+      url: localhost:8002
+      use-https: false
+

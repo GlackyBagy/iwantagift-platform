@@ -1,0 +1,2 @@
+ALTER TABLE wishlist
+    ADD CONSTRAINT TITLE_USER_ID_PAIR_UNIQUE UNIQUE(title, owner_id);

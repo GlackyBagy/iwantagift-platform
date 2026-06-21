@@ -1,0 +1,37 @@
+spring:
+  application:
+    name: ${SPRING_APPLICATION_NAME}
+  kafka:
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS}
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${SPRING_SECURITY_OAUTH2_RESOURCESERVER_JWT_ISSUER_URI}
+  servlet:
+    multipart:
+      max-file-size: ${IWAG_AVATAR_MAX_FILE_SIZE}
+      max-request-size: ${IWAG_AVATAR_MAX_REQUEST_SIZE}
+  datasource:
+    url: ${SPRING_DATASOURCE_URL}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME}
+
+server:
+  port: ${SERVER_PORT}
+
+iwag:
+  services:
+    ui:
+      url: ${IWAG_UI_URL}
+      use-https: ${IWAG_UI_USE_HTTPS}
+    auth:
+      url: ${IWAG_AUTH_URL}
+      use-https: ${IWAG_AUTH_USE_HTTPS}
+  s3:
+    endpoint: ${IWAG_S3_ENDPOINT}
+    region: ${IWAG_S3_REGION}
+    bucket: ${IWAG_S3_BUCKET}
+    access-key: ${IWAG_S3_ACCESS_KEY}
+    secret-key: ${IWAG_S3_SECRET_KEY}

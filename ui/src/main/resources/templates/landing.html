@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head th:replace="~{fragments/head :: head(title='iwag — landing', extraCss=null)}">
+    <title></title>
+</head>
+<body>
+    <header th:replace="~{fragments/header :: header}"></header>
+
+    <main class="d-flex flex-column" style="min-height: 100vh;">
+        <div class="spacer1"></div>
+        <div class="container">
+            <div class="card hero-card mx-auto">
+                <div class="card-body text-center py-5 px-4 px-md-5">
+                    <span class="hero-badge">Wishlist platform</span>
+                    <h1 class="hero-title">Store wishes in a single place</h1>
+                    <p class="hero-text">Share your wishlist with friends and family, and never miss a gift opportunity again.
+
+                    </p>
+                    <div class="feature-list">
+                        <div class="feature-pill">Public and private wishlists</div>
+                        <div class="feature-pill">Easy sharing with friends and family</div>
+                        <div class="feature-pill">Dynamic price tracking</div>
+                        <div class="feature-pill">Privacy</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="spacer2"></div>
+    </main>
+
+    <footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>

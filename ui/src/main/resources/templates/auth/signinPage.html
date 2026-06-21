@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head th:replace="~{fragments/head :: head(
+    title='iwag — Sign in',
+    extraCss=${#lists.toList({'/css/auth/authStyle.css'})})}">
+    <title></title>
+</head>
+<body>
+    <header th:replace="~{fragments/header :: header}"></header>
+
+    <main class="d-flex flex-column" style="min-height: 80vh;">
+        <div class="container">
+            <div class="card hero-card mx-auto">
+                <div class="card-body text-center py-5 px-1">
+                    <h1 class="hero-title mb-4">Sign in</h1>
+                    <form id="signupForm" th:action="@{/oauth2/authorization/iwag-ui}" method="get"
+                          class="w-100" style="max-width: 420px; margin: 0 auto;">
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-auth">Continue to sign in</button>
+                        </div>
+                        
+                        <!-- Divider -->
+                        <div class="text-center text-secondary mb-3">or</div>
+
+                        <!-- OAuth -->
+                        <div class="d-grid gap-2">
+                            <button type="button" class="btn btn-outline-light">
+                                Continue with Google
+                            </button>
+                            <button type="button" class="btn btn-outline-light">
+                                Continue with GitHub
+                            </button>
+                        </div>
+
+                        <div class="auth-divider my-4 d-flex align-items-center">
+                            <hr class="flex-grow-1">
+                            <span class="px-3 text-secondary small">
+                                Don't have an account? 
+                                <a href="/auth/signup" class="auth-link">Sign up</a>
+                            </span>
+                            <hr class="flex-grow-1">
+                        </div>
+                        
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+
+    <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
+    <footer th:replace="~{fragments/footer :: footer}"></footer>
+</body>
+</html>
