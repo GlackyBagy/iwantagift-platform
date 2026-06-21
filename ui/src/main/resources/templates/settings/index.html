@@ -225,10 +225,15 @@
     </div>
 </main>
 
+<div th:if="${emailChangeSent}"    id="flash-emailChangeSent"    hidden></div>
+<div th:if="${passwordChangeSent}" id="flash-passwordChangeSent" hidden></div>
+<div th:if="${emailConfirmSent}"   id="flash-emailConfirmSent"   hidden></div>
+
 <footer th:replace="~{fragments/footer :: footer}"></footer>
 <script th:src="@{/js/bootstrap.bundle.min.js}"></script>
 <script th:src="@{/js/settings/profileSettings.js}"></script>
 <script th:src="@{/js/settings/dangerZone.js}"></script>
+<script th:src="@{/js/settings/settingsToast.js}"></script>
 <script>
     document.addEventListener("DOMContentLoaded", () => {
         const passwordInput = document.getElementById("settings-password");

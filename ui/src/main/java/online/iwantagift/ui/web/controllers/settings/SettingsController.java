@@ -79,7 +79,8 @@ public class SettingsController {
         authService.sendEmailChangeMessage(accessToken, credentialsDTO);
 
         log.info("Sent email change request");
-        return "redirect:/settings"; // todo js alert
+        redirectAttributes.addFlashAttribute("emailChangeSent", true);
+        return "redirect:/settings";
     }
 
     @PostMapping("/changePassword")
@@ -104,7 +105,8 @@ public class SettingsController {
 
         authService.sendPasswordChangeMessage(accessToken, credentialsDTO);
 
-        return "redirect:/settings"; // todo js alert
+        redirectAttributes.addFlashAttribute("passwordChangeSent", true);
+        return "redirect:/settings";
     }
 
     @PostMapping("/confirmEmail")
@@ -120,7 +122,8 @@ public class SettingsController {
 
         authService.sendEmailConfirmationMessage(accessToken);
 
-        return "redirect:/settings"; // todo js alert
+        redirectAttributes.addFlashAttribute("emailConfirmSent", true);
+        return "redirect:/settings";
     }
 
     private void addFieldErrors(BindingResult bindingResult, String field,
