@@ -51,6 +51,16 @@ public class ProfileService {
                 .build());
     }
 
+    public void deleteProfileById(UUID profileId) {
+        profileRepository.findById(profileId).ifPresent(profile -> {
+            Optional.ofNullable(profile.getAvatar())
+                    .map(Avatar::getStorageKey)
+                    .ifPresent(avatarStorageService::delete);
+
+            profileRepository.delete(profile);
+        });
+    }
+
     public Optional<String> getAvatarPublicUrl(UUID profileId) {
         return profileRepository.findById(profileId)
                 .map(Profile::getAvatar)

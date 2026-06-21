@@ -35,3 +35,6 @@ iwag:
     price:
       kafka-topics:
         - newWishes
+    auth:
+      kafka-topics:
+        - deleteAll

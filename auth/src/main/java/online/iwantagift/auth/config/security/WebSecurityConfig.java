@@ -39,7 +39,7 @@ public class WebSecurityConfig {
     @Order(2)
     SecurityFilterChain apiSecurityFilterChain(HttpSecurity http) {
         http
-                .securityMatcher("/auth/change/**", "/auth/confirm/**")
+                .securityMatcher("/auth/change/**", "/auth/confirm/**", "/auth/deleteAccount", "/auth/deleteAll")
                 .authorizeHttpRequests(requests -> requests.anyRequest().authenticated())
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session

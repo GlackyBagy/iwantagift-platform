@@ -25,7 +25,15 @@ public class EmailVerificationUrlBuilder {
         return buildForPathAndToken("/auth/reset/password/confirm", token);
     }
 
-    private String buildForPathAndToken(String path, String token){
+    public String buildForAccountDeleteConfirm(String token) {
+        return buildForPathAndToken("/auth/deleteAccount/confirm", token);
+    }
+
+    public String buildForDataDeleteConfirm(String token) {
+        return buildForPathAndToken("/auth/deleteAll/confirm", token);
+    }
+
+    private String buildForPathAndToken(String path, String token) {
         return UriComponentsBuilder.fromUriString(authBaseUrl)
                 .path(path)
                 .queryParam("token", UriUtils.encode(token, StandardCharsets.UTF_8))

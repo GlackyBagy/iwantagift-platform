@@ -1,6 +1,6 @@
 package online.iwantagift.auth.services;
 
-import online.iwantagift.auth.models.dto.EmailChangeVerification;
+import online.iwantagift.auth.models.dto.VerificationViaEmail;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
@@ -57,10 +57,10 @@ class VerificationTokenServiceTest {
         ));
         VerificationTokenService service = new VerificationTokenService(redisTemplate);
 
-        Optional<EmailChangeVerification> result = service.findEmailChange("token");
+        Optional<VerificationViaEmail> result = service.findEmailChange("token");
 
         assertEquals(
-                new EmailChangeVerification("old@example.com", "new@example.com"),
+                new VerificationViaEmail("old@example.com", "new@example.com"),
                 result.orElseThrow()
         );
     }

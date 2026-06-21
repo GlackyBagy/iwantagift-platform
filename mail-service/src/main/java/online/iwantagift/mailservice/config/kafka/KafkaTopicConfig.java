@@ -7,6 +7,8 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.kafka.config.TopicBuilder;
 import org.springframework.kafka.core.KafkaAdmin;
 
+import static online.iwantagift.mailservice.messaging.kafka.MailChangeConsumer.ACCOUNT_DELETE_CONFIRMATION_TOPIC;
+import static online.iwantagift.mailservice.messaging.kafka.MailChangeConsumer.DATA_DELETE_CONFIRMATION_TOPIC;
 import static online.iwantagift.mailservice.messaging.kafka.MailChangeConsumer.EMAIL_CHANGE_TOPIC;
 import static online.iwantagift.mailservice.messaging.kafka.MailChangeConsumer.EMAIL_VERIFY_TOPIC;
 import static online.iwantagift.mailservice.messaging.kafka.MailChangeConsumer.PASSWORD_RESET_TOPIC;
@@ -22,7 +24,10 @@ public class KafkaTopicConfig {
         NewTopic emailVerifyTopic = TopicBuilder.name(EMAIL_VERIFY_TOPIC).build();
         NewTopic passwordResetTopic = TopicBuilder.name(PASSWORD_RESET_TOPIC).build();
         NewTopic passwordResetRequestTopic = TopicBuilder.name(PASSWORD_RESET_REQUEST_TOPIC).build();
+        NewTopic accountDeleteConfirmationTopic = TopicBuilder.name(ACCOUNT_DELETE_CONFIRMATION_TOPIC).build();
+        NewTopic dataDeleteConfirmationTopic = TopicBuilder.name(DATA_DELETE_CONFIRMATION_TOPIC).build();
         return new KafkaAdmin.NewTopics(
-                emailChangeTopic, emailVerifyTopic, passwordResetTopic, passwordResetRequestTopic);
+                emailChangeTopic, emailVerifyTopic, passwordResetTopic, passwordResetRequestTopic,
+                accountDeleteConfirmationTopic, dataDeleteConfirmationTopic);
     }
 }

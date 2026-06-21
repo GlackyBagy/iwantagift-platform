@@ -14,7 +14,7 @@ import tools.jackson.databind.ObjectMapper;
 @Component
 @RequiredArgsConstructor
 @Slf4j
-public class UserCreatedConsumer {
+public class UserEventConsumer {
 
     private final ProfileService profileService;
     private final ObjectMapper objectMapper;
@@ -29,7 +29,8 @@ public class UserCreatedConsumer {
                 log.info("Ensured profile exists for user {}", event.id());
             }
             case DELETED -> {
-                // todo
+                profileService.deleteProfileById(event.id());
+                log.info("Idempotently deleted profile for user {}", event.id());
             }
         }
     }

@@ -1,9 +1,9 @@
 package online.iwantagift.auth.services;
 
 import lombok.RequiredArgsConstructor;
-import online.iwantagift.auth.messaging.kafka.CredentialsProducer;
+import online.iwantagift.auth.messaging.kafka.MailRequestProducer;
 import online.iwantagift.auth.models.events.PasswordResetEvent;
-import online.iwantagift.auth.models.events.PasswordResetRequestEvent;
+import online.iwantagift.auth.models.events.MailRequestEvent;
 import online.iwantagift.auth.util.EmailVerificationUrlBuilder;
 import online.iwantagift.auth.util.PasswordGenerator;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,7 +27,7 @@ public class PasswordResetService {
     private final AccountService accountService;
     private final PasswordGenerator passwordGenerator;
     private final PasswordEncoder passwordEncoder;
-    private final CredentialsProducer credentialsProducer;
+    private final MailRequestProducer mailRequestProducer;
     private final EmailVerificationUrlBuilder emailVerificationUrlBuilder;
 
     public enum RequestOutcome {
@@ -50,7 +50,7 @@ public class PasswordResetService {
         }
 
         String confirmUrl = emailVerificationUrlBuilder.buildForResetConfirm(token.get());
-        credentialsProducer.sendPasswordResetRequest(new PasswordResetRequestEvent(email, confirmUrl));
+        mailRequestProducer.sendPasswordResetRequest(new MailRequestEvent(email, confirmUrl));
         return RequestOutcome.SENT;
     }
 
@@ -71,7 +71,7 @@ public class PasswordResetService {
             return false;
         }
 
-        credentialsProducer.sendPasswordReset(new PasswordResetEvent(email.get(), newPassword));
+        mailRequestProducer.sendPasswordReset(new PasswordResetEvent(email.get(), newPassword));
         return true;
     }
 

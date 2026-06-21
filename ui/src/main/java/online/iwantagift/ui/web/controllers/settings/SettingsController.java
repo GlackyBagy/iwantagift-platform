@@ -8,16 +8,16 @@ import online.iwantagift.ui.models.validation.AuthValidationGroups;
 import online.iwantagift.ui.services.AuthService;
 import online.iwantagift.ui.services.CurrentUserService;
 import online.iwantagift.ui.services.ProfileService;
+import online.iwantagift.ui.util.exceptions.ReauthenticationRequiredException;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.server.ResponseStatusException;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import java.util.List;
@@ -131,6 +131,28 @@ public class SettingsController {
 
         if (!messages.isEmpty()) {
             redirectAttributes.addFlashAttribute(attribute, messages);
+        }
+    }
+
+    @PostMapping("/deleteAccount")
+    @ResponseBody
+    public void deleteAccount(Authentication authentication) {
+        try {
+            String accessToken = currentUserService.requireAccessToken(authentication);
+            authService.sendAccountDeleteMessage(accessToken);
+        } catch (ReauthenticationRequiredException | IllegalStateException e) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
+        }
+    }
+
+    @PostMapping("/deleteAll")
+    @ResponseBody
+    public void deleteAll(Authentication authentication) {
+        try {
+            String accessToken = currentUserService.requireAccessToken(authentication);
+            authService.sendDataDeleteMessage(accessToken);
+        } catch (ReauthenticationRequiredException | IllegalStateException e) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, e.getMessage());
         }
     }
 }
