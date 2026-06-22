@@ -1,7 +1,5 @@
 package online.iwantagift.mailservice;
 
-import org.springframework.mail.SimpleMailMessage;
-
 public class MessageBuilder {
     private static final String UPDATE_EMAIL_SUBJECT = "Update email";
     private static final String UPDATE_EMAIL_CONTENT_TEMPLATE = "Here is your link to confirm changing your email: %n%s";
@@ -25,51 +23,27 @@ public class MessageBuilder {
     private static final String DATA_DELETE_CONFIRM_SUBJECT = "Confirm deletion of all data";
     private static final String DATA_DELETE_CONFIRM_TEMPLATE = "Open this link to confirm deletion of all wishlists and wishes: %n%s";
 
-    public static SimpleMailMessage buildForUpdateEmail(String to, String verificationUrl) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
-        message.setSubject(UPDATE_EMAIL_SUBJECT);
-        message.setText(UPDATE_EMAIL_CONTENT_TEMPLATE.formatted(verificationUrl));
-        return message;
+    public static MailMessage buildForUpdateEmail(String to, String verificationUrl) {
+        return new MailMessage(to, UPDATE_EMAIL_SUBJECT, UPDATE_EMAIL_CONTENT_TEMPLATE.formatted(verificationUrl));
     }
 
-    public static SimpleMailMessage buildForEmailVerification(String to, String verificationUrl) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
-        message.setSubject(VERIFY_EMAIL_SUBJECT);
-        message.setText(VERIFY_EMAIL_CONTENT_TEMPLATE.formatted(verificationUrl));
-        return message;
+    public static MailMessage buildForEmailVerification(String to, String verificationUrl) {
+        return new MailMessage(to, VERIFY_EMAIL_SUBJECT, VERIFY_EMAIL_CONTENT_TEMPLATE.formatted(verificationUrl));
     }
 
-    public static SimpleMailMessage buildForPasswordResetRequest(String to, String confirmUrl) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
-        message.setSubject(RESET_PASSWORD_REQUEST_SUBJECT);
-        message.setText(RESET_PASSWORD_REQUEST_CONTENT_TEMPLATE.formatted(confirmUrl));
-        return message;
+    public static MailMessage buildForPasswordResetRequest(String to, String confirmUrl) {
+        return new MailMessage(to, RESET_PASSWORD_REQUEST_SUBJECT, RESET_PASSWORD_REQUEST_CONTENT_TEMPLATE.formatted(confirmUrl));
     }
 
-    public static SimpleMailMessage buildForPasswordReset(String to, String newPassword) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
-        message.setSubject(RESET_PASSWORD_SUBJECT);
-        message.setText(RESET_PASSWORD_CONTENT_TEMPLATE.formatted(newPassword));
-        return message;
+    public static MailMessage buildForPasswordReset(String to, String newPassword) {
+        return new MailMessage(to, RESET_PASSWORD_SUBJECT, RESET_PASSWORD_CONTENT_TEMPLATE.formatted(newPassword));
     }
 
-    public static SimpleMailMessage buildForAccountDeleteConfirm(String to, String confirmUrl){
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
-        message.setSubject(ACCOUNT_DELETE_CONFIRM_SUBJECT);
-        message.setText(ACCOUNT_DELETE_CONFIRM_TEMPLATE.formatted(confirmUrl));
-        return message;
+    public static MailMessage buildForAccountDeleteConfirm(String to, String confirmUrl) {
+        return new MailMessage(to, ACCOUNT_DELETE_CONFIRM_SUBJECT, ACCOUNT_DELETE_CONFIRM_TEMPLATE.formatted(confirmUrl));
     }
 
-    public static SimpleMailMessage buildForDataDeleteConfirm(String to, String confirmUrl){
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setTo(to);
-        message.setSubject(DATA_DELETE_CONFIRM_SUBJECT);
-        message.setText(DATA_DELETE_CONFIRM_TEMPLATE.formatted(confirmUrl));
-        return message;
+    public static MailMessage buildForDataDeleteConfirm(String to, String confirmUrl) {
+        return new MailMessage(to, DATA_DELETE_CONFIRM_SUBJECT, DATA_DELETE_CONFIRM_TEMPLATE.formatted(confirmUrl));
     }
 }
