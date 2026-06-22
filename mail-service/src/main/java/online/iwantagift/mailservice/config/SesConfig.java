@@ -6,7 +6,7 @@ import org.springframework.context.annotation.Configuration;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
-import software.amazon.awssdk.services.ses.SesClient;
+import software.amazon.awssdk.services.sesv2.SesV2Client;
 
 import java.net.URI;
 
@@ -26,8 +26,8 @@ public class SesConfig {
     private String secretKey;
 
     @Bean
-    public SesClient sesClient() {
-        return SesClient.builder()
+    public SesV2Client sesClient() {
+        return SesV2Client.builder()
                 .endpointOverride(URI.create(endpoint))
                 .region(Region.of(region))
                 .credentialsProvider(StaticCredentialsProvider.create(
