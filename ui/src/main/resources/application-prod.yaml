@@ -44,6 +44,10 @@ spring:
 
 server:
   port: ${SERVER_PORT:8080}
+  # Behind Caddy (TLS terminated at the proxy, plain HTTP to this service): honor
+  # X-Forwarded-Proto/Host so the OAuth2 redirect_uri is built with https and matches
+  # the redirect URI registered on the auth server.
+  forward-headers-strategy: framework
 
 iwag:
   services:

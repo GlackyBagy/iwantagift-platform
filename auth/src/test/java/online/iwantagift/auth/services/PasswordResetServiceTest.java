@@ -1,8 +1,8 @@
 package online.iwantagift.auth.services;
 
-import online.iwantagift.auth.messaging.kafka.CredentialsProducer;
+import online.iwantagift.auth.messaging.kafka.MailRequestProducer;
 import online.iwantagift.auth.models.events.PasswordResetEvent;
-import online.iwantagift.auth.models.events.PasswordResetRequestEvent;
+import online.iwantagift.auth.models.events.MailRequestEvent;
 import online.iwantagift.auth.util.EmailVerificationUrlBuilder;
 import online.iwantagift.auth.util.PasswordGenerator;
 import org.junit.jupiter.api.Test;
@@ -29,7 +29,8 @@ class PasswordResetServiceTest {
     @Mock AccountService accountService;
     @Mock PasswordGenerator passwordGenerator;
     @Mock PasswordEncoder passwordEncoder;
-    @Mock CredentialsProducer credentialsProducer;
+    @Mock
+    MailRequestProducer mailRequestProducer;
     @Mock EmailVerificationUrlBuilder emailVerificationUrlBuilder;
 
     private PasswordResetService service() {
@@ -38,7 +39,7 @@ class PasswordResetServiceTest {
                 accountService,
                 passwordGenerator,
                 passwordEncoder,
-                credentialsProducer,
+                mailRequestProducer,
                 emailVerificationUrlBuilder
         );
     }
@@ -53,7 +54,7 @@ class PasswordResetServiceTest {
         PasswordResetService.RequestOutcome outcome = service().request("user@example.com");
 
         assertEquals(PasswordResetService.RequestOutcome.SENT, outcome);
-        verify(credentialsProducer).sendPasswordResetRequest(new PasswordResetRequestEvent(
+        verify(mailRequestProducer).sendPasswordResetRequest(new MailRequestEvent(
                 "user@example.com",
                 "http://auth/auth/reset/password/confirm?token=token"
         ));
@@ -67,7 +68,7 @@ class PasswordResetServiceTest {
         PasswordResetService.RequestOutcome outcome = service().request("user@example.com");
 
         assertEquals(PasswordResetService.RequestOutcome.ALREADY_PENDING, outcome);
-        verifyNoInteractions(credentialsProducer);
+        verifyNoInteractions(mailRequestProducer);
     }
 
     @Test
@@ -78,7 +79,7 @@ class PasswordResetServiceTest {
 
         assertEquals(PasswordResetService.RequestOutcome.SENT, outcome);
         verify(passwordResetTokenService, never()).create("ghost@example.com");
-        verifyNoInteractions(credentialsProducer);
+        verifyNoInteractions(mailRequestProducer);
     }
 
     @Test
@@ -91,7 +92,7 @@ class PasswordResetServiceTest {
         assertTrue(service().confirm("token"));
 
         verify(accountService).updatePassword("user@example.com", "hash");
-        verify(credentialsProducer).sendPasswordReset(
+        verify(mailRequestProducer).sendPasswordReset(
                 new PasswordResetEvent("user@example.com", "generated-pass"));
     }
 
@@ -101,7 +102,7 @@ class PasswordResetServiceTest {
 
         assertFalse(service().confirm("missing"));
 
-        verifyNoInteractions(credentialsProducer);
+        verifyNoInteractions(mailRequestProducer);
         verifyNoInteractions(passwordGenerator);
     }
 }

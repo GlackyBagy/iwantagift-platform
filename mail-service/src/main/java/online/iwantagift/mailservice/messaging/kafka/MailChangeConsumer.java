@@ -6,7 +6,7 @@ import online.iwantagift.mailservice.MailService;
 import online.iwantagift.mailservice.MessageBuilder;
 import online.iwantagift.mailservice.models.events.CredentialsUpdateEvent;
 import online.iwantagift.mailservice.models.events.PasswordResetEvent;
-import online.iwantagift.mailservice.models.events.PasswordResetRequestEvent;
+import online.iwantagift.mailservice.models.events.MailRequestEvent;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 import tools.jackson.databind.ObjectMapper;
@@ -20,6 +20,8 @@ public class MailChangeConsumer {
     public static final String PASSWORD_RESET_REQUEST_TOPIC = "passwordResetRequest";
     public static final String EMAIL_CHANGE_TOPIC = "emailChange";
     public static final String EMAIL_VERIFY_TOPIC = "emailVerify";
+    public static final String ACCOUNT_DELETE_CONFIRMATION_TOPIC = "deleteAccount";
+    public static final String DATA_DELETE_CONFIRMATION_TOPIC = "deleteAllConfirmation";
 
     private final ObjectMapper objectMapper;
     private final MailService mailService;
@@ -45,7 +47,7 @@ public class MailChangeConsumer {
 
     @KafkaListener(topics = PASSWORD_RESET_REQUEST_TOPIC)
     void handlePasswordResetRequest(String eventStr){
-        PasswordResetRequestEvent event = objectMapper.readValue(eventStr, PasswordResetRequestEvent.class);
+        MailRequestEvent event = objectMapper.readValue(eventStr, MailRequestEvent.class);
         mailService.send(
                 MessageBuilder.buildForPasswordResetRequest(event.email(), event.confirmUrl())
         );
@@ -56,6 +58,22 @@ public class MailChangeConsumer {
         PasswordResetEvent event = objectMapper.readValue(eventStr, PasswordResetEvent.class);
         mailService.send(
                 MessageBuilder.buildForPasswordReset(event.email(), event.newPassword())
+        );
+    }
+
+    @KafkaListener(topics = ACCOUNT_DELETE_CONFIRMATION_TOPIC)
+    void handleAccountDeleteConfirm(String eventStr){
+        MailRequestEvent event = objectMapper.readValue(eventStr, MailRequestEvent.class);
+        mailService.send(
+                MessageBuilder.buildForAccountDeleteConfirm(event.email(), event.confirmUrl())
+        );
+    }
+
+    @KafkaListener(topics = DATA_DELETE_CONFIRMATION_TOPIC)
+    void handleDataDeleteConfirm(String eventStr){
+        MailRequestEvent event = objectMapper.readValue(eventStr, MailRequestEvent.class);
+        mailService.send(
+                MessageBuilder.buildForDataDeleteConfirm(event.email(), event.confirmUrl())
         );
     }
 }

@@ -3,7 +3,7 @@ package online.iwantagift.auth.controllers;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import online.iwantagift.auth.config.IwagProperties;
-import online.iwantagift.auth.models.dto.EmailChangeVerification;
+import online.iwantagift.auth.models.dto.VerificationViaEmail;
 import online.iwantagift.auth.services.AccountService;
 import online.iwantagift.auth.services.VerificationTokenService;
 import org.springframework.http.HttpStatus;
@@ -39,7 +39,7 @@ public class TokenVerifierController {
 
     @GetMapping("/email")
     public String verifyEmail(@RequestParam String token) {
-        EmailChangeVerification verification = verificationTokenService.findEmailChange(token)
+        VerificationViaEmail verification = verificationTokenService.findEmailChange(token)
                 .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND));
 
         boolean successfullyVerified;

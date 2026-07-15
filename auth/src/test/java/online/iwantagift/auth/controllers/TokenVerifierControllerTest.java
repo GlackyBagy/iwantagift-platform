@@ -1,7 +1,7 @@
 package online.iwantagift.auth.controllers;
 
 import online.iwantagift.auth.config.IwagProperties;
-import online.iwantagift.auth.models.dto.EmailChangeVerification;
+import online.iwantagift.auth.models.dto.VerificationViaEmail;
 import online.iwantagift.auth.services.AccountService;
 import online.iwantagift.auth.services.VerificationTokenService;
 import org.junit.jupiter.api.BeforeEach;
@@ -39,7 +39,7 @@ class TokenVerifierControllerTest {
     void verifyEmail_changedEmail_updatesEmailRevokesTokenAndRedirects() throws MalformedURLException {
         configureUiBaseUrl("https://ui.example.com");
         when(verificationTokenService.findEmailChange("token")).thenReturn(Optional.of(
-                new EmailChangeVerification("old@example.com", "new@example.com")
+                new VerificationViaEmail("old@example.com", "new@example.com")
         ));
         when(accountService.updateEmail("old@example.com", "new@example.com")).thenReturn(true);
         TokenVerifierController controller = controller();
@@ -56,7 +56,7 @@ class TokenVerifierControllerTest {
     void verifyEmail_unchangedEmail_verifiesEmailAndRedirects() throws MalformedURLException {
         configureUiBaseUrl("https://ui.example.com/");
         when(verificationTokenService.findEmailChange("token")).thenReturn(Optional.of(
-                new EmailChangeVerification("user@example.com", "user@example.com")
+                new VerificationViaEmail("user@example.com", "user@example.com")
         ));
         when(accountService.verifyEmail("user@example.com")).thenReturn(true);
         TokenVerifierController controller = controller();
@@ -86,7 +86,7 @@ class TokenVerifierControllerTest {
     @Test
     void verifyEmail_accountUpdateFailed_throwsBadRequestAndKeepsToken() {
         when(verificationTokenService.findEmailChange("token")).thenReturn(Optional.of(
-                new EmailChangeVerification("old@example.com", "new@example.com")
+                new VerificationViaEmail("old@example.com", "new@example.com")
         ));
         when(accountService.updateEmail("old@example.com", "new@example.com")).thenReturn(false);
         TokenVerifierController controller = controller();

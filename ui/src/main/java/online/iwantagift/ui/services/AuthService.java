@@ -72,6 +72,14 @@ public class AuthService {
         authorizedRequest("/auth/change/password", accessToken, dto);
     }
 
+    public void sendAccountDeleteMessage(String accessToken){
+        authorizedRequest("/auth/deleteAccount", accessToken, null);
+    }
+
+    public void sendDataDeleteMessage(String accessToken){
+        authorizedRequest("/auth/deleteAll", accessToken, null);
+    }
+
     private void authorizedRequest(String path, String accessToken, Object body) {
         URI uri = UriComponentsBuilder.fromUriString(authServiceUrl)
                 .path(path)

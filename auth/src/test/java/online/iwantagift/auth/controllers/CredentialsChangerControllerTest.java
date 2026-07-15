@@ -1,6 +1,6 @@
 package online.iwantagift.auth.controllers;
 
-import online.iwantagift.auth.messaging.kafka.CredentialsProducer;
+import online.iwantagift.auth.messaging.kafka.MailRequestProducer;
 import online.iwantagift.auth.models.dto.CredentialsDTO;
 import online.iwantagift.auth.models.events.CredentialsUpdateEvent;
 import online.iwantagift.auth.services.AccountService;
@@ -25,7 +25,8 @@ class CredentialsChangerControllerTest {
 
     @Mock VerificationTokenService verificationTokenService;
     @Mock EmailVerificationUrlBuilder emailVerificationUrlBuilder;
-    @Mock CredentialsProducer credentialsProducer;
+    @Mock
+    MailRequestProducer mailRequestProducer;
     @Mock PasswordEncoder passwordEncoder;
     @Mock AccountService accountService;
     @Mock Authentication authentication;
@@ -35,7 +36,7 @@ class CredentialsChangerControllerTest {
         return new CredentialsChangerController(
                 verificationTokenService,
                 emailVerificationUrlBuilder,
-                credentialsProducer,
+                mailRequestProducer,
                 passwordEncoder,
                 accountService
         );
@@ -55,7 +56,7 @@ class CredentialsChangerControllerTest {
 
         ArgumentCaptor<CredentialsUpdateEvent> eventCaptor =
                 ArgumentCaptor.forClass(CredentialsUpdateEvent.class);
-        verify(credentialsProducer).sendEmailChange(eventCaptor.capture());
+        verify(mailRequestProducer).sendEmailChange(eventCaptor.capture());
         assertEquals(new CredentialsUpdateEvent(
                 "old@example.com",
                 "new@example.com",
@@ -76,6 +77,6 @@ class CredentialsChangerControllerTest {
         controller().changePassword(dto, bindingResult, authentication);
 
         verify(accountService).updatePassword("user@example.com", "hash");
-        verifyNoInteractions(credentialsProducer);
+        verifyNoInteractions(mailRequestProducer);
     }
 }

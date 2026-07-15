@@ -1,6 +1,7 @@
 <head th:fragment="head(title, extraCss)">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta th:if="${_csrf != null}" name="_csrf" th:content="${_csrf.token}">
 
     <title th:text="${title}">Default</title>
 

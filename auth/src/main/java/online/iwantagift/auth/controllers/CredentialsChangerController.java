@@ -2,7 +2,7 @@ package online.iwantagift.auth.controllers;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import online.iwantagift.auth.messaging.kafka.CredentialsProducer;
+import online.iwantagift.auth.messaging.kafka.MailRequestProducer;
 import online.iwantagift.auth.models.dto.CredentialsDTO;
 import online.iwantagift.auth.models.dto.abstracts.ValidationGroups;
 import online.iwantagift.auth.models.events.CredentialsUpdateEvent;
@@ -31,7 +31,7 @@ public class CredentialsChangerController {
 
     private final VerificationTokenService verificationTokenService;
     private final EmailVerificationUrlBuilder emailVerificationUrlBuilder;
-    private final CredentialsProducer credentialsProducer;
+    private final MailRequestProducer mailRequestProducer;
     private final PasswordEncoder passwordEncoder;
     private final AccountService accountService;
 
@@ -47,7 +47,7 @@ public class CredentialsChangerController {
         log.info("Generated verification token and url for email change to {}: {}",
                 dto.getEmail(), verificationUrl);
 
-        credentialsProducer.sendEmailChange(new CredentialsUpdateEvent(
+        mailRequestProducer.sendEmailChange(new CredentialsUpdateEvent(
                 oldEmail,
                 dto.getEmail(),
                 verificationUrl
@@ -61,7 +61,7 @@ public class CredentialsChangerController {
         String token = verificationTokenService.generateAndSaveForEmail(email, email);
         String verificationUrl = emailVerificationUrlBuilder.buildForEmail(token);
 
-        credentialsProducer.sendEmailVerify(new CredentialsUpdateEvent(
+        mailRequestProducer.sendEmailVerify(new CredentialsUpdateEvent(
                 email,
                 email,
                 verificationUrl

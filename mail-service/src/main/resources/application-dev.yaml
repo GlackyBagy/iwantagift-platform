@@ -5,22 +5,13 @@ spring:
     consumer:
       group-id: mail-service
     bootstrap-servers: localhost:9092
-  mail:
-    host: ${MAIL_HOST:smtp.beget.com}
-    port: ${MAIL_PORT:2525}
-    username: ${MAIL_USERNAME:noreply@iwag.online}
-    password: ${MAIL_PASSWORD}
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-            required: true
-          connectiontimeout: 10000
-          timeout: 10000
-          writetimeout: 10000
 
+postbox:
+  endpoint: ${POSTBOX_ENDPOINT:https://postbox.cloud.yandex.net}
+  region: ${POSTBOX_REGION:ru-central1}
+  access-key: ${POSTBOX_ACCESS_KEY}
+  secret-key: ${POSTBOX_SECRET_KEY}
+  from: ${POSTBOX_FROM:noreply@iwantagift.online}
 
 server:
   port: 9978

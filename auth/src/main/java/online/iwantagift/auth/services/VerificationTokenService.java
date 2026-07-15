@@ -1,7 +1,7 @@
 package online.iwantagift.auth.services;
 
 import lombok.RequiredArgsConstructor;
-import online.iwantagift.auth.models.dto.EmailChangeVerification;
+import online.iwantagift.auth.models.dto.VerificationViaEmail;
 import org.springframework.data.redis.core.HashOperations;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -42,7 +42,7 @@ public class VerificationTokenService {
         return Base64.getUrlEncoder().withoutPadding().encodeToString(tokenBytes);
     }
 
-    public Optional<EmailChangeVerification> findEmailChange(String token) {
+    public Optional<VerificationViaEmail> findEmailChange(String token) {
         Map<Object, Object> fields = find(token);
         Object oldEmail = fields.get(OLD_EMAIL_FIELD);
         Object newEmail = fields.get(NEW_EMAIL_FIELD);
@@ -52,7 +52,7 @@ public class VerificationTokenService {
             return Optional.empty();
         }
 
-        return Optional.of(new EmailChangeVerification(oldEmailValue, newEmailValue));
+        return Optional.of(new VerificationViaEmail(oldEmailValue, newEmailValue));
     }
 
     private Map<Object, Object> find(String token) {

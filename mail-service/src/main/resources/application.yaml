@@ -4,19 +4,11 @@ spring:
   kafka:
     consumer:
       group-id: mail-service
-    bootstrap-servers:  ${SPRING_KAFKA_BOOTSTRAP_SERVERS}
-  mail:
-    host: ${SPRING_MAIL_HOST}
-    port: ${SPRING_MAIL_PORT}
-    username: ${MAIL_USERNAME}
-    password: ${MAIL_PASSWORD}
-    properties:
-      mail:
-        smtp:
-          auth: true
-          starttls:
-            enable: true
-            required: true
-          connectiontimeout: 5000
-          timeout: 5000
-          writetimeout: 5000
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS}
+
+postbox:
+  endpoint: ${POSTBOX_ENDPOINT:https://postbox.cloud.yandex.net}
+  region: ${POSTBOX_REGION:ru-central1}
+  access-key: ${POSTBOX_ACCESS_KEY}
+  secret-key: ${POSTBOX_SECRET_KEY}
+  from: ${POSTBOX_FROM:noreply@iwantagift.online}

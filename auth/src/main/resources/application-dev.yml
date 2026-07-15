@@ -48,3 +48,6 @@ iwag:
     - passwordResetRequest
     - createdUser
     - accountEvent
+    - deleteAccount
+    - deleteAllConfirmation
+    - deleteAll

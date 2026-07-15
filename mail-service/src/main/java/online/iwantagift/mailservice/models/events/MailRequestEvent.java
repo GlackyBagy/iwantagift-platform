@@ -1,6 +1,6 @@
 package online.iwantagift.mailservice.models.events;
 
-public record PasswordResetRequestEvent(
+public record MailRequestEvent(
         String email,
         String confirmUrl
 ) {

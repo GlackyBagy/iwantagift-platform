@@ -3,3 +3,9 @@ spring:
     import: classpath:application.yml
   application:
     name: ${SPRING_APPLICATION_NAME:auth}
+
+server:
+  # Behind Caddy (TLS terminated at the proxy, plain HTTP to this service): honor
+  # X-Forwarded-Proto/Host so the issuer, the /login redirect and redirect_uri validation
+  # use https instead of the http scheme seen on the internal hop.
+  forward-headers-strategy: framework
