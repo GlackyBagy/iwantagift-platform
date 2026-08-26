@@ -1,84 +1,37 @@
-# 🎁 Wishlist Platform
+# iwantagift Platform
 
+A microservices platform for creating, sharing, and managing wishlists.
 
+## Services
 
-A microservices-based platform for creating, sharing, and managing wishlists in a secure and convenient way.
+| Service | Description | Status |
+|---|---|---|
+| `auth-service` | Registration, login, credential/password management, email verification, OAuth2 authorization server, JWT issuing | Ready |
+| `wishlist-service` | CRUD for wishlists and wishes | Ready |
+| `profile-service` | User profiles and avatars (stored via S3) | Ready |
+| `mail-service` | Transactional email (verification, password reset, credential changes) via AWS SES, driven by Kafka events | Ready |
+| `ui-service` | Web frontend / BFF, currently server-rendered with Thymeleaf | Ready, being rewritten in React |
+| `productprice-service` | Item pricing and related logic | In development |
+| `monitoring-service` | Logging, metrics, observability | Planned |
 
----
+## Features
 
-## 🚀 Overview
+- **Wishlists** — create wishlists, add wishes, and share them with others via a link
+- **Accounts** — sign up, sign in, verify your email, and reset a forgotten password
+- **Profiles** — a personal page with an avatar and public wishlists
+- **Notifications by email** — account and security events (verification, password reset, credential changes) trigger transactional emails
 
-This platform allows users to create wishlists, share them with others, and receive gifts without exposing sensitive personal information such as their address.
+## Tech Stack
 
-It is especially useful for:
-- content creators (bloggers, streamers)
-- groups of friends
-- collaborative gift funding
+- **Backend:** Java 21, Spring Boot, Spring Data JPA, Flyway, Spring Security (OAuth2 Authorization/Resource Server), Apache Kafka
+- **Frontend:** Thymeleaf, migrating to React
+- **Data & Storage:** PostgreSQL, Redis, AWS S3, AWS SES
+- **Infrastructure:** Docker Compose, GitHub Actions CI/CD (build, test, publish to GHCR, deploy), Caddy as reverse proxy / TLS termination
 
----
+## Roadmap
 
-## 🏗️ Microservices
-
-The system is designed as a set of independent services:
-
-- **wishlist-service** — core service for managing wishlists (CRUD) ✅
-- **productprice-service** — handles item pricing and related logic
-- **auth-service** — authentication & authorization (Spring Security, OAuth2) 🚧
-- **monitoring-service** — logging, metrics, and system monitoring 🚧
-
-> Additional services may be added as the system evolves.
-
----
-
-## 💡 Features
-
-### Wishlist functionality
-- Create public and private wishlists
-- Manage items within wishlists
-- Share wishlists with others
-
-### Gifting system
-- Send gifts via the platform as an intermediary
-- Attach messages to gifts
-
-### Crowdfunding
-- Collect money for specific items or entire wishlists
-- Support group contributions
-
-### Privacy & Security
-- Protect user personal data by ensuring sensitive information (e.g., addresses) is never exposed and is securely stored using encryption
-- Secure authentication and authorization (in progress)
-
----
-
-## 🛠️ Tech Stack
-
-**Backend:**
-- Java
-- Spring Boot
-- Spring Data JPA
-- Spring Security (in progress)
-- OAuth2 (planned)
-
-**Frontend:**
-- Thymeleaf
-
-**Infrastructure:**
-- Docker (planned)
-- REST APIs
-
-**Database:**
-- PostgreSQL
-- Redis
-
-**Message brokers:**
-- Kafka
-
----
-
-## 📦 Current Status
-
-- ✅ MVP for Wishlist CRUD microservice implemented
-- 🚧 Authentication service in development
-- 🚧 Frontend (UI) in development
-- 🚧 Monitoring service planned
+- Migrate the frontend from Thymeleaf to React
+- Adopt Spring Cloud for service discovery, configuration, and API gateway concerns
+- Gifting system with an intermediary and attachable messages
+- Crowdfunding for individual items or whole wishlists, with group contributions
+- Monitoring, logging, and metrics
